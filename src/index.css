@@ -1,14 +1,32 @@
 @import url('https://fonts.cdnfonts.com/css/general-sans');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  /* --- FONTS --- */
+  --font-zentry: "zentry", sans-serif;
+  --font-general: "general", sans-serif;
+  --font-robert-medium: "robert-medium", sans-serif;
+  --font-robert-regular: "robert-regular", sans-serif;
+  --font-circular-web: "circular-web", sans-serif;
+
+  /* --- COLORS --- */
+  --color-blue-50: #DFDFF0;
+  --color-blue-75: #DFDFF2;
+  --color-blue-100: #F0F2FA;
+  --color-blue-200: #010101;
+  --color-blue-300: #4FB7DD;
+
+  --color-violet-300: #5724FF;
+
+  --color-yellow-100: #8E983F;
+  --color-yellow-300: #EDFF66;
+}
 
 body {
   width: 100dvw;
   overflow-x: hidden;
   background-color: #dfdff0;
-  font-family: 'General Sans', sans-serif;
+  font-family: var(--font-general);
 }
 
 @layer base {
@@ -39,6 +57,7 @@ body {
 }
 
 @layer utilities {
+  /* 1. Giữ nguyên class này để dùng trong HTML nếu cần */
   .border-hsla {
     @apply border border-white/20;
   }
@@ -64,7 +83,7 @@ body {
   }
 
   .special-font b {
-    font-family: 'Zentry';
+    font-family: var(--font-zentry);
     font-feature-settings: 'ss01' on;
   }
 
@@ -85,7 +104,9 @@ body {
   }
 
   .animated-word {
-    @apply special-font font-zentry font-black opacity-0;
+    @apply font-zentry font-black opacity-0;
+    font-feature-settings: 'ss01' on;
+    
     transform: translate3d(10px, 51px, -60px) rotateY(60deg) rotateX(-40deg);
     transform-origin: 50% 50% -150px !important;
     will-change: opacity, transform;
