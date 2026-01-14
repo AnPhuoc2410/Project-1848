@@ -88,8 +88,8 @@ const Features = () => {
           />
         </BentoTilt>
 
-        <div className="grid h-[135vh] grid-cols-2 grid-rows-3 gap-7">
-          <BentoTilt className="row-span-1 bento-tilt_1 md:col-span-1 md:row-span-2">
+        <div className="grid h-[135vh] w-full grid-cols-1 md:grid-cols-2 grid-rows-3 md:grid-rows-2 gap-7">
+          <BentoTilt className="row-span-1 md:row-span-2 bento-tilt_1">
             <BentoCard
               src="videos/skill-2.webm"
               title={
@@ -101,7 +101,7 @@ const Features = () => {
             />
           </BentoTilt>
 
-          <BentoTilt className="row-span-1 bento-tilt_1 ms-32 md:col-span-1 md:ms-0">
+          <BentoTilt className="row-span-1 bento-tilt_1">
             <BentoCard
               src="videos/skill.webm"
               title={
@@ -113,7 +113,7 @@ const Features = () => {
             />
           </BentoTilt>
 
-          <BentoTilt className="bento-tilt_1 me-14 md:col-span-1 md:me-0">
+          <BentoTilt className="row-span-1 bento-tilt_1">
             <BentoCard
               src="videos/skill-3.webm"
               title={
@@ -123,25 +123,6 @@ const Features = () => {
               }
               description="Prove your skills, climb the ranks, and become the Radiant of Valorant."
             />
-          </BentoTilt>
-
-          <BentoTilt className="bento-tilt_2">
-            <video
-              src="videos/skill-4.webm"
-              loop
-              autoPlay
-              muted
-              className="object-cover object-center size-full"
-            />
-          </BentoTilt>
-
-          <BentoTilt className="bento-tilt_2">
-            <div className="flex flex-col justify-between p-5 size-full bg-violet-300">
-              <h1 className="text-black bento-title special-font max-w-64">
-                m<b>o</b>re co<b>m</b>ing s<b>o</b>on!
-              </h1>
-              <TiLocationArrow className="m-5 scale-[5] self-end" />
-            </div>
           </BentoTilt>
         </div>
       </div>
