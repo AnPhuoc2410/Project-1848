@@ -1,6 +1,6 @@
-import AnimatedTitle from "./AnimatedTitle";
-import Button from "./Button";
-import PropTypes from "prop-types";
+import AnimatedTitle from './AnimatedTitle';
+import Button from './Button';
+import PropTypes from 'prop-types';
 
 const ImageClipBox = ({ src, clipClass }) => {
   return (

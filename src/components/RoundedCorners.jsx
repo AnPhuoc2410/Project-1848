@@ -1,4 +1,3 @@
-
 const RoundedCorners = () => {
   return (
     <svg

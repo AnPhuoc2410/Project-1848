@@ -1,13 +1,13 @@
-import { FaEnvelope, FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaEnvelope, FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
 
 const socialLinks = [
-  { href: "https://www.github.com/mehedihasanshefat", icon: <FaGithub /> },
+  { href: 'https://www.github.com/mehedihasanshefat', icon: <FaGithub /> },
   {
-    href: "https://www.linkedin.com/in/mehedihasanshefat",
+    href: 'https://www.linkedin.com/in/mehedihasanshefat',
     icon: <FaLinkedin />,
   },
-  { href: "mailto:webdev.shefat@gmail.com", icon: <FaEnvelope /> },
-  { href: "https://x.com/mhshefat_dev", icon: <FaTwitter /> },
+  { href: 'mailto:webdev.shefat@gmail.com', icon: <FaEnvelope /> },
+  { href: 'https://x.com/mhshefat_dev', icon: <FaTwitter /> },
 ];
 
 const Footer = () => {

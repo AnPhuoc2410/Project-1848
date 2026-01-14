@@ -17,5 +17,6 @@
 - **JavaScript (ES6+)**
 
 ---
+
 ![Hero Section](./screenshots/hero.png)
 ![Animations](./screenshots/animation.png)

@@ -1,12 +1,12 @@
-import clsx from "clsx";
-import gsap from "gsap";
-import { useWindowScroll } from "react-use";
-import { useEffect, useRef, useState } from "react";
-import { TiLocationArrow } from "react-icons/ti";
+import clsx from 'clsx';
+import gsap from 'gsap';
+import { useWindowScroll } from 'react-use';
+import { useEffect, useRef, useState } from 'react';
+import { TiLocationArrow } from 'react-icons/ti';
 
-import Button from "./Button";
+import Button from './Button';
 
-const navItems = ["Media", "News", "Leaderboards", "About", "Contact"];
+const navItems = ['Media', 'News', 'Leaderboards', 'About', 'Contact'];
 
 const NavBar = () => {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -35,13 +35,13 @@ const NavBar = () => {
   useEffect(() => {
     if (currentScrollY === 0) {
       setIsNavVisible(true);
-      navContainerRef.current.classList.remove("floating-nav");
+      navContainerRef.current.classList.remove('floating-nav');
     } else if (currentScrollY > lastScrollY) {
       setIsNavVisible(false);
-      navContainerRef.current.classList.add("floating-nav");
+      navContainerRef.current.classList.add('floating-nav');
     } else if (currentScrollY < lastScrollY) {
       setIsNavVisible(true);
-      navContainerRef.current.classList.add("floating-nav");
+      navContainerRef.current.classList.add('floating-nav');
     }
 
     setLastScrollY(currentScrollY);
@@ -64,13 +64,17 @@ const NavBar = () => {
         <nav className="flex size-full items-center justify-between p-4">
           <div className="flex items-center gap-7">
             <img src="/img/logo.png" alt="logo" className="w-10" />
-            <a href="https://playvalorant.com/en-gb/platform-selection/" target="_blank">
-            <Button
-              id="product-button"
-              title="Download Game"
-              rightIcon={<TiLocationArrow />}
-              containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
-            /></a>
+            <a
+              href="https://playvalorant.com/en-gb/platform-selection/"
+              target="_blank"
+            >
+              <Button
+                id="product-button"
+                title="Download Game"
+                rightIcon={<TiLocationArrow />}
+                containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
+              />
+            </a>
           </div>
 
           <div className="flex h-full items-center">
@@ -99,7 +103,7 @@ const NavBar = () => {
               {[1, 2, 3, 4].map((bar) => (
                 <div
                   key={bar}
-                  className={clsx("indicator-line", {
+                  className={clsx('indicator-line', {
                     active: isIndicatorActive,
                   })}
                   style={{

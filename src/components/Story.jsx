@@ -1,8 +1,8 @@
-import { useRef } from "react";
-import AnimatedTitle from "./AnimatedTitle";
-import gsap from "gsap";
-import RoundedCorners from "./RoundedCorners";
-import Button from "./Button";
+import { useRef } from 'react';
+import AnimatedTitle from './AnimatedTitle';
+import gsap from 'gsap';
+import RoundedCorners from './RoundedCorners';
+import Button from './Button';
 
 const Story = () => {
   const frameRef = useRef(null);
@@ -28,7 +28,7 @@ const Story = () => {
       rotateX,
       rotateY,
       transformPerspective: 500,
-      ease: "power1.inOut",
+      ease: 'power1.inOut',
     });
   };
 
@@ -40,7 +40,7 @@ const Story = () => {
         duration: 0.3,
         rotateX: 0,
         rotateY: 0,
-        ease: "power1.inOut",
+        ease: 'power1.inOut',
       });
     }
   };

@@ -1,9 +1,9 @@
-import PropTypes from "prop-types";
-import { useRef, useState } from "react";
-import { TiLocationArrow } from "react-icons/ti";
+import PropTypes from 'prop-types';
+import { useRef, useState } from 'react';
+import { TiLocationArrow } from 'react-icons/ti';
 
-export const BentoTilt = ({ children, className = "" }) => {
-  const [transformStyle, setTransformStyle] = useState("");
+export const BentoTilt = ({ children, className = '' }) => {
+  const [transformStyle, setTransformStyle] = useState('');
   const itemRef = useRef(null);
 
   const handleMouseMove = (event) => {
@@ -23,7 +23,7 @@ export const BentoTilt = ({ children, className = "" }) => {
   };
 
   const handleMouseLeave = () => {
-    setTransformStyle("");
+    setTransformStyle('');
   };
 
   return (
