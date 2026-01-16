@@ -76,7 +76,7 @@ const Features = () => {
           </p>
         </div>
 
-        <BentoTilt className="relative w-full overflow-hidden rounded-md border-hsla mb-7 h-96 md:h-[65vh]">
+        <BentoTilt className="relative w-full overflow-hidden rounded-md border border-white/20 mb-7 h-96 md:h-[65vh]">
           <BentoCard
             src="videos/skill-1.webm"
             title={
