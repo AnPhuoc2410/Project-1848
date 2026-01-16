@@ -1,25 +1,25 @@
 @import url('https://fonts.cdnfonts.com/css/general-sans');
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   /* --- FONTS --- */
-  --font-zentry: "zentry", sans-serif;
-  --font-general: "general", sans-serif;
-  --font-robert-medium: "robert-medium", sans-serif;
-  --font-robert-regular: "robert-regular", sans-serif;
-  --font-circular-web: "circular-web", sans-serif;
+  --font-zentry: 'zentry', sans-serif;
+  --font-general: 'general', sans-serif;
+  --font-robert-medium: 'robert-medium', sans-serif;
+  --font-robert-regular: 'robert-regular', sans-serif;
+  --font-circular-web: 'circular-web', sans-serif;
 
   /* --- COLORS --- */
-  --color-blue-50: #DFDFF0;
-  --color-blue-75: #DFDFF2;
-  --color-blue-100: #F0F2FA;
+  --color-blue-50: #dfdff0;
+  --color-blue-75: #dfdff2;
+  --color-blue-100: #f0f2fa;
   --color-blue-200: #010101;
-  --color-blue-300: #4FB7DD;
+  --color-blue-300: #4fb7dd;
 
-  --color-violet-300: #5724FF;
+  --color-violet-300: #5724ff;
 
-  --color-yellow-100: #8E983F;
-  --color-yellow-300: #EDFF66;
+  --color-yellow-100: #8e983f;
+  --color-yellow-300: #edff66;
 }
 
 body {
@@ -57,11 +57,6 @@ body {
 }
 
 @layer utilities {
-  /* 1. Giữ nguyên class này để dùng trong HTML nếu cần */
-  .border-hsla {
-    @apply border border-white/20;
-  }
-
   .nav-hover-btn {
     @apply relative ms-10 font-general text-xs uppercase text-blue-50 after:absolute after:-bottom-0.5 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-neutral-800 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100 dark:after:bg-white cursor-pointer;
   }
@@ -106,14 +101,14 @@ body {
   .animated-word {
     @apply font-zentry font-black opacity-0;
     font-feature-settings: 'ss01' on;
-    
+
     transform: translate3d(10px, 51px, -60px) rotateY(60deg) rotateX(-40deg);
     transform-origin: 50% 50% -150px !important;
     will-change: opacity, transform;
   }
 
   .bento-tilt_1 {
-    @apply relative border-hsla col-span-2 overflow-hidden rounded-md transition-transform duration-300 ease-out;
+    @apply relative border border-white/20 col-span-2 overflow-hidden rounded-md transition-transform duration-300 ease-out;
   }
 
   .bento-tilt_2 {
