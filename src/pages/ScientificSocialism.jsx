@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import AnimatedTitle from '../components/AnimatedTitle';
 
 const ScientificSocialism = () => {
   const courseModules = [
@@ -67,11 +68,12 @@ const ScientificSocialism = () => {
         <div className="absolute inset-0 bg-background z-0">
           <div className="absolute inset-0 bg-grid-pattern"></div>
         </div>
-        <div className="relative z-10 text-center px-4">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-primary mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-            Chủ Nghĩa Xã Hội Khoa Học
-          </h1>
-          <p className="text-lg md:text-xl lg:text-2xl text-text mb-8 max-w-3xl mx-auto" style={{ fontFamily: 'var(--font-atkinson)' }}>
+        <div className="relative z-10 text-center px-4 space-y-6">
+          <AnimatedTitle
+            title="Chủ Nghĩa <br /> Xã Hội Khoa Học"
+            containerClass="!text-blue-300"
+          />
+          <p className="text-lg md:text-xl lg:text-2xl text-text mb-4 max-w-3xl mx-auto" style={{ fontFamily: 'var(--font-atkinson)' }}>
             Khóa học nền tảng về tư tưởng và lý luận
           </p>
         </div>
@@ -81,9 +83,7 @@ const ScientificSocialism = () => {
       <section id="introduction" className="py-16 md:py-24 scroll-mt-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-text mb-6" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-              Giới thiệu về khóa học
-            </h2>
+            <AnimatedTitle title="Giới thiệu về khóa học" containerClass="!text-blue-300" />
             <p className="text-base md:text-lg text-text leading-relaxed text-left">
               Chủ nghĩa xã hội khoa học là một trong ba bộ phận hợp thành của chủ nghĩa Mác - Lênin. Theo nghĩa rộng, đây là sự luận giải từ các góc độ triết học, kinh tế chính trị học và chính trị - xã hội về sự chuyển biến tất yếu của xã hội loài người từ chủ nghĩa tư bản lên chủ nghĩa xã hội và chủ nghĩa cộng sản.
               <br/><br/>
@@ -97,9 +97,7 @@ const ScientificSocialism = () => {
       <section id="content" className="py-16 md:py-24 bg-gray-50 scroll-mt-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-              Nội dung khóa học
-            </h2>
+            <AnimatedTitle title="Nội dung khóa học" containerClass="!text-blue-300" />
             <p className="text-base md:text-lg text-text max-w-2xl mx-auto">
               Khám phá các chủ đề cốt lõi của Chủ nghĩa xã hội khoa học qua các chuyên đề sau.
             </p>
@@ -126,9 +124,7 @@ const ScientificSocialism = () => {
       <section id="timeline" className="py-16 md:py-24 scroll-mt-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-              Dòng thời gian
-            </h2>
+            <AnimatedTitle title="Dòng thời gian" containerClass="!text-blue-300" />
             <p className="text-base md:text-lg text-text max-w-2xl mx-auto">
               Lịch sử hình thành và phát triển của chủ nghĩa xã hội khoa học qua các cột mốc quan trọng.
             </p>
@@ -138,7 +134,7 @@ const ScientificSocialism = () => {
             {timelineEvents.map((event, index) => (
               <div key={event.id} className={`mb-8 flex justify-between items-center w-full ${index % 2 === 0 ? 'flex-row-reverse left-timeline' : 'right-timeline'}`}>
                 <div className="order-1 w-5/12"></div>
-                <div className="z-20 flex items-center order-1 bg-primary shadow-xl w-8 h-8 rounded-full">
+                <div className="z-20 flex items-center order-1 bg-blue-300 shadow-xl w-8 h-8 rounded-full">
                   <h1 className="mx-auto font-semibold text-sm text-white">{event.id}</h1>
                 </div>
                 <div className="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4">
@@ -156,9 +152,7 @@ const ScientificSocialism = () => {
       <section id="concepts" className="py-16 md:py-24 bg-gray-50 scroll-mt-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-              Các khái niệm cốt lõi
-            </h2>
+            <AnimatedTitle title="Các khái niệm cốt lõi" containerClass="!text-blue-300" />
             <p className="text-base md:text-lg text-text max-w-2xl mx-auto">
               Hệ tư tưởng này được xây dựng dựa trên các khái niệm và phạm trù nền tảng sau.
             </p>
@@ -178,37 +172,6 @@ const ScientificSocialism = () => {
         </div>
       </section>
 
-      {/* Game Section */}
-      <section id="game" className="py-16 md:py-24 bg-gray-50 scroll-mt-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-              Trò chơi: Giải đố CNXH Khoa học
-            </h2>
-            <p className="text-base md:text-lg text-text max-w-3xl mx-auto">
-              Đây là một trò chơi giải đố hợp tác dành cho 2 người chơi để tìm hiểu về triết học Mác - Lênin, lấy cảm hứng từ "We Were Here" và "Keep Talking and Nobody Explodes". Một người chơi sẽ là "Người hướng dẫn" chỉ thấy lý thuyết, và người còn lại là "Người thực hành" chỉ thấy các hành động. Cả hai phải giao tiếp để giải quyết các câu đố.
-            </p>
-          </div>
-          <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg border border-border">
-            <h3 className="text-xl font-bold text-primary mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-              Cách chơi
-            </h3>
-            <ol className="list-decimal list-inside space-y-3 text-left">
-              <li>Mở terminal và di chuyển đến thư mục <code>marxism-puzzle-game</code>.</li>
-              <li>Chạy <code>npm install</code> để cài đặt các dependencies.</li>
-              <li>Chạy <code>npm start</code> để khởi động server game.</li>
-              <li>Mở <strong>hai cửa sổ trình duyệt</strong> và truy cập <a href="http://localhost:3000" target="_blank" rel="noopener noreferrer" className="text-primary underline">http://localhost:3000</a>.</li>
-              <li>Nhấn "JOIN GAME" ở cả hai cửa sổ để bắt đầu.</li>
-            </ol>
-            <div className="mt-8 text-center">
-              <a href="http://localhost:3000" target="_blank" rel="noopener noreferrer" className="bg-secondary text-text font-bold py-3 px-8 rounded-lg text-lg hover:bg-yellow-500 transition-colors duration-300">
-                Bắt đầu chơi
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* About the Instructor Section */}
       <section id="instructor" className="py-16 md:py-24 scroll-mt-16">
         <div className="container mx-auto px-4">
@@ -218,9 +181,7 @@ const ScientificSocialism = () => {
               <img src="https://via.placeholder.com/256" alt="Instructor" className="w-full h-full object-cover" />
             </div>
             <div className="text-center md:text-left max-w-lg">
-              <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-                Giảng viên
-              </h2>
+            <AnimatedTitle title="Giảng viên" containerClass="!text-blue-300" />
               <h3 className="text-xl font-bold text-primary mb-2">Thầy Lê Minh Trí</h3>
               <p className="text-base text-text leading-relaxed">
                 Với hơn 100 năm kinh nghiệm giảng dạy và nghiên cứu về chủ nghĩa Mác - Lênin, Thầy Lê Minh Trí sẽ mang đến cho bạn những bài giảng sâu sắc, dễ hiểu và gắn liền với thực tiễn Việt Nam. Cùng những game tương tác thú vị, thầy sẽ giúp bạn nắm vững kiến thức và áp dụng hiệu quả vào cuộc sống.
