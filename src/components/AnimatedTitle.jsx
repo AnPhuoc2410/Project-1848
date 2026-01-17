@@ -11,25 +11,27 @@ const AnimatedTitle = ({ title, containerClass }) => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const titleAnimation = gsap.timeline({
+      const words = containerRef.current?.querySelectorAll('.animated-word');
+      if (!words || words.length === 0) return;
+
+      gsap.set(words, { opacity: 0, y: 24, rotateX: -30, rotateY: 20 });
+
+      gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: '100 bottom',
           end: 'center bottom',
           toggleActions: 'play none none reverse',
         },
+      }).to(words, {
+        opacity: 1,
+        y: 0,
+        rotateX: 0,
+        rotateY: 0,
+        ease: 'power2.out',
+        stagger: 0.03,
+        duration: 0.6,
       });
-
-      titleAnimation.to(
-        '.animated-word',
-        {
-          opacity: 1,
-          transform: 'translate3d(0, 0, 0) rotateY(0deg) rotateX(0deg)',
-          ease: 'power2.inOut',
-          stagger: 0.02,
-        },
-        0
-      );
     }, containerRef);
 
     return () => ctx.revert();

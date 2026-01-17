@@ -1,45 +1,69 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+const navLinks = [
+  { href: '/#introduction', label: 'Giới thiệu', type: 'home-hash' },
+  { href: '/#content', label: 'Nội dung', type: 'home-hash' },
+  { href: '/#timeline', label: 'Dòng thời gian', type: 'home-hash' },
+  { href: '/#concepts', label: 'Khái niệm', type: 'home-hash' },
+  { href: '/#instructor', label: 'Giảng viên', type: 'home-hash' },
+  { href: '/mirror-hall', label: 'Đại sảnh gương 3D', type: 'route' },
+  { href: '/mini-game', label: 'Mini-game', type: 'route' },
+
+];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { href: '#introduction', label: 'Giới thiệu' },
-    { href: '#content', label: 'Nội dung' },
-    { href: '#timeline', label: 'Dòng thời gian' },
-    { href: '#concepts', label: 'Khái niệm' },
-    { href: '#instructor', label: 'Giảng viên' },
-    { href: '#game', label: 'Trò chơi' },
-  ];
+  const containerClass = `fixed inset-x-0 top-0 z-50 transition-colors duration-300 border border-blue-300/40 bg-blue-75/90 backdrop-blur-md shadow-lg`;
+
+  const linkColor = scrolled ? 'text-blue-200' : 'text-blue-200';
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
+    <nav className={containerClass}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          <a href="#" className={`text-xl font-bold ${scrolled ? 'text-primary' : 'text-white'}`} style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+          <Link to="/" className={`text-xl font-bold ${linkColor}`} style={{ fontFamily: 'var(--font-crimson-pro)' }}>
             Chủ nghĩa xã hội khoa học
-          </a>
+          </Link>
           <div className="hidden md:flex items-center space-x-6">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className={`text-sm font-medium transition-colors duration-300 ${scrolled ? 'text-text hover:text-primary' : 'text-white hover:text-gray-200'}`}
-                style={{ fontFamily: 'var(--font-atkinson)' }}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              if (link.type === 'home-hash') {
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-medium nav-hover-btn"
+                    style={{ fontFamily: 'var(--font-atkinson)' }}
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="text-sm font-medium nav-hover-btn"
+                  style={{ fontFamily: 'var(--font-atkinson)' }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+            <Link
+              to="/game"
+              className="text-sm font-semibold rounded-md bg-blue-300 px-4 py-2 text-blue-200 hover:bg-blue-200 hover:text-blue-300 transition-colors"
+              style={{ fontFamily: 'var(--font-atkinson)' }}
+            >
+              Tới trò chơi
+            </Link>
           </div>
         </div>
       </div>
