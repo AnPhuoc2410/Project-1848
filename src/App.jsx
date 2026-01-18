@@ -1,22 +1,28 @@
-import About from './components/About';
-import Contact from './components/Contact';
-import Features from './components/Features';
-import Footer from './components/Footer';
-import Hero from './components/Hero';
-import Navbar from './components/Navbar';
-import Story from './components/Story';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ScientificSocialism from './pages/ScientificSocialism';
+import MirrorHall from './pages/MirrorHall';
+import MiniGame from './pages/MiniGame';
+import GameRedirect from './pages/GameRedirect';
+import Lobby from './pages/Lobby';
+import PlayerA from './pages/PlayerA';
+import PlayerB from './pages/PlayerB';
+import './index.css';
 
 const App = () => {
   return (
-    <main className="relative w-screen min-h-screen overflow-x-hidden">
-      <Navbar />
-      <Hero />
-      <About />
-      <Features />
-      <Story />
-      <Contact />
-      <Footer />
-    </main>
+    <BrowserRouter>
+      <main className="relative w-screen min-h-screen overflow-x-hidden bg-background text-text">
+        <Routes>
+          <Route path="/" element={<ScientificSocialism />} />
+          <Route path="/mirror-hall" element={<MirrorHall />} />
+          <Route path="/mini-game" element={<MiniGame />} />
+          <Route path="/game" element={<GameRedirect />} />
+          <Route path="/lobby" element={<Lobby />} />
+          <Route path="/a" element={<PlayerA />} />
+          <Route path="/b" element={<PlayerB />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   );
 };
 
