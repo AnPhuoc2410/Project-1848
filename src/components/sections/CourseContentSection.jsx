@@ -16,14 +16,29 @@ const CourseContentSection = ({ modules }) => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {modules.map((module) => (
-            <div key={module.id} className="bg-white border border-border rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
-              <span className="text-sm font-bold text-primary" style={{ fontFamily: 'var(--font-atkinson)' }}>
+            <div
+              key={module.id}
+              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-white p-6 transition-all duration-500 ease-out hover:-translate-y-3 hover:scale-[1.01] hover:border-primary/80 hover:shadow-[0_24px_60px_-32px_rgba(0,0,0,0.55)]"
+            >
+              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 blur-3xl"
+                style={{ background: 'radial-gradient(circle at 20% 20%, rgba(185,28,28,0.16), transparent 35%), radial-gradient(circle at 80% 30%, rgba(251,191,36,0.16), transparent 32%), radial-gradient(circle at 50% 80%, rgba(0,0,0,0.08), transparent 45%)' }}
+              />
+              <div className="pointer-events-none absolute inset-[1px] rounded-2xl bg-gradient-to-br from-white/80 via-white/70 to-white/60" />
+              <div className="pointer-events-none absolute inset-0 rounded-2xl border border-white/70 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+              <span
+                className="relative text-sm font-bold text-primary"
+                style={{ fontFamily: 'var(--font-atkinson)' }}
+              >
                 Chuyên đề {module.id}
               </span>
-              <h3 className="text-xl font-bold text-text mt-2 mb-3" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+              <h3
+                className="relative mt-2 mb-3 text-xl font-bold text-text transition-colors duration-500 group-hover:text-primary"
+                style={{ fontFamily: 'var(--font-crimson-pro)' }}
+              >
                 {module.title}
               </h3>
-              <p className="text-base text-text leading-relaxed">
+              <p className="relative text-base leading-relaxed text-text transition-colors duration-500 group-hover:text-gray-800">
                 {module.description}
               </p>
             </div>

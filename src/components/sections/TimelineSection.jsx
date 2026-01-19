@@ -1,14 +1,16 @@
 import React from 'react';
+import AnimatedTitle from '../AnimatedTitle';
 
 const TimelineSection = ({ events }) => {
   return (
     <section id="timeline" className="py-16 md:py-24 scroll-mt-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-            Dòng thời gian
-          </h2>
-          <p className="text-base md:text-lg text-text max-w-2xl mx-auto">
+          <AnimatedTitle
+            title="DÒNG TH<b>Ờ</b>I GIAN <br /> NHỮNG CỘT M<b>Ố</b>C CHÍNH"
+            containerClass="mt-2 pointer-events-none text-text"
+          />
+          <p className="mt-6 text-base md:text-lg text-text max-w-2xl mx-auto">
             Lịch sử hình thành và phát triển của chủ nghĩa xã hội khoa học qua các cột mốc quan trọng.
           </p>
         </div>
@@ -24,6 +26,15 @@ const TimelineSection = ({ events }) => {
                 <p className="text-sm font-medium text-primary">{event.date}</p>
                 <h3 className="font-bold text-gray-800 text-lg">{event.title}</h3>
                 <p className="text-sm leading-snug tracking-wide text-gray-900 text-opacity-100">{event.description}</p>
+                {event.image && (
+                  <div className="mt-3 overflow-hidden rounded-lg border border-border/60 bg-gray-50">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="h-40 w-full object-cover object-center"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
