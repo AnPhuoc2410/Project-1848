@@ -1,14 +1,16 @@
 import React from 'react';
+import AnimatedTitle from '../AnimatedTitle';
 
 const CourseContentSection = ({ modules }) => {
   return (
     <section id="content" className="py-16 md:py-24 bg-gray-50 scroll-mt-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-text mb-4" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-            Nội dung khóa học
-          </h2>
-          <p className="text-base md:text-lg text-text max-w-2xl mx-auto">
+          <AnimatedTitle
+            title="NỘI DUNG <b>KHÓA</b> HỌC <br /> KẾT CẤU <b>CHUYÊN</b> ĐỀ"
+            containerClass="mt-5 pointer-events-none text-text"
+          />
+          <p className="mt-6 text-base md:text-lg text-text max-w-2xl mx-auto">
             Khám phá các chủ đề cốt lõi của Chủ nghĩa xã hội khoa học qua các chuyên đề sau.
           </p>
         </div>
