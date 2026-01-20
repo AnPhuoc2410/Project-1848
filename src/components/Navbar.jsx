@@ -1,122 +1,82 @@
-import clsx from 'clsx';
-import gsap from 'gsap';
-import { useWindowScroll } from 'react-use';
-import { useEffect, useRef, useState } from 'react';
-import { TiLocationArrow } from 'react-icons/ti';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
-import Button from './Button';
+const navLinks = [
+  { href: '/#introduction', label: 'Giới thiệu', type: 'home-hash' },
+  { href: '/#content', label: 'Nội dung', type: 'home-hash' },
+  { href: '/#timeline', label: 'Dòng thời gian', type: 'home-hash' },
+  { href: '/#instructor', label: 'Giảng viên', type: 'home-hash' },
+  { href: '/mirror-hall', label: 'Đại sảnh gương 3D', type: 'route' },
+  { href: '/mini-game', label: 'Mini-game', type: 'route' },
+];
 
-const navItems = ['Media', 'News', 'Leaderboards', 'About', 'Contact'];
-
-const NavBar = () => {
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [isIndicatorActive, setIsIndicatorActive] = useState(false);
-
-  const audioElementRef = useRef(null);
-  const navContainerRef = useRef(null);
-
-  const { y: currentScrollY } = useWindowScroll();
-  const [isNavVisible, setIsNavVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  const toggleAudioIndicator = () => {
-    setIsAudioPlaying((prev) => !prev);
-    setIsIndicatorActive((prev) => !prev);
-  };
+const Navbar = () => {
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    if (isAudioPlaying) {
-      audioElementRef.current.play();
-    } else {
-      audioElementRef.current.pause();
-    }
-  }, [isAudioPlaying]);
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
 
-  useEffect(() => {
-    if (currentScrollY === 0) {
-      setIsNavVisible(true);
-      navContainerRef.current.classList.remove('floating-nav');
-    } else if (currentScrollY > lastScrollY) {
-      setIsNavVisible(false);
-      navContainerRef.current.classList.add('floating-nav');
-    } else if (currentScrollY < lastScrollY) {
-      setIsNavVisible(true);
-      navContainerRef.current.classList.add('floating-nav');
-    }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [scrolled]);
 
-    setLastScrollY(currentScrollY);
-  }, [currentScrollY, lastScrollY]);
+  const containerClass = `fixed inset-x-0 top-0 z-50 transition-colors duration-300 border border-blue-300/40 bg-blue-75/90 backdrop-blur-md shadow-lg`;
 
-  useEffect(() => {
-    gsap.to(navContainerRef.current, {
-      y: isNavVisible ? 0 : -100,
-      opacity: isNavVisible ? 1 : 0,
-      duration: 0.2,
-    });
-  }, [isNavVisible]);
+  const linkColor = scrolled ? 'text-black' : 'text-black';
 
   return (
-    <div
-      ref={navContainerRef}
-      className="fixed inset-x-0 top-4 z-50 h-16 border-none transition-all duration-700 sm:inset-x-6"
-    >
-      <header className="absolute top-1/2 w-full -translate-y-1/2">
-        <nav className="flex size-full items-center justify-between p-4">
-          <div className="flex items-center gap-7">
-            <img src="/img/logo.png" alt="logo" className="w-10" />
-            <a
-              href="https://playvalorant.com/en-gb/platform-selection/"
-              target="_blank"
-            >
-              <Button
-                id="product-button"
-                title="Download Game"
-                rightIcon={<TiLocationArrow />}
-                containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
-              />
-            </a>
-          </div>
-
-          <div className="flex h-full items-center">
-            <div className="hidden md:block">
-              {navItems.map((item, index) => (
-                <a
-                  key={index}
-                  href={`#${item.toLowerCase()}`}
-                  className="nav-hover-btn"
+    <nav className={containerClass}>
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          <Link
+            to="/"
+            className={`text-xl font-bold ${linkColor}`}
+            style={{ fontFamily: 'var(--font-crimson-pro)' }}
+          >
+            Chủ nghĩa xã hội khoa học
+          </Link>
+          <div className="hidden md:flex items-center space-x-6">
+            {navLinks.map((link) => {
+              if (link.type === 'home-hash') {
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-medium nav-hover-btn text-black"
+                    style={{ fontFamily: 'var(--font-atkinson)' }}
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="text-sm font-medium nav-hover-btn text-black"
+                  style={{ fontFamily: 'var(--font-atkinson)' }}
                 >
-                  {item}
-                </a>
-              ))}
-            </div>
-
-            <button
-              onClick={toggleAudioIndicator}
-              className="ml-10 flex items-center space-x-0.5"
+                  {link.label}
+                </Link>
+              );
+            })}
+            <Link
+              to="/game"
+              className="text-sm font-semibold rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 hover:text-white transition-colors"
+              style={{ fontFamily: 'var(--font-atkinson)' }}
             >
-              <audio
-                ref={audioElementRef}
-                className="hidden"
-                src="/audio/loop.mp3"
-                loop
-              />
-              {[1, 2, 3, 4].map((bar) => (
-                <div
-                  key={bar}
-                  className={clsx('indicator-line', {
-                    active: isIndicatorActive,
-                  })}
-                  style={{
-                    animationDelay: `${bar * 0.1}s`,
-                  }}
-                />
-              ))}
-            </button>
+              Tới trò chơi
+            </Link>
           </div>
-        </nav>
-      </header>
-    </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 
-export default NavBar;
+export default Navbar;

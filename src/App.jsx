@@ -1,33 +1,39 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import About from './components/About';
-import Contact from './components/Contact';
-import Features from './components/Features';
-import Footer from './components/Footer';
-import Hero from './components/Hero';
-import Navbar from './components/Navbar';
-import Story from './components/Story';
-import Lobby from './pages/Lobby';
-import PlayerA from './pages/PlayerA';
-import PlayerB from './pages/PlayerB';
+import ScientificSocialism from './pages/ScientificSocialism';
+import './index.css';
+
+// Lazy load components that might use heavy dependencies or sockets
+const MirrorHall = lazy(() => import('./pages/MirrorHall'));
+const MiniGame = lazy(() => import('./pages/MiniGame'));
+const GameRedirect = lazy(() => import('./pages/GameRedirect'));
+const Lobby = lazy(() => import('./pages/Lobby'));
+const PlayerA = lazy(() => import('./pages/PlayerA'));
+const PlayerB = lazy(() => import('./pages/PlayerB'));
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+  </div>
+);
 
 const App = () => {
   return (
-    <main className="relative w-screen min-h-screen overflow-x-hidden">
-      <Navbar />
-      <Hero />
-      <About />
-      <Features />
-      <Story />
-      <Contact />
-      <Footer />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Lobby />} />
-          <Route path="/a" element={<PlayerA />} />
-          <Route path="/b" element={<PlayerB />} />
-        </Routes>
-      </BrowserRouter>
-    </main>
+    <BrowserRouter>
+      <main className="relative w-screen min-h-screen overflow-x-hidden bg-background text-text">
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<ScientificSocialism />} />
+            <Route path="/mirror-hall" element={<MirrorHall />} />
+            <Route path="/mini-game" element={<MiniGame />} />
+            <Route path="/game" element={<GameRedirect />} />
+            <Route path="/lobby" element={<Lobby />} />
+            <Route path="/a" element={<PlayerA />} />
+            <Route path="/b" element={<PlayerB />} />
+          </Routes>
+        </Suspense>
+      </main>
+    </BrowserRouter>
   );
 };
 
