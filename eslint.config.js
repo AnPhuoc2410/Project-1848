@@ -17,7 +17,7 @@ export default [
         sourceType: 'module',
       },
     },
-    settings: { react: { version: '18.3' } },
+    settings: { react: { version: '19.2.3' } },
     plugins: {
       react,
       'react-hooks': reactHooks,
@@ -31,7 +31,7 @@ export default [
       'react/jsx-no-target-blank': 'off',
       'react-refresh/only-export-components': 'warn',
       'react/prop-types': 'off',
-      'no-unused-vars': 'off',
+      'no-unused-vars': 'warn',
       'no-console': 'off',
     },
   },
