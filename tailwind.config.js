@@ -9,8 +9,15 @@ export default {
         'robert-medium': ['Robert-Medium', 'sans-serif'],
         'robert-regular': ['Robert-Regular', 'sans-serif'],
         'circular-web': ['Circular-Web', 'sans-serif'],
+        'eb-garamond': ['"EB Garamond"', 'serif'],
+        'crimson-text': ['"Crimson Text"', 'serif'],
       },
       colors: {
+        primary: '#002244', // Navy
+        secondary: '#B31B1B', // Red
+        cta: '#B31B1B', // Red
+        background: '#F8F8F8', // Off-white
+        text: '#111111', // Near-black
         blue: {
           50: '#DFDFF0',
           75: '#DFDFF2',
