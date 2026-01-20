@@ -43,10 +43,15 @@ const About = () => {
 
         <div className="about-subtext text-text">
           <p>
-            Chủ nghĩa xã hội khoa học là một trong ba bộ phận hợp thành của chủ nghĩa Mác - Lênin, luận giải sự chuyển biến tất yếu từ chủ nghĩa tư bản lên chủ nghĩa xã hội và chủ nghĩa cộng sản.
+            Chủ nghĩa xã hội khoa học là một trong ba bộ phận hợp thành của chủ
+            nghĩa Mác - Lênin, luận giải sự chuyển biến tất yếu từ chủ nghĩa tư
+            bản lên chủ nghĩa xã hội và chủ nghĩa cộng sản.
           </p>
           <p className="text-gray-600">
-            Môn học tập trung nghiên cứu những quy luật chính trị - xã hội của quá trình hình thành và phát triển hình thái kinh tế - xã hội cộng sản chủ nghĩa, hướng tới mục tiêu giải phóng giai cấp, dân tộc và con người, tạo điều kiện phát triển toàn diện.
+            Môn học tập trung nghiên cứu những quy luật chính trị - xã hội của
+            quá trình hình thành và phát triển hình thái kinh tế - xã hội cộng
+            sản chủ nghĩa, hướng tới mục tiêu giải phóng giai cấp, dân tộc và
+            con người, tạo điều kiện phát triển toàn diện.
           </p>
         </div>
       </div>
