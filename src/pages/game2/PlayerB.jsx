@@ -1,7 +1,7 @@
-import { socket } from '../socket';
+import { socket } from '../../socket';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import LightBoard from '../components/LightBoard';
+import LightBoard from '../../components/LightBoard';
 
 export default function PlayerB() {
   const [params] = useSearchParams();
@@ -274,7 +274,7 @@ export default function PlayerB() {
             </p>
             <div className="rounded-lg overflow-hidden bg-gray-100">
               <img
-                src="/img/circuit.png"
+                src="/img_game/circuit.png"
                 alt="Bảng đèn vật lý"
                 className="w-full h-auto"
                 onError={(e) => {
@@ -282,14 +282,6 @@ export default function PlayerB() {
                   e.target.nextSibling.style.display = 'flex';
                 }}
               />
-              <div className="hidden items-center justify-center p-8 text-text/40 text-center">
-                <div>
-                  <p>Đặt ảnh bảng đèn vật lý tại:</p>
-                  <code className="block mt-2 px-3 py-2 bg-gray-200 rounded text-sm">
-                    public/img/circuit.png
-                  </code>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
-import { socket } from '../socket';
+import { socket } from '../../socket';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import LightBoard from '../components/LightBoard';
+import LightBoard from '../../components/LightBoard';
 
 export default function PlayerA() {
   const [params] = useSearchParams();
