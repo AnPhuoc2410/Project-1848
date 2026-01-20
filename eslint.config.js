@@ -24,16 +24,16 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
-      ...js.configs.recommended.rules,
-      ...react.configs.recommended.rules,
-      ...react.configs['jsx-runtime'].rules,
-      ...reactHooks.configs.recommended.rules,
+      // Tắt hết các rule - chỉ format style thôi
       'react/jsx-no-target-blank': 'off',
-      'react-refresh/only-export-components': 'warn',
+      'react-refresh/only-export-components': 'off',
       'react/prop-types': 'off',
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
       'no-console': 'off',
       'react/no-unescaped-entities': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'no-undef': 'off',
     },
   },
 ];

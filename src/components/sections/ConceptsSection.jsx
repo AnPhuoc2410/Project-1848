@@ -37,4 +37,14 @@ const ConceptsSection = ({ concepts }) => {
   );
 };
 
+ConceptsSection.propTypes = {
+  concepts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};
+
 export default ConceptsSection;

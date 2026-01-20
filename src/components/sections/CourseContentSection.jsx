@@ -53,4 +53,14 @@ const CourseContentSection = ({ modules }) => {
   );
 };
 
+CourseContentSection.propTypes = {
+  modules: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};
+
 export default CourseContentSection;

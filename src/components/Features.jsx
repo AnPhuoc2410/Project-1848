@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
-import { TiLocationArrow } from 'react-icons/ti';
 
 export const BentoTilt = ({ children, className = '' }) => {
   const [transformStyle, setTransformStyle] = useState('');

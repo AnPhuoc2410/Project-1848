@@ -13,11 +13,11 @@ const GameSection = () => {
           </h2>
           <p className="text-base md:text-lg text-text max-w-3xl mx-auto">
             Đây là một trò chơi giải đố hợp tác dành cho 2 người chơi để tìm
-            hiểu về triết học Mác - Lênin, lấy cảm hứng từ "We Were Here" và
-            "Keep Talking and Nobody Explodes". Một người chơi sẽ là "Người
-            hướng dẫn" chỉ thấy lý thuyết, và người còn lại là "Người thực hành"
-            chỉ thấy các hành động. Cả hai phải giao tiếp để giải quyết các câu
-            đố.
+            hiểu về triết học Mác - Lênin, lấy cảm hứng từ &quot;We Were
+            Here&quot; và &quot;Keep Talking and Nobody Explodes&quot;. Một
+            người chơi sẽ là &quot;Người hướng dẫn&quot; chỉ thấy lý thuyết, và
+            người còn lại là &quot;Người thực hành&quot; chỉ thấy các hành động.
+            Cả hai phải giao tiếp để giải quyết các câu đố.
           </p>
         </div>
         <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg border border-border">
@@ -34,7 +34,7 @@ const GameSection = () => {
             <li>
               Mở hai cửa sổ trình duyệt và truy cập http://localhost:3000.
             </li>
-            <li>Nhấn "JOIN GAME" ở cả hai cửa sổ để bắt đầu.</li>
+            <li>Nhấn &quot;JOIN GAME&quot; ở cả hai cửa sổ để bắt đầu.</li>
           </ol>
           <div className="mt-8 text-center">
             <Link
