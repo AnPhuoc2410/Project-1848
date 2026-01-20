@@ -4,6 +4,7 @@ import {
   BOARD_TEXTURES,
   BOARDS_INFO,
   COLLISION_SCENE_URL,
+  KARL_MARX_MODEL_URL,
   ON_LOAD_MODEL_FINISH,
   ON_LOAD_PROGRESS,
   STATIC_SCENE_URL,
@@ -49,6 +50,7 @@ export default class Environment {
     try {
       await this._loadSceneAndCollisionDetection();
       await this._loadStaticScene();
+      await this._loadKarlMarxModel();
       await this._loadBoardsTexture();
       this._configureGallery();
       this._createSpecularReflection();
@@ -134,6 +136,49 @@ export default class Environment {
     }
     mirror.rotation.x = -0.5 * Math.PI;
     this.core.scene.add(mirror);
+  }
+
+  /*
+   * Load Karl Marx statue model
+   * */
+  private _loadKarlMarxModel(): Promise<void> {
+    return new Promise((resolve) => {
+      this.loader.gltf_loader.load(
+        KARL_MARX_MODEL_URL,
+        (gltf) => {
+          const marxModel = gltf.scene;
+
+          // Position the statue in the gallery (adjust as needed)
+          marxModel.position.set(0, 0, 0);
+          marxModel.scale.set(1, 1, 1);
+
+          // Add to collision scene for interactions
+          marxModel.traverse((item) => {
+            if (isMesh(item)) {
+              item.castShadow = true;
+              item.receiveShadow = true;
+            }
+            // Add to raycast objects for interactions
+            this.raycast_objects.push(item);
+          });
+
+          // Add model to scene
+          this.core.scene.add(marxModel);
+          resolve();
+        },
+        (event) => {
+          this.core.$emit(ON_LOAD_PROGRESS, {
+            url: KARL_MARX_MODEL_URL,
+            loaded: event.loaded,
+            total: event.total,
+          });
+        },
+        (error) => {
+          console.error('Error loading Karl Marx model:', error);
+          resolve(); // Resolve anyway to not block other loading
+        }
+      );
+    });
   }
 
   /*

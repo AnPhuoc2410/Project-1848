@@ -9,6 +9,10 @@ export const STATIC_SCENE_URL = new URL(
   './assets/models/scene_desk_obj.glb',
   import.meta.url
 ).href;
+export const KARL_MARX_MODEL_URL = new URL(
+  './assets/models/karl_marx_statue.glb',
+  import.meta.url
+).href;
 
 /*
  * Texture Resources
