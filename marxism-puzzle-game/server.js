@@ -229,10 +229,12 @@ io.on('connection', (socket) => {
     if (!room || !room.currentWire) return;
 
     const wire = room.currentWire;
-    const isReal = isCorrectWire(wire.from, wire.to);
 
-    // The question's correctAnswer determines what A should answer
-    // But the REAL result is whether this wire is in correctWires
+    // Player A's answer directly tells B whether to connect or not
+    // YES = B should connect this wire
+    // NO = B should NOT connect this wire
+    const shouldConnect = answer === 'YES';
+
     const result = {
       from: wire.from,
       to: wire.to,
@@ -241,8 +243,7 @@ io.on('connection', (socket) => {
       fromColor: wire.fromColor,
       toColor: wire.toColor,
       playerAAnswer: answer,
-      isReal: isReal, // Is this a real wire to connect?
-      isRequired: isReal, // Same as isReal for clarity
+      shouldConnect: shouldConnect, // What A told B to do
     };
 
     room.wireResults.push(result);
@@ -255,7 +256,7 @@ io.on('connection', (socket) => {
     });
 
     console.log(
-      `Answer: ${wire.fromLabel} → ${wire.toLabel} = ${isReal ? 'REAL' : 'FAKE'}`
+      `Answer: ${wire.fromLabel} → ${wire.toLabel} = ${answer} (${shouldConnect ? 'NỐI' : 'KHÔNG NỐI'})`
     );
   });
 

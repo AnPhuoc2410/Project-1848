@@ -173,7 +173,7 @@ export default function PlayerB() {
     } else {
       setMyConnections((prev) => [
         ...prev,
-        { from: wire.from, to: wire.to, color: '#44aaff' },
+        { from: wire.from, to: wire.to, color: '#ffcc00' },
       ]);
     }
     setCheckResult(null);
@@ -190,8 +190,8 @@ export default function PlayerB() {
     socket.emit('reset-game', { roomId });
   };
 
-  // Count real wires discovered
-  const realWiresCount = wireResults.filter((r) => r.isReal).length;
+  // Count wires that A said should be connected
+  const shouldConnectCount = wireResults.filter((r) => r.shouldConnect).length;
 
   return (
     <div className="player-page player-b">
@@ -287,9 +287,9 @@ export default function PlayerB() {
             ) : (
               <ul className="result-list">
                 {wireResults.map((r, i) => (
-                  <li key={i} className={r.isReal ? 'real' : 'fake'}>
+                  <li key={i} className={r.shouldConnect ? 'real' : 'fake'}>
                     <span className="result-icon">
-                      {r.isReal ? '✅' : '❌'}
+                      {r.shouldConnect ? '✅' : '❌'}
                     </span>
                     <span className="result-wire">
                       <span style={{ color: r.fromColor }}>{r.fromLabel}</span>
@@ -297,7 +297,7 @@ export default function PlayerB() {
                       <span style={{ color: r.toColor }}>{r.toLabel}</span>
                     </span>
                     <span className="result-label">
-                      {r.isReal ? 'REAL - NỐI!' : 'FAKE - KHÔNG NỐI'}
+                      {r.shouldConnect ? 'NỐI!' : 'KHÔNG NỐI'}
                     </span>
                   </li>
                 ))}

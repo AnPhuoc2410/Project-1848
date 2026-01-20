@@ -96,7 +96,7 @@ export default function PlayerA() {
   const displayConnections = wireResults.map((r) => ({
     from: r.from,
     to: r.to,
-    color: r.isReal ? '#44ff88' : '#ff4444',
+    color: r.shouldConnect ? '#44ff88' : '#ff4444',
   }));
 
   return (
@@ -180,16 +180,16 @@ export default function PlayerA() {
               {wireResults.map((result, i) => (
                 <li
                   key={i}
-                  className={result.isReal ? 'required' : 'not-required'}
+                  className={result.shouldConnect ? 'required' : 'not-required'}
                 >
                   <span className="result-icon">
-                    {result.isReal ? '✅' : '❌'}
+                    {result.shouldConnect ? '✅' : '❌'}
                   </span>
                   <span className="wire-label">
                     {result.fromLabel} → {result.toLabel}
                   </span>
                   <span className="result-text">
-                    {result.isReal ? 'REAL' : 'FAKE'}
+                    {result.shouldConnect ? 'NỐI' : 'KHÔNG NỐI'}
                   </span>
                 </li>
               ))}
