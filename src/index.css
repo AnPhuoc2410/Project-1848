@@ -83,7 +83,7 @@ body {
   }
 
   .about-subtext {
-    @apply absolute left-1/2 bottom-[-80dvh] w-full max-w-[70rem] -translate-x-1/2 text-center font-circular-web text-lg md:max-w-[40rem];
+    @apply relative mx-auto mt-12 w-full max-w-[70rem] text-center font-circular-web text-lg md:max-w-[40rem];
   }
 
   .about-image {
