@@ -1,16 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * LightBoard Component - Interactive light board with wire connections
- * @param {Object} props
- * @param {Array} props.nodes - Light node definitions [{id, label, color}]
- * @param {Array} props.connections - Current wire connections [{from, to}]
- * @param {Function} props.onWireStart - Callback when wire drag starts
- * @param {Function} props.onWireComplete - Callback when wire is completed
- * @param {boolean} props.interactive - Whether user can draw wires
- * @param {Object} props.highlightWire - Wire to highlight {from, to, color}
- * @param {boolean} props.showAllPossible - Show all possible wire paths
- * @param {Array} props.possibleWires - All possible wire pairs
+ * Updated for light theme matching main web design
  */
 export default function LightBoard({
   nodes = [],
@@ -31,7 +24,7 @@ export default function LightBoard({
   const getNodePosition = (index, total) => {
     const centerX = 200;
     const centerY = 200;
-    const radius = 140;
+    const radius = 130;
     const angle = (index / total) * Math.PI * 2 - Math.PI / 2;
     return {
       x: centerX + Math.cos(angle) * radius,
@@ -47,9 +40,11 @@ export default function LightBoard({
   const handleMouseMove = (e) => {
     if (!selectedNode || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
+    const scaleX = 400 / rect.width;
+    const scaleY = 400 / rect.height;
     setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
     });
   };
 
@@ -59,14 +54,12 @@ export default function LightBoard({
     if (!selectedNode) {
       setSelectedNode(node);
     } else if (selectedNode.id !== node.id) {
-      // Complete wire connection
       onWireComplete?.({
         from: selectedNode.id,
         to: node.id,
       });
       setSelectedNode(null);
     } else {
-      // Clicked same node, cancel
       setSelectedNode(null);
     }
   };
@@ -79,7 +72,7 @@ export default function LightBoard({
   const renderWire = (
     fromId,
     toId,
-    color = '#88ff88',
+    color = '#16a34a',
     key,
     animated = false,
     dashed = false
@@ -90,15 +83,15 @@ export default function LightBoard({
 
     return (
       <g key={key}>
-        {/* Glow effect */}
+        {/* Shadow/glow effect */}
         <line
           x1={from.x}
           y1={from.y}
           x2={to.x}
           y2={to.y}
           stroke={color}
-          strokeWidth="8"
-          strokeOpacity="0.3"
+          strokeWidth="6"
+          strokeOpacity="0.25"
           strokeLinecap="round"
           style={dashed ? { strokeDasharray: '8 4' } : {}}
         />
@@ -123,38 +116,59 @@ export default function LightBoard({
       <svg
         ref={svgRef}
         viewBox="0 0 400 400"
-        className="light-board-svg"
+        className="light-board-svg light-theme"
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setSelectedNode(null)}
       >
-        {/* Background circle */}
+        {/* Light background */}
+        <defs>
+          <linearGradient
+            id="boardGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#f8fafc" />
+            <stop offset="100%" stopColor="#f1f5f9" />
+          </linearGradient>
+          <filter id="dropShadow">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.1" />
+          </filter>
+        </defs>
+
+        {/* Outer background circle */}
         <circle
           cx="200"
           cy="200"
-          r="170"
-          fill="rgba(0,20,40,0.8)"
-          stroke="rgba(100,150,200,0.3)"
+          r="180"
+          fill="url(#boardGradient)"
+          stroke="#e2e8f0"
           strokeWidth="2"
+          filter="url(#dropShadow)"
         />
 
         {/* Inner rings */}
         <circle
           cx="200"
           cy="200"
-          r="140"
+          r="130"
           fill="none"
-          stroke="rgba(100,150,200,0.2)"
+          stroke="#cbd5e1"
           strokeWidth="1"
-          strokeDasharray="4 4"
+          strokeDasharray="6 4"
         />
 
-        {/* Show all possible wires (for Player B reference) */}
+        {/* Center dot */}
+        <circle cx="200" cy="200" r="4" fill="#94a3b8" />
+
+        {/* Show all possible wires */}
         {showAllPossible &&
           possibleWires.map((wire, i) =>
             renderWire(
               wire.from,
               wire.to,
-              'rgba(100,100,100,0.4)',
+              '#94a3b8',
               `possible-${i}`,
               false,
               true
@@ -166,7 +180,7 @@ export default function LightBoard({
           renderWire(
             conn.from,
             conn.to,
-            conn.color || '#44ff88',
+            conn.color || '#16a34a',
             `conn-${i}`,
             true
           )
@@ -177,7 +191,7 @@ export default function LightBoard({
           renderWire(
             highlightWire.from,
             highlightWire.to,
-            highlightWire.color || '#ffff44',
+            highlightWire.color || '#eab308',
             'highlight',
             true
           )}
@@ -187,7 +201,7 @@ export default function LightBoard({
           renderWire(
             pendingWire.from,
             pendingWire.to,
-            '#44aaff',
+            '#3b82f6',
             'pending',
             true
           )}
@@ -199,7 +213,7 @@ export default function LightBoard({
             y1={getNodePos(selectedNode.id)?.y}
             x2={mousePos.x}
             y2={mousePos.y}
-            stroke="#ffff44"
+            stroke="#eab308"
             strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray="8 4"
@@ -222,44 +236,54 @@ export default function LightBoard({
               cy={node.y}
               r={
                 selectedNode?.id === node.id
-                  ? 28
+                  ? 26
                   : hoveredNode === node.id
-                    ? 25
-                    : 20
+                    ? 23
+                    : 18
               }
               fill={node.color}
-              opacity={0.3}
+              opacity={0.25}
               className="node-glow"
             />
             {/* Main node */}
             <circle
               cx={node.x}
               cy={node.y}
-              r={15}
+              r={14}
               fill={node.color}
-              stroke={
-                selectedNode?.id === node.id
-                  ? '#ffffff'
-                  : 'rgba(255,255,255,0.5)'
-              }
-              strokeWidth={selectedNode?.id === node.id ? 3 : 1}
+              stroke={selectedNode?.id === node.id ? '#1f2937' : '#ffffff'}
+              strokeWidth={selectedNode?.id === node.id ? 3 : 2}
+              filter="url(#dropShadow)"
               className="node-main"
             />
             {/* Inner highlight */}
             <circle
-              cx={node.x - 4}
-              cy={node.y - 4}
-              r={5}
-              fill="rgba(255,255,255,0.5)"
+              cx={node.x - 3}
+              cy={node.y - 3}
+              r={4}
+              fill="rgba(255,255,255,0.6)"
             />
-            {/* Label */}
+
+            {/* Label with background for readability */}
+            <rect
+              x={node.x - 28}
+              y={node.y + 22}
+              width="56"
+              height="18"
+              rx="4"
+              fill="white"
+              fillOpacity="0.9"
+              stroke="#e2e8f0"
+              strokeWidth="1"
+            />
             <text
               x={node.x}
-              y={node.y + 35}
+              y={node.y + 34}
               textAnchor="middle"
-              fill="rgba(255,255,255,0.8)"
+              fill="#1f2937"
               fontSize="11"
-              fontWeight="500"
+              fontWeight="600"
+              fontFamily="var(--font-atkinson)"
             >
               {node.label}
             </text>
@@ -268,7 +292,7 @@ export default function LightBoard({
       </svg>
 
       {interactive && selectedNode && (
-        <div className="wire-hint">
+        <div className="wire-hint-light">
           Click đèn khác để nối dây từ{' '}
           <strong style={{ color: selectedNode.color }}>
             {selectedNode.label}
@@ -278,3 +302,14 @@ export default function LightBoard({
     </div>
   );
 }
+
+LightBoard.propTypes = {
+  nodes: PropTypes.array,
+  connections: PropTypes.array,
+  onWireComplete: PropTypes.func,
+  interactive: PropTypes.bool,
+  highlightWire: PropTypes.object,
+  showAllPossible: PropTypes.bool,
+  possibleWires: PropTypes.array,
+  pendingWire: PropTypes.object,
+};

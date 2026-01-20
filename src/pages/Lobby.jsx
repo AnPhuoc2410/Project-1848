@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TiLocationArrow } from 'react-icons/ti';
+import Button from '../components/Button';
 
 export default function Lobby() {
   const nav = useNavigate();
@@ -10,70 +12,106 @@ export default function Lobby() {
   };
 
   return (
-    <div className="lobby-page">
-      <div className="lobby-container">
-        <div className="lobby-header">
-          <h1>🔌 Light Board Puzzle</h1>
-          <p className="subtitle">Triết học Marxism - Puzzle hợp tác 2 người</p>
-        </div>
+    <div className="game-lobby">
+      {/* Background with grid pattern */}
+      <div className="absolute inset-0 z-0 bg-background">
+        <div className="absolute inset-0 bg-grid-pattern" />
+      </div>
 
-        <div className="room-input">
-          <label>Mã phòng:</label>
-          <input
-            type="text"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
-            placeholder="Nhập mã phòng..."
-          />
-        </div>
-
-        {/* Blind Mode Info - Always ON */}
-        <div className="blind-mode-notice">
-          <span className="blind-icon">🔇</span>
-          <div className="blind-text">
-            <strong>Blind Mode</strong>
-            <span>
-              Player B không thấy kết quả - phải giao tiếp qua voice chat!
-            </span>
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
+        <div className="lobby-card">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="special-font text-4xl sm:text-5xl font-black text-primary mb-2">
+              🔌 LI<b>G</b>HT BO<b>A</b>RD
+            </h1>
+            <p className="font-robert-regular text-text/70">
+              Triết học Marxism - Puzzle hợp tác 2 người
+            </p>
           </div>
-        </div>
 
-        <div className="role-selection">
-          <button className="role-btn role-a" onClick={() => join('a')}>
-            <span className="role-icon">📖</span>
-            <span className="role-name">Player A</span>
-            <span className="role-desc">Lý thuyết - Trả lời câu hỏi</span>
-          </button>
+          {/* Room Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-text/80 mb-2">
+              Mã phòng
+            </label>
+            <input
+              type="text"
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+              placeholder="Nhập mã phòng..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-border bg-white text-text 
+                         focus:border-primary focus:outline-none transition-colors
+                         font-atkinson text-lg"
+            />
+          </div>
 
-          <button className="role-btn role-b" onClick={() => join('b')}>
-            <span className="role-icon">🔧</span>
-            <span className="role-name">Player B</span>
-            <span className="role-desc">Thực hành - Nối dây 🔇</span>
-          </button>
-        </div>
+          {/* Blind Mode Notice */}
+          <div className="flex items-center gap-4 p-4 mb-6 bg-primary/5 rounded-xl border border-primary/20">
+            <span className="text-2xl">🔇</span>
+            <div>
+              <p className="font-semibold text-primary">Blind Mode</p>
+              <p className="text-sm text-text/60">
+                Player B không thấy kết quả - giao tiếp qua voice chat!
+              </p>
+            </div>
+          </div>
 
-        <div className="lobby-instructions">
-          <h3>Cách chơi:</h3>
-          <ol>
-            <li>
-              <strong>Player B</strong> nhìn ảnh vật lý, chọn cặp đèn để hỏi A
-            </li>
-            <li>
-              <strong>Player A</strong> đọc câu hỏi, suy nghĩ và trả lời (YES =
-              NỐI, NO = KHÔNG NỐI)
-            </li>
-            <li>
-              <strong>Player A</strong> nói kết quả qua voice chat cho B (B
-              không thấy trên màn hình!)
-            </li>
-            <li>
-              <strong>Player B</strong> nối dây theo hướng dẫn từ A
-            </li>
-            <li>
-              Khi hoàn thành, Player B bấm <strong>Kiểm tra</strong>
-            </li>
-            <li>Đúng 4 dây → Thắng! Sai → Trừ 30 giây!</li>
-          </ol>
+          {/* Role Selection */}
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <button onClick={() => join('a')} className="role-card role-card-a">
+              <span className="text-3xl mb-2">📖</span>
+              <span className="font-crimson-pro text-xl font-bold">
+                Player A
+              </span>
+              <span className="text-sm opacity-80">Lý thuyết</span>
+            </button>
+
+            <button onClick={() => join('b')} className="role-card role-card-b">
+              <span className="text-3xl mb-2">🔧</span>
+              <span className="font-crimson-pro text-xl font-bold">
+                Player B
+              </span>
+              <span className="text-sm opacity-80">Thực hành 🔇</span>
+            </button>
+          </div>
+
+          {/* Instructions */}
+          <div className="bg-white/50 rounded-xl p-5 border border-border">
+            <h3 className="font-crimson-pro text-lg font-bold text-text mb-3">
+              📋 Cách chơi
+            </h3>
+            <ol className="space-y-2 text-sm text-text/70 font-robert-regular">
+              <li className="flex gap-2">
+                <span className="font-bold text-primary">1.</span>
+                <span>
+                  <b>Player B</b> nhìn ảnh vật lý, chọn cặp đèn để hỏi A
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-primary">2.</span>
+                <span>
+                  <b>Player A</b> trả lời câu hỏi (YES = NỐI, NO = KHÔNG NỐI)
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-primary">3.</span>
+                <span>
+                  <b>Player A</b> nói kết quả qua voice chat cho B
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-primary">4.</span>
+                <span>
+                  <b>Player B</b> nối dây → bấm <b>Kiểm tra</b>
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-primary">5.</span>
+                <span>Đúng 4 dây → Thắng! Sai → Trừ 30 giây!</span>
+              </li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>

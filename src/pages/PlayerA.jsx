@@ -25,26 +25,21 @@ export default function PlayerA() {
   const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
-    // Join room
     socket.emit('join-room', { roomId, role: 'A' });
 
-    // Receive initial game state
     socket.on('game-init', (data) => {
       setLightNodes(data.lightNodes);
       setWireResults(data.wireResults || []);
     });
 
-    // Receive question from Player B's wire selection
     socket.on('wire-question', ({ wire, question, forPlayerA }) => {
       if (!forPlayerA) return;
-
       setCurrentWire(wire);
       setCurrentQuestion(question);
       setShowQuestion(true);
       setLoading(false);
     });
 
-    // Wire result confirmed
     socket.on('wire-result', ({ result, totalResults }) => {
       setWireResults(totalResults);
       setShowQuestion(false);
@@ -52,23 +47,14 @@ export default function PlayerA() {
       setLoading(false);
     });
 
-    // Answer updated (for editing existing answers)
     socket.on('answer-updated', ({ totalResults }) => {
       setWireResults(totalResults);
       setEditingIndex(null);
     });
 
-    // Level complete
-    socket.on('level-complete', ({ message }) => {
-      setLevelComplete(true);
-    });
+    socket.on('level-complete', () => setLevelComplete(true));
+    socket.on('game-over', () => setGameOver(true));
 
-    // Game over
-    socket.on('game-over', () => {
-      setGameOver(true);
-    });
-
-    // Game reset
     socket.on('game-reset', (data) => {
       setLightNodes(data.lightNodes);
       setWireResults([]);
@@ -90,75 +76,77 @@ export default function PlayerA() {
     };
   }, [roomId]);
 
-  // Answer new question
   const handleAnswer = (answer) => {
     setLoading(true);
-    socket.emit('answer-question', {
-      roomId,
-      answer,
-    });
+    socket.emit('answer-question', { roomId, answer });
   };
 
-  // Click on history item to edit
   const handleEditClick = (index) => {
-    if (editingIndex === index) {
-      setEditingIndex(null); // Close if clicking same item
-    } else {
-      setEditingIndex(index);
-    }
+    setEditingIndex(editingIndex === index ? null : index);
   };
 
-  // Change existing answer
   const handleChangeAnswer = (index, newAnswer) => {
     const result = wireResults[index];
     if (result.shouldConnect === (newAnswer === 'YES')) {
-      // Same answer, just close
       setEditingIndex(null);
       return;
     }
-
-    socket.emit('update-answer', {
-      roomId,
-      wireIndex: index,
-      newAnswer,
-    });
+    socket.emit('update-answer', { roomId, wireIndex: index, newAnswer });
   };
 
-  const handleReset = () => {
-    socket.emit('reset-game', { roomId });
-  };
+  const handleReset = () => socket.emit('reset-game', { roomId });
 
-  // Create visual connections from results
   const displayConnections = wireResults.map((r) => ({
     from: r.from,
     to: r.to,
-    color: r.shouldConnect ? '#44ff88' : '#ff4444',
+    color: r.shouldConnect ? '#16a34a' : '#dc2626',
   }));
 
   return (
-    <div className="player-page player-a">
-      <div className="player-header">
-        <h1>Player A</h1>
-        <span className="player-role">Lý thuyết</span>
-        <span className="room-id">Room: {roomId}</span>
+    <div className="game-page">
+      {/* Background */}
+      <div className="absolute inset-0 z-0 bg-background">
+        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
       </div>
 
+      {/* Header */}
+      <header className="game-header">
+        <div className="flex items-center gap-4">
+          <h1 className="special-font text-2xl font-black text-secondary">
+            PL<b>A</b>YER A
+          </h1>
+          <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm font-medium">
+            📖 Lý thuyết
+          </span>
+        </div>
+        <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
+          Room: {roomId}
+        </span>
+      </header>
+
+      {/* Game Over Overlay */}
       {gameOver && (
-        <div className="game-over-overlay">
-          <div className="game-over-content">
-            <h2>⏰ Hết Thời Gian!</h2>
-            <p>Player B đã hết thời gian</p>
-            <button className="action-btn primary" onClick={handleReset}>
+        <div className="game-overlay">
+          <div className="overlay-card bg-red-50 border-red-200">
+            <h2 className="text-2xl font-bold text-primary mb-2">
+              ⏰ Hết Thời Gian!
+            </h2>
+            <p className="text-text/70 mb-4">Player B đã hết thời gian</p>
+            <button onClick={handleReset} className="btn-primary">
               Chơi lại
             </button>
           </div>
         </div>
       )}
 
-      <div className="game-content">
-        <div className="board-section">
-          <h3>Bảng đèn</h3>
-          <p className="board-hint">Hiển thị các cặp đèn đã được hỏi</p>
+      {/* Main Content */}
+      <div className="relative z-10 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        {/* Left - Board */}
+        <div className="game-card">
+          <h3 className="card-title">🔌 Bảng đèn</h3>
+          <p className="text-sm text-text/50 mb-4">
+            Hiển thị các cặp đèn đã được hỏi
+          </p>
           <LightBoard
             nodes={lightNodes}
             connections={displayConnections}
@@ -167,133 +155,179 @@ export default function PlayerA() {
           />
         </div>
 
-        <div className="control-section">
-          <div className="status-box">
-            <h3>📋 Trạng thái</h3>
+        {/* Right - Controls */}
+        <div className="space-y-6">
+          {/* Status Box */}
+          <div className="game-card">
+            <h3 className="card-title">📋 Trạng thái</h3>
+
             {!showQuestion && !levelComplete && (
-              <div className="waiting-status">
-                <div className="three-body">
+              <div className="text-center py-8">
+                <div className="three-body mx-auto mb-4">
                   <div className="three-body__dot"></div>
                   <div className="three-body__dot"></div>
                   <div className="three-body__dot"></div>
                 </div>
-                <p>Đang chờ Player B chọn cặp đèn...</p>
-                <p className="hint-text">
+                <p className="text-text/70">
+                  Đang chờ Player B chọn cặp đèn...
+                </p>
+                <p className="text-sm text-text/40 mt-2">
                   Player B sẽ đọc từ ảnh vật lý và chọn cặp đèn để hỏi bạn
                 </p>
               </div>
             )}
 
             {showQuestion && currentWire && (
-              <div className="question-panel">
-                <div className="question-wire-info">
-                  <p>Player B hỏi về cặp:</p>
-                  <div className="wire-display">
-                    <strong style={{ color: currentWire.fromColor }}>
+              <div className="space-y-4">
+                {/* Wire Info */}
+                <div className="text-center p-4 bg-secondary/10 rounded-xl">
+                  <p className="text-sm text-text/60 mb-2">
+                    Player B hỏi về cặp:
+                  </p>
+                  <div className="flex items-center justify-center gap-3 text-xl font-bold">
+                    <span style={{ color: currentWire.fromColor }}>
                       {currentWire.fromLabel}
-                    </strong>
-                    <span className="arrow">→</span>
-                    <strong style={{ color: currentWire.toColor }}>
+                    </span>
+                    <span className="text-text/30">→</span>
+                    <span style={{ color: currentWire.toColor }}>
                       {currentWire.toLabel}
-                    </strong>
+                    </span>
                   </div>
                 </div>
 
-                <div className="question-box">
-                  <h4>❓ Câu hỏi Triết học:</h4>
-                  <p className="question-text">{currentQuestion}</p>
+                {/* Question */}
+                <div className="p-4 bg-white rounded-xl border-l-4 border-secondary">
+                  <h4 className="text-sm font-medium text-secondary mb-2">
+                    ❓ Câu hỏi Triết học:
+                  </h4>
+                  <p className="text-text font-robert-regular">
+                    {currentQuestion}
+                  </p>
                 </div>
 
-                <div className="answer-buttons">
+                {/* Answer Buttons */}
+                <div className="grid grid-cols-2 gap-4">
                   <button
-                    className="answer-btn yes"
                     onClick={() => handleAnswer('YES')}
                     disabled={loading}
+                    className="answer-btn answer-yes"
                   >
-                    ✓ YES
-                    <span>Dây cần nối</span>
+                    <span className="text-2xl">✓</span>
+                    <span className="font-bold">YES</span>
+                    <span className="text-xs opacity-70">Dây cần nối</span>
                   </button>
                   <button
-                    className="answer-btn no"
                     onClick={() => handleAnswer('NO')}
                     disabled={loading}
+                    className="answer-btn answer-no"
                   >
-                    ✗ NO
-                    <span>Không cần nối</span>
+                    <span className="text-2xl">✗</span>
+                    <span className="font-bold">NO</span>
+                    <span className="text-xs opacity-70">Không cần nối</span>
                   </button>
                 </div>
-                {loading && <p className="loading-text">Đang gửi...</p>}
+                {loading && (
+                  <p className="text-center text-text/50">Đang gửi...</p>
+                )}
+              </div>
+            )}
+
+            {levelComplete && (
+              <div className="text-center py-8">
+                <h2 className="text-2xl font-bold text-green-600 mb-2">
+                  🎉 Hoàn thành!
+                </h2>
+                <p className="text-text/70 mb-4">
+                  Player B đã nối đúng tất cả dây!
+                </p>
+                <button onClick={handleReset} className="btn-secondary">
+                  Chơi lại
+                </button>
               </div>
             )}
           </div>
 
-          {levelComplete && (
-            <div className="status-message success">
-              <h2>🎉 Hoàn thành!</h2>
-              <p>Player B đã nối đúng tất cả dây!</p>
-              <button className="action-btn secondary" onClick={handleReset}>
-                Chơi lại
-              </button>
-            </div>
-          )}
+          {/* Wire History */}
+          <div className="game-card">
+            <h3 className="card-title">
+              📝 Lịch sử câu hỏi ({wireResults.length})
+            </h3>
+            <p className="text-xs text-text/40 mb-3">
+              👆 Click vào để đổi đáp án
+            </p>
 
-          <div className="wire-history editable">
-            <h4>📝 Lịch sử câu hỏi ({wireResults.length})</h4>
-            <p className="history-hint">👆 Click vào để đổi đáp án</p>
-            <ul>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
               {wireResults.map((result, i) => (
-                <li
+                <div
                   key={i}
-                  className={`${result.shouldConnect ? 'required' : 'not-required'} ${editingIndex === i ? 'editing' : ''}`}
                   onClick={() => handleEditClick(i)}
+                  className={`history-item ${result.shouldConnect ? 'history-yes' : 'history-no'} 
+                             ${editingIndex === i ? 'ring-2 ring-primary' : ''}`}
                 >
-                  <div className="result-main">
-                    <span className="result-icon">
-                      {result.shouldConnect ? '✅' : '❌'}
-                    </span>
-                    <span className="wire-label">
+                  <div className="flex items-center gap-3">
+                    <span>{result.shouldConnect ? '✅' : '❌'}</span>
+                    <span className="flex-1">
                       <span style={{ color: result.fromColor }}>
                         {result.fromLabel}
                       </span>
-                      <span className="arrow">→</span>
+                      <span className="text-text/30 mx-2">→</span>
                       <span style={{ color: result.toColor }}>
                         {result.toLabel}
                       </span>
                     </span>
-                    <span className="result-text">
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        result.shouldConnect
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
                       {result.shouldConnect ? 'NỐI' : 'KHÔNG NỐI'}
                     </span>
-                    <span className="edit-hint">✏️</span>
+                    <span className="text-text/30">✏️</span>
                   </div>
 
                   {editingIndex === i && (
                     <div
-                      className="edit-panel"
+                      className="mt-3 pt-3 border-t border-border"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <p>Đổi đáp án:</p>
-                      <div className="edit-buttons">
+                      <p className="text-sm text-text/60 mb-2">Đổi đáp án:</p>
+                      <div className="grid grid-cols-2 gap-2">
                         <button
-                          className={`edit-btn yes ${result.shouldConnect ? 'current' : ''}`}
                           onClick={() => handleChangeAnswer(i, 'YES')}
+                          className={`py-2 rounded-lg text-sm font-medium transition
+                            ${
+                              result.shouldConnect
+                                ? 'bg-green-600 text-white'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
                         >
                           ✓ YES - NỐI
                         </button>
                         <button
-                          className={`edit-btn no ${!result.shouldConnect ? 'current' : ''}`}
                           onClick={() => handleChangeAnswer(i, 'NO')}
+                          className={`py-2 rounded-lg text-sm font-medium transition
+                            ${
+                              !result.shouldConnect
+                                ? 'bg-red-600 text-white'
+                                : 'bg-red-100 text-red-700 hover:bg-red-200'
+                            }`}
                         >
                           ✗ NO - KHÔNG NỐI
                         </button>
                       </div>
                     </div>
                   )}
-                </li>
+                </div>
               ))}
+
               {wireResults.length === 0 && (
-                <li className="empty">Chưa có câu hỏi nào</li>
+                <p className="text-center text-text/40 py-4">
+                  Chưa có câu hỏi nào
+                </p>
               )}
-            </ul>
+            </div>
           </div>
         </div>
       </div>
