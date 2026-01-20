@@ -23,7 +23,9 @@ const HeroSection = () => {
 
   useEffect(() => {
     if (loadedVideos === totalVideos - 1) {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 0);
     }
   }, [loadedVideos]);
 
@@ -80,10 +82,7 @@ const HeroSection = () => {
   const getVideoSrc = (index) => `videos/hero-${index}.webm`;
 
   return (
-    <header
-      id="home"
-      className="relative h-dvh w-screen overflow-x-hidden"
-    >
+    <header id="home" className="relative h-dvh w-screen overflow-x-hidden">
       <div className="absolute inset-0 z-0 bg-background">
         <div className="absolute inset-0 bg-grid-pattern" />
       </div>
@@ -149,16 +148,14 @@ const HeroSection = () => {
           <div className="absolute left-0 top-0 z-40 size-full">
             <div className="mt-24 px-5 sm:px-10">
               <h1 className="special-font hero-heading text-primary">
-                CH<b>Ủ</b> NGH<b>Ĩ</b>A <br /> X<b>Ã</b> HỘ<b>I</b> 
+                CH<b>Ủ</b> NGH<b>Ĩ</b>A <br /> X<b>Ã</b> HỘ<b>I</b>
               </h1>
 
               <p className="mb-5 max-w-72 font-robert-regular text-text">
                 Khóa học nền tảng về tư tưởng và lý luận <br />
                 Củng cố kiến thức, mở rộng tầm nhìn.
               </p>
-              <a
-                href="#introduction"
-              >
+              <a href="#introduction">
                 <Button
                   id="cta-course"
                   title="Khám phá khóa học"
@@ -170,9 +167,9 @@ const HeroSection = () => {
           </div>
         </div>
 
-      <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
-        K<b>H</b>OA<b>H</b>ỌC
-      </h1>
+        <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
+          K<b>H</b>OA<b>H</b>ỌC
+        </h1>
       </div>
     </header>
   );

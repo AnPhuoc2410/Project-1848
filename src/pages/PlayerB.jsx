@@ -15,7 +15,7 @@ export default function PlayerB() {
         isValid ? `✅ ${from} → ${to} CONNECTED` : `❌ INVALID CONNECTION`
       );
     });
-  }, []);
+  }, [roomId]);
 
   return (
     <div>

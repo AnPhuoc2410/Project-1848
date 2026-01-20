@@ -8,7 +8,7 @@ export default function PlayerA() {
 
   useEffect(() => {
     socket.emit('join-room', { roomId, role: 'A' });
-  }, []);
+  }, [roomId]);
 
   const send = (answer) => {
     socket.emit('connect-wire', {

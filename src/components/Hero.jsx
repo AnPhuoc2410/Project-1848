@@ -24,7 +24,9 @@ const Hero = () => {
 
   useEffect(() => {
     if (loadedVideos === totalVideos - 1) {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 0);
     }
   }, [loadedVideos]);
 
