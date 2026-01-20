@@ -19,9 +19,9 @@ const Gallery3D = () => {
 
     // Cleanup function
     return () => {
-      // Clean up Three.js resources if needed
       if (coreRef.current) {
-        // Add cleanup logic here if Core class has a cleanup method
+        coreRef.current.dispose();
+        coreRef.current = null;
       }
     };
   }, []);
