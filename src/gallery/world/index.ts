@@ -12,7 +12,7 @@ import {
   ON_ENTER_APP,
   ON_SHOW_TOOLTIP,
 } from '../Constants';
-import { Object3D } from 'three';
+import { Object3D, Vector3 } from 'three';
 
 export default class World {
   private core: Core;
@@ -33,7 +33,11 @@ export default class World {
     this.core.$on(ON_ENTER_APP, this._onEnterApp.bind(this));
 
     this.environment = new Environment();
-    this.character = new Character({ speed: 12 });
+    // Spawn player on top of stairs, will walk down to gallery
+    this.character = new Character({
+      speed: 10,
+      reset_position: new Vector3(0, 8, 35), // On top of stairs
+    });
     this.css_3d_renderer = new Css3DRenderer();
     this.audio = new Audio();
     this.ray_caster_controls = new RayCasterControls();
