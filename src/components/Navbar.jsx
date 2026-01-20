@@ -5,7 +5,6 @@ const navLinks = [
   { href: '/#introduction', label: 'Giới thiệu', type: 'home-hash' },
   { href: '/#content', label: 'Nội dung', type: 'home-hash' },
   { href: '/#timeline', label: 'Dòng thời gian', type: 'home-hash' },
-  { href: '/#concepts', label: 'Khái niệm', type: 'home-hash' },
   { href: '/#instructor', label: 'Giảng viên', type: 'home-hash' },
   { href: '/mirror-hall', label: 'Đại sảnh gương 3D', type: 'route' },
   { href: '/mini-game', label: 'Mini-game', type: 'route' },

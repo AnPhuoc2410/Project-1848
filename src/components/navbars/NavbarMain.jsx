@@ -16,7 +16,6 @@ const NavbarMain = () => {
     { href: '#introduction', label: 'Giới thiệu', type: 'anchor' },
     { href: '#content', label: 'Nội dung', type: 'anchor' },
     { href: '#timeline', label: 'Dòng thời gian', type: 'anchor' },
-    { href: '#concepts', label: 'Khái niệm', type: 'anchor' },
     { href: '#instructor', label: 'Giảng viên', type: 'anchor' },
     { href: '/mirror-hall', label: 'Mini-game', type: 'route' },
   ];
