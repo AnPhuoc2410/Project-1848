@@ -12,11 +12,16 @@
   --font-circular-web: 'circular-web', sans-serif;
 
   /* --- NEW COLORS --- */
-  --color-primary: #B91C1C; /* Red */
-  --color-secondary: #FBBF24; /* Gold/Yellow */
-  --color-background: #F9FAFB; /* Off-white */
-  --color-text: #1F2937; /* Dark Gray */
-  --color-border: #E5E7EB; /* Gray */
+  --color-primary: #b91c1c;
+  /* Red */
+  --color-secondary: #fbbf24;
+  /* Gold/Yellow */
+  --color-background: #f9fafb;
+  /* Off-white */
+  --color-text: #1f2937;
+  /* Dark Gray */
+  --color-border: #e5e7eb;
+  /* Gray */
 }
 
 body {
@@ -201,11 +206,36 @@ body {
   }
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-crimson-pro);
 }
 
 /* make scrollbar thin */
 ::-webkit-scrollbar {
   width: 0px;
+}
+
+/* ScientificSocialism.jsx styles */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.left-timeline {
+  flex-direction: row-reverse;
+}
+
+.right-timeline {
+  flex-direction: row;
+}
+
+html {
+  scroll-behavior: smooth;
 }
