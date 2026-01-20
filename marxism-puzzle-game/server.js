@@ -260,6 +260,29 @@ io.on('connection', (socket) => {
     );
   });
 
+  // Player A updates an existing answer
+  socket.on('update-answer', ({ roomId, wireIndex, newAnswer }) => {
+    const room = rooms[roomId];
+    if (!room || wireIndex < 0 || wireIndex >= room.wireResults.length) return;
+
+    const shouldConnect = newAnswer === 'YES';
+    room.wireResults[wireIndex].playerAAnswer = newAnswer;
+    room.wireResults[wireIndex].shouldConnect = shouldConnect;
+
+    // Notify both players of the update
+    io.to(roomId).emit('answer-updated', {
+      wireIndex,
+      newAnswer,
+      shouldConnect,
+      totalResults: room.wireResults,
+    });
+
+    const wire = room.wireResults[wireIndex];
+    console.log(
+      `Answer UPDATED: ${wire.fromLabel} → ${wire.toLabel} = ${newAnswer} (${shouldConnect ? 'NỐI' : 'KHÔNG NỐI'})`
+    );
+  });
+
   // Player B submits their connections
   socket.on('submit-connections', ({ roomId, connections }) => {
     const room = rooms[roomId];

@@ -2425,3 +2425,612 @@ html {
   background: none;
   border: none;
 }
+
+/* ======================================
+   BLIND MODE STYLES
+   ====================================== */
+
+/* Mode Toggle in Lobby */
+.mode-toggle {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 100, 100, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 100, 100, 0.2);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.toggle-label input[type='checkbox'] {
+  display: none;
+}
+
+.toggle-switch {
+  width: 48px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 13px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.toggle-label input:checked + .toggle-switch {
+  background: linear-gradient(135deg, #ff6666, #cc4444);
+}
+
+.toggle-label input:checked + .toggle-switch::after {
+  left: 25px;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.toggle-desc {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.blind-tag {
+  margin-left: 6px;
+  font-size: 0.9rem;
+}
+
+/* Blind Mode Badge */
+.blind-mode-badge {
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #cc4444, #aa2222);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Blind Mode Info Panel */
+.blind-mode-info {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba(255, 100, 100, 0.1);
+  border-radius: 16px;
+  border: 2px dashed rgba(255, 100, 100, 0.3);
+  margin-bottom: 20px;
+}
+
+.blind-mode-info .blind-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.blind-mode-info h4 {
+  margin: 0 0 10px;
+  color: #ff6666;
+  font-size: 1.2rem;
+}
+
+.blind-mode-info p {
+  margin: 5px 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+}
+
+.blind-mode-info .asked-count {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: inline-block;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.blind-mode-info .asked-count strong {
+  color: #ffcc00;
+  font-size: 1.3rem;
+}
+
+/* Compact Blind Mode Info */
+.blind-mode-info.compact {
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.blind-mode-info.compact p {
+  margin: 3px 0;
+  font-size: 0.85rem;
+}
+
+/* Blind Mode Notice in Lobby */
+.blind-mode-notice {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.25);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.blind-mode-notice .blind-icon {
+  font-size: 2rem;
+}
+
+.blind-mode-notice .blind-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.blind-mode-notice .blind-text strong {
+  color: #ff6666;
+  font-size: 1rem;
+}
+
+.blind-mode-notice .blind-text span {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+/* ======================================
+   PLAYER A - QUESTION PANEL
+   ====================================== */
+
+.question-panel {
+  background: rgba(0, 30, 60, 0.5);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(100, 200, 255, 0.2);
+}
+
+.question-wire-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.question-wire-info p {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.wire-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.4rem;
+}
+
+.wire-display .arrow {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.question-box {
+  background: rgba(255, 200, 100, 0.1);
+  border: 1px solid rgba(255, 200, 100, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.question-box h4 {
+  margin: 0 0 10px;
+  color: #ffcc66;
+  font-size: 0.95rem;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  color: white;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.answer-selection {
+  margin-bottom: 20px;
+}
+
+.answer-selection > p {
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.answer-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.answer-select-btn {
+  flex: 1;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.answer-select-btn span {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.answer-select-btn.yes {
+  background: rgba(50, 200, 100, 0.15);
+  color: #44ff88;
+  border-color: rgba(50, 200, 100, 0.3);
+}
+
+.answer-select-btn.yes:hover,
+.answer-select-btn.yes.selected {
+  background: rgba(50, 200, 100, 0.3);
+  border-color: #44ff88;
+  box-shadow: 0 0 20px rgba(50, 200, 100, 0.3);
+}
+
+.answer-select-btn.no {
+  background: rgba(255, 100, 100, 0.15);
+  color: #ff6666;
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+.answer-select-btn.no:hover,
+.answer-select-btn.no.selected {
+  background: rgba(255, 100, 100, 0.3);
+  border-color: #ff6666;
+  box-shadow: 0 0 20px rgba(255, 100, 100, 0.3);
+}
+
+.confirm-section {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selected-preview {
+  margin: 0 0 15px;
+  font-size: 1rem;
+}
+
+.selected-preview strong.yes {
+  color: #44ff88;
+}
+
+.selected-preview strong.no {
+  color: #ff6666;
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #4477ff, #2255dd) !important;
+  font-size: 1rem;
+  padding: 15px 30px;
+}
+
+.confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(68, 119, 255, 0.4);
+}
+
+.change-hint {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ======================================
+   PLAYER B - ASKED WIRES SECTION
+   ====================================== */
+
+.asked-wires-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(0, 30, 60, 0.4);
+  border-radius: 12px;
+  border: 1px solid rgba(100, 150, 255, 0.15);
+}
+
+.asked-wires-section h4 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.asked-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.asked-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.asked-number {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  min-width: 20px;
+}
+
+.asked-wire {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.asked-status {
+  font-size: 0.75rem;
+  color: rgba(255, 200, 100, 0.7);
+}
+
+/* My Connections List */
+.my-connections-list {
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(255, 200, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 200, 0, 0.2);
+}
+
+.my-connections-list h5 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: #ffcc00;
+}
+
+.my-connections-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.connected-wire {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(255, 200, 0, 0.15);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.connected-wire .arrow {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+}
+
+/* ======================================
+   EDITABLE ANSWER HISTORY (Player A)
+   ====================================== */
+
+.wire-history.editable {
+  margin-top: 20px;
+}
+
+.wire-history.editable .history-hint {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.wire-history.editable ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wire-history.editable li {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.wire-history.editable li:hover {
+  transform: translateX(5px);
+}
+
+.wire-history.editable li.editing {
+  background: rgba(100, 150, 255, 0.15) !important;
+  border-color: rgba(100, 150, 255, 0.4) !important;
+}
+
+.result-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+}
+
+.wire-history.editable .result-main .wire-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wire-history.editable .result-main .arrow {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.edit-hint {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.wire-history.editable li:hover .edit-hint {
+  opacity: 0.6;
+}
+
+/* Edit Panel */
+.edit-panel {
+  padding: 15px;
+  background: rgba(0, 20, 40, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-panel p {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.edit-btn.yes {
+  background: rgba(50, 200, 100, 0.15);
+  color: #44ff88;
+  border-color: rgba(50, 200, 100, 0.3);
+}
+
+.edit-btn.yes:hover,
+.edit-btn.yes.current {
+  background: rgba(50, 200, 100, 0.3);
+  border-color: #44ff88;
+}
+
+.edit-btn.no {
+  background: rgba(255, 100, 100, 0.15);
+  color: #ff6666;
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+.edit-btn.no:hover,
+.edit-btn.no.current {
+  background: rgba(255, 100, 100, 0.3);
+  border-color: #ff6666;
+}
+
+.edit-btn.current::after {
+  content: ' (hiện tại)';
+  font-size: 0.7rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* Answer buttons for new questions */
+.answer-btn {
+  flex: 1;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.answer-btn span {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.answer-btn.yes {
+  background: rgba(50, 200, 100, 0.2);
+  color: #44ff88;
+  border-color: rgba(50, 200, 100, 0.3);
+}
+
+.answer-btn.yes:hover {
+  background: rgba(50, 200, 100, 0.4);
+  border-color: #44ff88;
+  box-shadow: 0 0 25px rgba(50, 200, 100, 0.4);
+  transform: scale(1.02);
+}
+
+.answer-btn.no {
+  background: rgba(255, 100, 100, 0.2);
+  color: #ff6666;
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+.answer-btn.no:hover {
+  background: rgba(255, 100, 100, 0.4);
+  border-color: #ff6666;
+  box-shadow: 0 0 25px rgba(255, 100, 100, 0.4);
+  transform: scale(1.02);
+}
+
+.loading-text {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 15px 0 0;
+  font-size: 0.9rem;
+}

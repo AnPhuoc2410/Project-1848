@@ -2,7 +2,6 @@ import { socket } from '../socket';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LightBoard from '../components/LightBoard';
-import QuestionModal from '../components/QuestionModal';
 
 export default function PlayerA() {
   const [params] = useSearchParams();
@@ -17,6 +16,9 @@ export default function PlayerA() {
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [currentWire, setCurrentWire] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Editing existing answer
+  const [editingIndex, setEditingIndex] = useState(null);
 
   // Game status
   const [levelComplete, setLevelComplete] = useState(false);
@@ -50,6 +52,12 @@ export default function PlayerA() {
       setLoading(false);
     });
 
+    // Answer updated (for editing existing answers)
+    socket.on('answer-updated', ({ totalResults }) => {
+      setWireResults(totalResults);
+      setEditingIndex(null);
+    });
+
     // Level complete
     socket.on('level-complete', ({ message }) => {
       setLevelComplete(true);
@@ -66,6 +74,7 @@ export default function PlayerA() {
       setWireResults([]);
       setShowQuestion(false);
       setCurrentWire(null);
+      setEditingIndex(null);
       setLevelComplete(false);
       setGameOver(false);
     });
@@ -74,17 +83,44 @@ export default function PlayerA() {
       socket.off('game-init');
       socket.off('wire-question');
       socket.off('wire-result');
+      socket.off('answer-updated');
       socket.off('level-complete');
       socket.off('game-over');
       socket.off('game-reset');
     };
   }, [roomId]);
 
+  // Answer new question
   const handleAnswer = (answer) => {
     setLoading(true);
     socket.emit('answer-question', {
       roomId,
       answer,
+    });
+  };
+
+  // Click on history item to edit
+  const handleEditClick = (index) => {
+    if (editingIndex === index) {
+      setEditingIndex(null); // Close if clicking same item
+    } else {
+      setEditingIndex(index);
+    }
+  };
+
+  // Change existing answer
+  const handleChangeAnswer = (index, newAnswer) => {
+    const result = wireResults[index];
+    if (result.shouldConnect === (newAnswer === 'YES')) {
+      // Same answer, just close
+      setEditingIndex(null);
+      return;
+    }
+
+    socket.emit('update-answer', {
+      roomId,
+      wireIndex: index,
+      newAnswer,
     });
   };
 
@@ -149,17 +185,44 @@ export default function PlayerA() {
             )}
 
             {showQuestion && currentWire && (
-              <div className="question-incoming">
-                <p>
-                  Player B hỏi về cặp:{' '}
-                  <strong style={{ color: currentWire.fromColor }}>
-                    {currentWire.fromLabel}
-                  </strong>{' '}
-                  →{' '}
-                  <strong style={{ color: currentWire.toColor }}>
-                    {currentWire.toLabel}
-                  </strong>
-                </p>
+              <div className="question-panel">
+                <div className="question-wire-info">
+                  <p>Player B hỏi về cặp:</p>
+                  <div className="wire-display">
+                    <strong style={{ color: currentWire.fromColor }}>
+                      {currentWire.fromLabel}
+                    </strong>
+                    <span className="arrow">→</span>
+                    <strong style={{ color: currentWire.toColor }}>
+                      {currentWire.toLabel}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="question-box">
+                  <h4>❓ Câu hỏi Triết học:</h4>
+                  <p className="question-text">{currentQuestion}</p>
+                </div>
+
+                <div className="answer-buttons">
+                  <button
+                    className="answer-btn yes"
+                    onClick={() => handleAnswer('YES')}
+                    disabled={loading}
+                  >
+                    ✓ YES
+                    <span>Dây cần nối</span>
+                  </button>
+                  <button
+                    className="answer-btn no"
+                    onClick={() => handleAnswer('NO')}
+                    disabled={loading}
+                  >
+                    ✗ NO
+                    <span>Không cần nối</span>
+                  </button>
+                </div>
+                {loading && <p className="loading-text">Đang gửi...</p>}
               </div>
             )}
           </div>
@@ -174,23 +237,57 @@ export default function PlayerA() {
             </div>
           )}
 
-          <div className="wire-history">
-            <h4>Lịch sử câu hỏi ({wireResults.length})</h4>
+          <div className="wire-history editable">
+            <h4>📝 Lịch sử câu hỏi ({wireResults.length})</h4>
+            <p className="history-hint">👆 Click vào để đổi đáp án</p>
             <ul>
               {wireResults.map((result, i) => (
                 <li
                   key={i}
-                  className={result.shouldConnect ? 'required' : 'not-required'}
+                  className={`${result.shouldConnect ? 'required' : 'not-required'} ${editingIndex === i ? 'editing' : ''}`}
+                  onClick={() => handleEditClick(i)}
                 >
-                  <span className="result-icon">
-                    {result.shouldConnect ? '✅' : '❌'}
-                  </span>
-                  <span className="wire-label">
-                    {result.fromLabel} → {result.toLabel}
-                  </span>
-                  <span className="result-text">
-                    {result.shouldConnect ? 'NỐI' : 'KHÔNG NỐI'}
-                  </span>
+                  <div className="result-main">
+                    <span className="result-icon">
+                      {result.shouldConnect ? '✅' : '❌'}
+                    </span>
+                    <span className="wire-label">
+                      <span style={{ color: result.fromColor }}>
+                        {result.fromLabel}
+                      </span>
+                      <span className="arrow">→</span>
+                      <span style={{ color: result.toColor }}>
+                        {result.toLabel}
+                      </span>
+                    </span>
+                    <span className="result-text">
+                      {result.shouldConnect ? 'NỐI' : 'KHÔNG NỐI'}
+                    </span>
+                    <span className="edit-hint">✏️</span>
+                  </div>
+
+                  {editingIndex === i && (
+                    <div
+                      className="edit-panel"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p>Đổi đáp án:</p>
+                      <div className="edit-buttons">
+                        <button
+                          className={`edit-btn yes ${result.shouldConnect ? 'current' : ''}`}
+                          onClick={() => handleChangeAnswer(i, 'YES')}
+                        >
+                          ✓ YES - NỐI
+                        </button>
+                        <button
+                          className={`edit-btn no ${!result.shouldConnect ? 'current' : ''}`}
+                          onClick={() => handleChangeAnswer(i, 'NO')}
+                        >
+                          ✗ NO - KHÔNG NỐI
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
               {wireResults.length === 0 && (
@@ -200,14 +297,6 @@ export default function PlayerA() {
           </div>
         </div>
       </div>
-
-      <QuestionModal
-        isOpen={showQuestion}
-        question={currentQuestion}
-        wire={currentWire}
-        onAnswer={handleAnswer}
-        loading={loading}
-      />
     </div>
   );
 }

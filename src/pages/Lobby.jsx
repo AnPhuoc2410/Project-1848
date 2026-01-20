@@ -27,6 +27,17 @@ export default function Lobby() {
           />
         </div>
 
+        {/* Blind Mode Info - Always ON */}
+        <div className="blind-mode-notice">
+          <span className="blind-icon">🔇</span>
+          <div className="blind-text">
+            <strong>Blind Mode</strong>
+            <span>
+              Player B không thấy kết quả - phải giao tiếp qua voice chat!
+            </span>
+          </div>
+        </div>
+
         <div className="role-selection">
           <button className="role-btn role-a" onClick={() => join('a')}>
             <span className="role-icon">📖</span>
@@ -37,7 +48,7 @@ export default function Lobby() {
           <button className="role-btn role-b" onClick={() => join('b')}>
             <span className="role-icon">🔧</span>
             <span className="role-name">Player B</span>
-            <span className="role-desc">Thực hành - Nối dây</span>
+            <span className="role-desc">Thực hành - Nối dây 🔇</span>
           </button>
         </div>
 
@@ -45,16 +56,23 @@ export default function Lobby() {
           <h3>Cách chơi:</h3>
           <ol>
             <li>
-              <strong>Player A</strong> kéo dây và trả lời câu hỏi triết học
-              (Yes/No)
+              <strong>Player B</strong> nhìn ảnh vật lý, chọn cặp đèn để hỏi A
             </li>
             <li>
-              <strong>Player B</strong> nhận hướng dẫn và nối dây trên bảng thật
+              <strong>Player A</strong> đọc câu hỏi, suy nghĩ và trả lời (YES =
+              NỐI, NO = KHÔNG NỐI)
             </li>
             <li>
-              Khi hoàn thành tất cả dây, Player B bấm <strong>Kiểm tra</strong>
+              <strong>Player A</strong> nói kết quả qua voice chat cho B (B
+              không thấy trên màn hình!)
             </li>
-            <li>Đúng → Cả hai thắng! Sai → Thử lại!</li>
+            <li>
+              <strong>Player B</strong> nối dây theo hướng dẫn từ A
+            </li>
+            <li>
+              Khi hoàn thành, Player B bấm <strong>Kiểm tra</strong>
+            </li>
+            <li>Đúng 4 dây → Thắng! Sai → Trừ 30 giây!</li>
           </ol>
         </div>
       </div>

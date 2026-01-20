@@ -7,9 +7,12 @@ export default function PlayerB() {
   const [params] = useSearchParams();
   const roomId = params.get('room');
 
+  // Blind Mode is now always ON (part of the game)
+  const blindMode = true;
+
   // Game state
   const [lightNodes, setLightNodes] = useState([]);
-  const [wireResults, setWireResults] = useState([]);
+  const [askedWires, setAskedWires] = useState([]); // List of wires asked (without results)
   const [myConnections, setMyConnections] = useState([]);
   const [requiredWireCount, setRequiredWireCount] = useState(4);
 
@@ -59,8 +62,18 @@ export default function PlayerB() {
       setLightNodes(data.lightNodes);
       setTimeRemaining(data.timeRemaining);
       setRequiredWireCount(data.requiredWireCount || 4);
+      // In blind mode, we track asked wires without results
       if (data.wireResults) {
-        setWireResults(data.wireResults);
+        setAskedWires(
+          data.wireResults.map((r) => ({
+            from: r.from,
+            to: r.to,
+            fromLabel: r.fromLabel,
+            toLabel: r.toLabel,
+            fromColor: r.fromColor,
+            toColor: r.toColor,
+          }))
+        );
       }
     });
 
@@ -73,14 +86,24 @@ export default function PlayerB() {
     socket.on('wire-already-asked', ({ result }) => {
       setCheckResult({
         type: 'info',
-        message: `Cặp này đã được hỏi rồi: ${result.isReal ? 'REAL ✅' : 'FAKE ❌'}`,
+        message: 'Cặp này đã được hỏi rồi! Hỏi Player A để nhớ lại kết quả.',
       });
       setTimeout(() => setCheckResult(null), 3000);
     });
 
-    // Wire result from Player A's answer
+    // Wire result from Player A's answer - only track that it was asked
     socket.on('wire-result', ({ result, totalResults }) => {
-      setWireResults(totalResults);
+      // Store wire info without the result (blind mode)
+      setAskedWires(
+        totalResults.map((r) => ({
+          from: r.from,
+          to: r.to,
+          fromLabel: r.fromLabel,
+          toLabel: r.toLabel,
+          fromColor: r.fromColor,
+          toColor: r.toColor,
+        }))
+      );
       setPendingWire(null);
     });
 
@@ -114,7 +137,7 @@ export default function PlayerB() {
     // Game reset
     socket.on('game-reset', (data) => {
       setLightNodes(data.lightNodes);
-      setWireResults([]);
+      setAskedWires([]);
       setMyConnections([]);
       setTimeRemaining(data.timeRemaining);
       setRequiredWireCount(data.requiredWireCount || 4);
@@ -190,14 +213,12 @@ export default function PlayerB() {
     socket.emit('reset-game', { roomId });
   };
 
-  // Count wires that A said should be connected
-  const shouldConnectCount = wireResults.filter((r) => r.shouldConnect).length;
-
   return (
     <div className="player-page player-b">
       <div className="player-header">
         <h1>Player B</h1>
         <span className="player-role">Thực hành</span>
+        <span className="blind-mode-badge">🔇 BLIND MODE</span>
         <div className={`timer ${timeRemaining < 60 ? 'warning' : ''}`}>
           ⏱️ {formatTime(timeRemaining)}
         </div>
@@ -273,32 +294,43 @@ export default function PlayerB() {
           </div>
         </div>
 
-        {/* Right side - Results and Connection */}
+        {/* Right side - Asked Wires and Connection */}
         <div className="instructions-section">
-          <h3>🔌 Kết quả & Nối dây</h3>
+          <h3>🔌 Nối dây (Blind Mode)</h3>
 
-          {/* Wire Results from A */}
-          <div className="wire-results">
-            <h4>Kết quả từ Player A ({wireResults.length} cặp đã hỏi)</h4>
-            {wireResults.length === 0 ? (
+          {/* Blind Mode Info */}
+          <div className="blind-mode-info compact">
+            <p>
+              🔇 Bạn <strong>không thấy</strong> kết quả từ Player A trên màn
+              hình.
+            </p>
+            <p>
+              Hãy <strong>lắng nghe</strong> Player A qua voice chat!
+            </p>
+          </div>
+
+          {/* Asked Wires List - Shows what was asked, NOT the results */}
+          <div className="asked-wires-section">
+            <h4>📝 Các cặp đã hỏi ({askedWires.length})</h4>
+            {askedWires.length === 0 ? (
               <p className="no-results">
-                Chưa có kết quả nào. Hãy chọn cặp đèn để hỏi!
+                Chưa hỏi cặp nào. Chọn cặp đèn để bắt đầu!
               </p>
             ) : (
-              <ul className="result-list">
-                {wireResults.map((r, i) => (
-                  <li key={i} className={r.shouldConnect ? 'real' : 'fake'}>
-                    <span className="result-icon">
-                      {r.shouldConnect ? '✅' : '❌'}
-                    </span>
-                    <span className="result-wire">
-                      <span style={{ color: r.fromColor }}>{r.fromLabel}</span>
+              <ul className="asked-list">
+                {askedWires.map((wire, i) => (
+                  <li key={i}>
+                    <span className="asked-number">{i + 1}.</span>
+                    <span className="asked-wire">
+                      <span style={{ color: wire.fromColor }}>
+                        {wire.fromLabel}
+                      </span>
                       <span className="arrow">→</span>
-                      <span style={{ color: r.toColor }}>{r.toLabel}</span>
+                      <span style={{ color: wire.toColor }}>
+                        {wire.toLabel}
+                      </span>
                     </span>
-                    <span className="result-label">
-                      {r.shouldConnect ? 'NỐI!' : 'KHÔNG NỐI'}
-                    </span>
+                    <span className="asked-status">❓ Hỏi A để biết!</span>
                   </li>
                 ))}
               </ul>
@@ -307,9 +339,9 @@ export default function PlayerB() {
 
           {/* Connection Board */}
           <div className="connection-board">
-            <h4>Bảng nối dây của bạn</h4>
+            <h4>🔧 Bảng nối dây của bạn</h4>
             <p className="board-hint">
-              Click 2 đèn để nối/gỡ dây. Chỉ nối các dây REAL!
+              Click 2 đèn để nối/gỡ dây. Nhớ lời Player A nói!
             </p>
             <LightBoard
               nodes={lightNodes}
@@ -317,6 +349,31 @@ export default function PlayerB() {
               onWireComplete={handleToggleConnection}
               interactive={!levelComplete && !gameOver}
             />
+
+            {/* Show current connections */}
+            {myConnections.length > 0 && (
+              <div className="my-connections-list">
+                <h5>Dây bạn đã nối:</h5>
+                <ul>
+                  {myConnections.map((conn, i) => {
+                    const fromNode = lightNodes.find((n) => n.id === conn.from);
+                    const toNode = lightNodes.find((n) => n.id === conn.to);
+                    return (
+                      <li key={i} className="connected-wire">
+                        <span style={{ color: fromNode?.color }}>
+                          {fromNode?.label}
+                        </span>
+                        <span className="arrow">→</span>
+                        <span style={{ color: toNode?.color }}>
+                          {toNode?.label}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             <div className="connection-count">
               Đã nối: {myConnections.length} / {requiredWireCount} dây cần thiết
             </div>
