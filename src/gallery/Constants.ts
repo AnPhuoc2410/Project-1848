@@ -29,7 +29,7 @@ export const BOARD_TEXTURES = [
 /*
  * Audio Resources
  * */
-export const AUDIO_URL = new URL('./assets/audio/我记得.m4a', import.meta.url)
+export const AUDIO_URL = new URL('./assets/audio/music.m4a', import.meta.url)
   .href;
 
 /*

@@ -62,7 +62,7 @@ export default class Character {
 
     this._checkCollision(delta_time, collider);
 
-    // 调整相机视角
+    // Adjust camera view
     this.core.camera.position.sub(this.core.orbit_controls.target);
     this.core.orbit_controls.target.copy(this.character.position);
     this.core.camera.position.add(this.character.position);
@@ -82,13 +82,13 @@ export default class Character {
   }
 
   private _checkCollision(delta_time: number, collider: Mesh) {
-    // 根据碰撞来调整player位置
+    // Adjust player position based on collision
     const capsule_info = this.capsule_info;
     this.temp_box.makeEmpty();
     this.temp_mat.copy(collider.matrixWorld).invert();
     this.temp_segment.copy(capsule_info.segment);
 
-    // 获取胶囊体在对撞机局部空间中的位置
+    // Get capsule position in collider local space
     this.temp_segment.start
       .applyMatrix4(this.character.matrixWorld)
       .applyMatrix4(this.temp_mat);
@@ -96,7 +96,7 @@ export default class Character {
       .applyMatrix4(this.character.matrixWorld)
       .applyMatrix4(this.temp_mat);
 
-    // 获取胶囊体的轴对齐边界框
+    // Get axis-aligned bounding box of capsule
     this.temp_box.expandByPoint(this.temp_segment.start);
     this.temp_box.expandByPoint(this.temp_segment.end);
 
@@ -106,7 +106,7 @@ export default class Character {
     collider.geometry?.boundsTree?.shapecast({
       intersectsBounds: (box) => box.intersectsBox(this.temp_box),
       intersectsTriangle: (tri) => {
-        // 检查场景是否与胶囊相交，并调整
+        // Check if scene intersects with capsule and adjust
         const tri_point = this.temp_vector;
         const capsule_point = this.temp_vector2;
 
@@ -125,14 +125,14 @@ export default class Character {
       },
     });
 
-    // 检查后得到胶囊体对撞机的调整位置
-    // 场景碰撞并移动它. capsule_info.segment.start被假定为玩家模型的原点。
+    // Get adjusted capsule collider position
+    // Scene collision and move it. capsule_info.segment.start is assumed to be the player model origin.
     const new_position = this.temp_vector;
     new_position
       .copy(this.temp_segment.start)
       .applyMatrix4(collider.matrixWorld);
 
-    // 检查对撞机移动了多少
+    // Check how much collider moved
     const delta_vector = this.temp_vector2;
     delta_vector.subVectors(new_position, this.character.position);
 
@@ -142,7 +142,7 @@ export default class Character {
     const offset = Math.max(0.0, delta_vector.length() - 1e-5);
     delta_vector.normalize().multiplyScalar(offset);
 
-    // 调整player模型位置
+    // Adjust player model position
     this.character.position.add(delta_vector);
 
     if (!this.player_is_on_ground) {
@@ -157,7 +157,7 @@ export default class Character {
   }
 
   /*
-   * 掉落地图检测
+   * Map fall detection
    * */
   private _checkReset() {
     if (this.character.position.y < this.reset_y) {
@@ -180,7 +180,7 @@ export default class Character {
     const angle = this.core.orbit_controls.getAzimuthalAngle();
 
     if (this.core.control_manage.mode === 'pc') {
-      // 根据PC端操作移动角色方位
+      // Move character based on PC controls
       if (this.core.control_manage.key_status['KeyW']) {
         this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
         this.character.position.addScaledVector(
@@ -213,7 +213,7 @@ export default class Character {
         );
       }
     } else {
-      // 根据移动端操作移动角色方位
+      // Move character based on mobile controls
       const degree = this.core.control_manage.move_degree;
       if (degree) {
         const angle = (degree - 90) * (Math.PI / 180);

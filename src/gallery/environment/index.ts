@@ -43,7 +43,7 @@ export default class Environment {
   }
 
   /*
-   * 加载全部场景物体（地图、画框和贴图、地板反射）
+   * Load all scene objects (map, frames and textures, floor reflection)
    * */
   private async _loadScenes() {
     try {
@@ -70,7 +70,7 @@ export default class Environment {
       const texture = this.texture_boards[key];
       texture.colorSpace = SRGBColorSpace;
 
-      // 根据纹理的宽高比和平面的宽高比，计算需要的缩放比例
+      // Calculate scaling ratio based on texture aspect ratio
       const texture_aspect_ratio = texture.image.width / texture.image.height;
       let scale_x = 1;
       let scale_y = 1;
@@ -81,7 +81,7 @@ export default class Environment {
         scale_y = texture_aspect_ratio;
       }
 
-      // 设置纹理的偏移和重复以进行居中和适应
+      // Set texture offset and repeat for centering and fitting
       texture.offset.set(0.5 - scale_x / 2, 0.5 - scale_y / 2);
       texture.repeat.set(scale_x, scale_y);
       texture.needsUpdate = true;
@@ -91,7 +91,7 @@ export default class Environment {
   }
 
   /*
-   * 设置画板userData数据、贴图翻转
+   * Set board userData and flip textures
    * */
   private _configureGallery() {
     for (const key in this.texture_boards) {
@@ -108,7 +108,7 @@ export default class Environment {
         show_boards: true,
       };
 
-      // 翻转贴图
+      // Flip textures
       if ([4, 5, 6, 7, 9].includes(+key)) {
         board.rotation.y = -Math.PI / 2;
       }
@@ -121,7 +121,7 @@ export default class Environment {
   }
 
   /*
-   * 产生地面镜面反射
+   * Create floor mirror reflection
    * */
   private _createSpecularReflection() {
     const mirror = new Reflector(new PlaneGeometry(100, 100), {
@@ -137,7 +137,7 @@ export default class Environment {
   }
 
   /*
-   * 加载不含碰撞其他的场景
+   * Load static scene without collision
    * */
   private _loadStaticScene(): Promise<void> {
     return new Promise((resolve) => {
@@ -149,7 +149,7 @@ export default class Environment {
             if (item.name === 'computer') {
               item.userData = {
                 name: item.name,
-                title: '噢，是远方 🏕',
+                title: 'Oh, the distance 🏕',
               };
               this.raycast_objects.push(item);
             }
@@ -193,7 +193,7 @@ export default class Environment {
               item.receiveShadow = true;
             }
 
-            // 提取出相框元素
+            // Extract frame elements
             if (/gallery.*_board/.test(item.name) && isMesh(item)) {
               this.gallery_boards[item.name] = item;
             }
