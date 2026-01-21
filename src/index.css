@@ -3391,6 +3391,17 @@ html {
   border-radius: 10px;
 }
 
+.freemason-space {
+  width: 80px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--color-text);
+  font-weight: bold;
+}
+
 /* Cipher Key Grid */
 .freemason-key {
   padding: 20px;

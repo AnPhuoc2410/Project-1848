@@ -113,7 +113,7 @@ export default function PlayerA() {
             {letters.map((letter, index) => (
               <div key={index} className="freemason-phrase-item">
                 {letter === ' ' ? (
-                  <span className="text-text/30">khoảng trống</span>
+                  <div className="freemason-space"></div>
                 ) : (
                   <FreemasonCipher letter={letter} size={70} />
                 )}
