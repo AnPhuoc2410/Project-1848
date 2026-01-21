@@ -103,7 +103,7 @@ export default class Core extends Emitter {
   }
 
   private _initRenderer() {
-    this.renderer.shadowMap.enabled = false; // DISABLED - Remove all shadows
+    this.renderer.shadowMap.enabled = false;
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;
     this.renderer.setSize(window.innerWidth, window.innerHeight);

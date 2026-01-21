@@ -37,101 +37,138 @@ export const AUDIO_URL = new URL('./assets/audio/music.m4a', import.meta.url)
   .href;
 
 /*
- * Board Info
+ * Board Info - 7 Chương CNXH Khoa học
  * */
 export const BOARDS_INFO = {
   1: {
-    title: 'Little Orange',
-    author: 'Artist',
+    title: 'Chương 1: Lý luận CNXH Khoa học',
+    author: 'C. Mác – Ph. Ăngghen – V.I. Lênin',
     describe: `
-		It stands in the center of the frame, quietly gazing at the audience. The soft orange color delicately outlines its fluffy fur and lively eyes.<br>
-		The kitten's small ears are slightly perked up, as if listening to something, and its body leans forward slightly, showing its curiosity and sensitivity to the surrounding world.<br>
-		The background of the painting is mainly light blue, creating a warm and gentle atmosphere, making people feel as if they are in a sunny afternoon.<br>
-		The entire artwork is delicate and exquisite, with bright and warm colors, bringing people a sense of warmth and intimacy.
+		<strong>🔴 CHỦ NGHĨA XÃ HỘI KHOA HỌC</strong><br><br>
+		Chủ nghĩa xã hội khoa học ra đời trên cơ sở kế thừa tinh hoa tư tưởng nhân loại và tổng kết thực tiễn phong trào công nhân, do <strong>C. Mác và Ph. Ăngghen</strong> sáng lập, được <strong>V.I. Lênin</strong> phát triển.<br><br>
+		Đây là nền tảng tư tưởng và phương pháp luận khoa học cho việc xây dựng xã hội mới.<br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• CNXH khoa học khác CNXH không tưởng<br>
+		• Có cơ sở khoa học và thực tiễn<br>
+		• Là nền tảng cho toàn bộ các chương sau
 		`,
   },
   2: {
-    title: 'Glimmer',
-    author: 'Artist',
+    title: 'Chương 2: Giai cấp Công nhân',
+    author: 'Sứ mệnh lịch sử của giai cấp công nhân',
     describe: `
-		Tiny starlight and the Milky Way form a mysterious cosmic world, evoking infinite reverie and imagination.<br>
-		When you gaze at this painting, you feel endless depth and tranquility.<br>
-		You seem to be in a night sky without noise or disturbance. In this peaceful space, you can see the glimmering light flickering in the Milky Way.<br>
-		These glimmers seem to be the only living beings in the night sky, weakly yet firmly emitting light, illuminating the entire galaxy.<br>
-		These glimmers are so delicate yet powerful, as if in the endless darkness, only they can bring hope and strength to people.
+		<strong>🔴 GIAI CẤP CÔNG NHÂN</strong><br><br>
+		Giai cấp công nhân là <strong>lực lượng sản xuất tiên tiến</strong>, có sứ mệnh lịch sử lãnh đạo cách mạng xã hội chủ nghĩa, xóa bỏ áp bức bóc lột, xây dựng xã hội mới công bằng, tiến bộ.<br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• Lực lượng lãnh đạo cách mạng<br>
+		• Gắn với sản xuất hiện đại<br>
+		• Vai trò trung tâm trong xây dựng CNXH ở Việt Nam<br><br>
+		<em>"Vô sản toàn thế giới, đoàn kết lại!"</em>
 		`,
   },
   3: {
-    title: 'Swan',
-    author: 'Artist',
+    title: 'Chương 3: Thời kỳ Quá độ',
+    author: 'Quá độ lên Chủ nghĩa Xã hội',
     describe: `
-		The lake surface is as calm as a mirror. A gentle breeze passes by, creating circles of fine ripples, as if laying a crystal-clear veil for the elegant white swans.<br>
-		One of the snow-white swans dances gracefully in the water, like a magnificent dancer performing on the water.<br>
-		Its pure white feathers shine with a faint halo under the sunlight, as dazzling as pearls.
+		<strong>🔴 THỜI KỲ QUÁ ĐỘ</strong><br><br>
+		Thời kỳ quá độ lên chủ nghĩa xã hội là giai đoạn <strong>cải biến sâu sắc</strong> mọi lĩnh vực của đời sống xã hội, tồn tại đan xen các yếu tố cũ và mới.<br><br>
+		<strong>⚠️ Không thể rút ngắn bằng ý chí chủ quan.</strong><br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• Quá trình lâu dài, phức tạp<br>
+		• Không thể "nhảy cóc"<br>
+		• Phù hợp điều kiện Việt Nam<br>
+		• Công nghiệp hóa, hiện đại hóa đất nước
 		`,
   },
   4: {
-    title: 'Mountain Cottage',
-    author: 'Artist',
+    title: 'Chương 4: Nhà nước & Dân chủ XHCN',
+    author: 'Nhà nước pháp quyền XHCN Việt Nam',
     describe: `
-		Peaceful and tranquil, distant mountains appear and disappear in the clouds and mist, like a dreamlike painting.<br>
-		The small cottage stands quietly at the foot of the mountain, with white walls and a roof bathed in gentle sunlight, making the cottage complement its surroundings.<br>
-		It reveals a natural harmonious beauty.
+		<strong>🔴 NHÀ NƯỚC PHÁP QUYỀN XHCN</strong><br><br>
+		Nhà nước pháp quyền xã hội chủ nghĩa Việt Nam là nhà nước <strong>của nhân dân, do nhân dân và vì nhân dân</strong>, bảo đảm quyền làm chủ của nhân dân, quản lý xã hội bằng pháp luật.<br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• Lập pháp – Hành pháp – Tư pháp<br>
+		• Phát huy dân chủ<br>
+		• Phòng, chống tham nhũng<br>
+		• Bảo vệ quyền con người
 		`,
   },
   5: {
-    title: 'Astronaut',
-    author: 'Artist',
+    title: 'Chương 5: Liên minh Giai cấp',
+    author: 'Công nhân – Nông dân – Trí thức',
     describe: `
-		The astronaut is draped in the night, wandering in the starry universe.<br>
-		Although we are now in the space age and humans can already take spaceships to the moon,<br>
-		we can never explore the universe inside another person's heart.
+		<strong>🔴 LIÊN MINH GIAI CẤP</strong><br><br>
+		Liên minh giai cấp <strong>công nhân – nông dân – trí thức</strong> là nền tảng chính trị – xã hội vững chắc của chế độ xã hội chủ nghĩa trong thời kỳ quá độ ở Việt Nam.<br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• Đảm bảo ổn định xã hội<br>
+		• Phát triển hài hòa các giai cấp<br>
+		• Điều kiện giữ vững CNXH<br>
+		• Đại đoàn kết toàn dân tộc
 		`,
   },
   6: {
-    title: 'Pink Ocean',
-    author: 'Artist',
+    title: 'Chương 6: Dân tộc & Tôn giáo',
+    author: 'Đoàn kết dân tộc – Tự do tín ngưỡng',
     describe: `
-		Pink clouds fluffy like cotton candy spread before your eyes, a crescent moon smiling between the gaps, moonlight soft and elegant.<br>
-		The purple sky is like a dream, starlight twinkling, listening silently, gently, the breeze caresses your face, quietly, life flows.
+		<strong>🔴 DÂN TỘC VÀ TÔN GIÁO</strong><br><br>
+		Đoàn kết các dân tộc và tôn trọng tự do tín ngưỡng là <strong>nguyên tắc nhất quán</strong> của Đảng và Nhà nước Việt Nam, nhằm xây dựng khối đại đoàn kết toàn dân tộc.<br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• 54 dân tộc Việt Nam anh em<br>
+		• Tự do tín ngưỡng, tôn giáo<br>
+		• Không phân biệt đối xử<br>
+		• Đa dạng văn hóa, thống nhất quốc gia
 		`,
   },
   7: {
-    title: 'Calm Waters',
-    author: 'Artist',
+    title: 'Chương 7: Gia đình trong CNXH',
+    author: 'Gia đình – Tế bào của xã hội',
     describe: `
-		Row a boat, leave the shore one hundred meters, calm waters, colorful clouds slowly fade.<br>
-		Row a boat, leave the shore two hundred meters, calm waters, night gently calls you.<br>
-		Row a boat, leave the shore three hundred meters, calm waters, big fish laughs at my silliness.<br>
-		Row a boat, leave the shore four hundred meters, calm waters, stars twinkle and smile.<br>
-		Row a boat, leave the shore five hundred meters, calm waters, sea turtle waves its arm at me.
+		<strong>🔴 GIA ĐÌNH TRONG CNXH</strong><br><br>
+		Gia đình là <strong>tế bào của xã hội</strong>, nơi hình thành và nuôi dưỡng con người mới xã hội chủ nghĩa, góp phần xây dựng xã hội ổn định và phát triển bền vững.<br><br>
+		<strong>📌 Ý chính:</strong><br>
+		• Bình đẳng giới<br>
+		• Hạnh phúc – Tiến bộ<br>
+		• Gia đình Việt Nam hiện đại<br>
+		• Nuôi dưỡng thế hệ tương lai
 		`,
   },
   8: {
-    title: 'Sunflower',
-    author: 'Artist',
+    title: 'Tổng quan CNXH Khoa học',
+    author: 'Hệ thống lý luận Mác-Lênin',
     describe: `
-		Sunshine shines, golden flower disk.<br>
-		Like a bright lamp, guiding the way forward.<br>
-		Sunflower, you are faith, you are strength, you are glory, you are perseverance, you are loyalty, you are admiration, you are beauty.
+		<strong>🔴 TỔNG QUAN</strong><br><br>
+		Chủ nghĩa xã hội khoa học là một trong <strong>ba bộ phận cấu thành</strong> của chủ nghĩa Mác-Lênin, cùng với Triết học Mác-Lênin và Kinh tế chính trị Mác-Lênin.<br><br>
+		<strong>📌 Ba bộ phận:</strong><br>
+		• Triết học Mác-Lênin<br>
+		• Kinh tế chính trị Mác-Lênin<br>
+		• Chủ nghĩa xã hội khoa học<br><br>
+		<em>Đây là kim chỉ nam cho cách mạng vô sản thế giới.</em>
 		`,
   },
   9: {
-    title: 'Flower · Tiger · Butterfly',
-    author: 'Artist',
+    title: 'Cách mạng Tháng Mười Nga',
+    author: 'V.I. Lênin – 1917',
     describe: `
-		A wonderful encounter, a combination of freedom and courage, a mysterious yet touching charm.<br>
-		In this colorful sea of flowers, a tiger with butterfly wings, riding a scooter,<br>
-		It's like a bolt of lightning, cutting through this beautiful heaven and earth.<br>
-		Its wings gently flutter, as if it can fly away from this beautiful world at any time and fly to a broader sky.
+		<strong>🔴 CÁCH MẠNG THÁNG MƯỜI</strong><br><br>
+		Cách mạng Tháng Mười Nga năm 1917 do <strong>V.I. Lênin</strong> lãnh đạo là cuộc cách mạng vô sản đầu tiên thành công trên thế giới, mở ra kỷ nguyên mới cho nhân loại.<br><br>
+		<strong>📌 Ý nghĩa lịch sử:</strong><br>
+		• Lật đổ chế độ Nga hoàng<br>
+		• Xây dựng nhà nước Xô-viết<br>
+		• Thức tỉnh các dân tộc bị áp bức<br>
+		• Ảnh hưởng đến Việt Nam
 		`,
   },
   10: {
-    title: 'Dolphin',
-    author: 'Artist',
+    title: 'Việt Nam trên con đường CNXH',
+    author: 'Đảng Cộng sản Việt Nam',
     describe: `
-		All turning points are hidden in dense flocks of birds, neither the sky nor the ocean can detect them, but they can be seen with beautiful dreams.<br>
-		Exploring the moment of reversal, all nostalgia is hidden in similar days, the spider in the heart imitates human celebrations with lanterns and decorations.
+		<strong>🔴 VIỆT NAM VÀ CNXH</strong><br><br>
+		Việt Nam kiên định con đường <strong>độc lập dân tộc gắn liền với chủ nghĩa xã hội</strong>, xây dựng đất nước ngày càng giàu mạnh, dân chủ, công bằng, văn minh.<br><br>
+		<strong>📌 Mục tiêu:</strong><br>
+		• Dân giàu, nước mạnh<br>
+		• Dân chủ, công bằng, văn minh<br>
+		• Hội nhập quốc tế<br>
+		• Bảo vệ Tổ quốc XHCN
 		`,
   },
 };
