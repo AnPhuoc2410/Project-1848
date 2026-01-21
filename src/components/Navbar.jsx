@@ -66,7 +66,7 @@ const Navbar = () => {
               );
             })}
             <Link
-              to="/game"
+              to="/lobby"
               className="text-sm font-semibold rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 hover:text-white transition-colors"
               style={{ fontFamily: 'var(--font-atkinson)' }}
             >

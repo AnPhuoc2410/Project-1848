@@ -3447,87 +3447,43 @@ html {
 
 /* ======================================
    LOBBY REDESIGN STYLES
-   Premium UI with glassmorphism & animations
+   Clean, minimal design
    ====================================== */
 
-/* Container */
-.lobby-container {
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Background */
+/* Background - Simple solid with subtle grid */
 .lobby-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
 }
 
-.lobby-bg-gradient {
+.lobby-bg-base {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background: #0f172a;
 }
 
 .lobby-bg-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 
-.lobby-bg-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.4;
-  animation: lobby-glow-pulse 8s ease-in-out infinite;
-}
-
-.lobby-bg-glow-1 {
-  top: -20%;
-  left: -10%;
-  width: 600px;
-  height: 600px;
-  background: linear-gradient(135deg, var(--color-primary), #ef4444);
-}
-
-.lobby-bg-glow-2 {
-  bottom: -20%;
-  right: -10%;
-  width: 500px;
-  height: 500px;
-  background: linear-gradient(135deg, var(--color-secondary), #f97316);
-  animation-delay: 4s;
-}
-
-@keyframes lobby-glow-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-
-  50% {
-    transform: scale(1.1);
-    opacity: 0.5;
-  }
-}
-
-/* Content */
+/* Content - Full width centered */
 .lobby-content {
   position: relative;
   z-index: 10;
+  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
-  gap: 32px;
+  padding: 40px 24px;
+  gap: 28px;
 }
 
 /* Header */
@@ -3535,36 +3491,12 @@ html {
   text-align: center;
 }
 
-.lobby-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.lobby-logo-icon {
-  font-size: 3rem;
-  animation: lobby-icon-float 3s ease-in-out infinite;
-}
-
-@keyframes lobby-icon-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
 .lobby-title {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: white;
-  letter-spacing: 0.05em;
-  text-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
 }
 
 .lobby-title b {
@@ -3572,123 +3504,107 @@ html {
 }
 
 .lobby-subtitle {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
 }
 
 /* Main Card */
 .lobby-main-card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  border-radius: 28px;
-  padding: 40px;
-  max-width: 560px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 480px;
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .lobby-section-title {
   font-family: var(--font-crimson-pro);
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: white;
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 /* Mode Selection Buttons */
 .lobby-mode-buttons {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .lobby-mode-btn {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px 24px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
   color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   text-align: left;
   font-family: inherit;
 }
 
 .lobby-mode-btn:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(8px);
-}
-
-.lobby-mode-create:hover {
-  border-color: var(--color-secondary);
-  background: rgba(251, 191, 36, 0.15);
-}
-
-.lobby-mode-join:hover {
-  border-color: var(--color-primary);
-  background: rgba(185, 28, 28, 0.15);
-}
-
-.lobby-mode-icon {
-  font-size: 2rem;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .lobby-mode-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .lobby-mode-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .lobby-mode-desc {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .lobby-mode-arrow {
-  font-size: 1.5rem;
-  opacity: 0.5;
-  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  opacity: 0.4;
+  transition: all 0.2s ease;
 }
 
 .lobby-mode-btn:hover .lobby-mode-arrow {
-  opacity: 1;
-  transform: translateX(4px);
+  opacity: 0.8;
+  transform: translateX(3px);
 }
 
 /* Room Flow */
 .lobby-room-flow {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
 .lobby-back-btn {
   align-self: flex-start;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .lobby-back-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
 }
 
@@ -3697,20 +3613,16 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 28px;
-  background: linear-gradient(
-    135deg,
-    rgba(251, 191, 36, 0.15),
-    rgba(245, 158, 11, 0.1)
-  );
-  border: 2px solid rgba(251, 191, 36, 0.3);
-  border-radius: 20px;
+  gap: 10px;
+  padding: 24px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 16px;
 }
 
 .lobby-room-label {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -3722,214 +3634,200 @@ html {
 }
 
 .lobby-room-code-text {
-  font-size: 2.5rem;
-  font-weight: 900;
+  font-size: 2rem;
+  font-weight: 800;
   font-family: monospace;
   color: var(--color-secondary);
-  letter-spacing: 0.15em;
-  text-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+  letter-spacing: 0.12em;
 }
 
 .lobby-copy-btn {
-  padding: 10px 14px;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.15);
-  font-size: 1.2rem;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .lobby-copy-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
 }
 
 .lobby-room-hint {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* Input Section (Join mode) */
 .lobby-input-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .lobby-input-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .lobby-room-input {
   width: 100%;
-  padding: 18px 24px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   font-family: monospace;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   text-align: center;
   text-transform: uppercase;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .lobby-room-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.08em;
   font-weight: 400;
 }
 
 .lobby-room-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 30px rgba(185, 28, 28, 0.3);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Role Selection */
 .lobby-role-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .lobby-role-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 
 .lobby-role-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 .lobby-role-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 24px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 6px;
+  padding: 20px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
   color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .lobby-role-card:hover {
-  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.lobby-role-a:hover,
 .lobby-role-a.selected {
   border-color: var(--color-secondary);
-  background: rgba(251, 191, 36, 0.2);
-  box-shadow: 0 12px 40px rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.15);
 }
 
-.lobby-role-b:hover,
 .lobby-role-b.selected {
   border-color: var(--color-primary);
-  background: rgba(185, 28, 28, 0.2);
-  box-shadow: 0 12px 40px rgba(185, 28, 28, 0.3);
-}
-
-.lobby-role-card.selected {
-  transform: translateY(-4px) scale(1.02);
-}
-
-.lobby-role-card .role-icon {
-  font-size: 2rem;
+  background: rgba(185, 28, 28, 0.15);
 }
 
 .lobby-role-card .role-name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
 .lobby-role-card .role-desc {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .lobby-role-card .role-tasks {
   list-style: none;
   padding: 0;
-  margin: 8px 0 0 0;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
+  margin: 6px 0 0 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
   text-align: center;
 }
 
 .lobby-role-card .role-tasks li {
-  padding: 2px 0;
+  padding: 1px 0;
 }
 
 /* Start Button */
 .lobby-start-btn {
   width: 100%;
-  padding: 18px 24px;
+  padding: 16px 20px;
   border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--color-primary), #dc2626);
+  border-radius: 12px;
+  background: var(--color-primary);
   color: white;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .lobby-start-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(185, 28, 28, 0.5);
+  background: #991b1b;
 }
 
 .lobby-start-btn:disabled {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.35);
   cursor: not-allowed;
 }
 
 /* Instructions */
 .lobby-instructions {
-  max-width: 560px;
+  max-width: 480px;
   width: 100%;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .lobby-instructions-title {
   font-family: var(--font-crimson-pro);
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-.lobby-instructions-grid {
+.lobby-instructions-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
-@media (max-width: 500px) {
-  .lobby-instructions-grid {
+@media (max-width: 480px) {
+  .lobby-instructions-list {
     grid-template-columns: 1fr;
   }
 }
@@ -3937,42 +3835,41 @@ html {
 .lobby-instruction-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
 }
 
 .lobby-instruction-item .instruction-step {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, var(--color-primary), #dc2626);
-  border-radius: 8px;
-  font-size: 0.85rem;
+  width: 24px;
+  height: 24px;
+  background: var(--color-primary);
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: white;
   flex-shrink: 0;
 }
 
 .lobby-instruction-item p {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.4;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.35;
   margin: 0;
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 520px) {
   .lobby-main-card {
-    padding: 28px 20px;
+    padding: 24px 18px;
   }
 
   .lobby-title {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
 
   .lobby-role-cards {
@@ -3980,6 +3877,6 @@ html {
   }
 
   .lobby-room-code-text {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
 }
