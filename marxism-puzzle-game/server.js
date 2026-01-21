@@ -116,7 +116,21 @@ let rooms = {};
 
 // Game 1 (Freemason Cipher) room state
 let game1Rooms = {};
-const game1Phrases = ['CONG SAN', 'MAC LENIN', 'DANG TA'];
+// Từ vựng liên quan đến Chủ nghĩa xã hội khoa học
+const game1Phrases = [
+  'DAN GIAU NUOC MANH',
+  'SU MENH LICH SU GIAI CAP CONG NHAN',
+  'LAM THEO NANG LUC HUONG THEO LAO DONG',
+  'THOI KY QUA DO LEN CHU NGHIA XA HOI',
+  'LIEN MINH GIAI CAP',
+  'NHA NUOC PHAP QUYEN',
+  'QUYEN LUC NHAN DAN',
+  'CACH MANG XA HOI',
+  'LIEN MINH CONG NONG TRI THUC',
+  'VAT CHAT QUYET DINH Y THUC',
+  'THUC TIEN LA TIEU CHUAN CHAN LY',
+  'CACH MANG XA HOI CHU NGHIA',
+];
 
 // Initial time in seconds (e.g., 5 minutes = 300 seconds)
 const INITIAL_TIME = 300;
@@ -379,24 +393,30 @@ io.on('connection', (socket) => {
   // ======================================
 
   // Join Game 1
-  socket.on('join-game1', ({ roomId, role, phrase }) => {
+  socket.on('join-game1', ({ roomId, role }) => {
     socket.join(`game1-${roomId}`);
 
     if (!game1Rooms[roomId]) {
+      // Server random chọn từ khi tạo room mới
+      const randomPhrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
       game1Rooms[roomId] = {
         players: {},
-        phrase:
-          phrase ||
-          game1Phrases[Math.floor(Math.random() * game1Phrases.length)],
+        phrase: randomPhrase,
         attempts: 0,
       };
+      console.log(
+        `[Game1] Room ${roomId} created with phrase: "${randomPhrase}"`
+      );
     }
 
     game1Rooms[roomId].players[role] = socket.id;
 
-    // If Player A joins with a phrase, update it
-    if (role === 'A' && phrase) {
-      game1Rooms[roomId].phrase = phrase;
+    // Nếu là Player A, gửi từ về cho A hiển thị
+    if (role === 'A') {
+      socket.emit('game1-phrase', {
+        phrase: game1Rooms[roomId].phrase,
+      });
     }
 
     // Notify other players

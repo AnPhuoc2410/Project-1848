@@ -3,20 +3,24 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import FreemasonCipher from '../../components/FreemasonCipher';
 
-// Default secret phrase
-const SECRET_PHRASE = 'CONG SAN';
-
 export default function PlayerA() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
 
-  const [phrase] = useState(SECRET_PHRASE);
+  const [phrase, setPhrase] = useState(''); // Nhận từ server
   const [playerBConnected, setPlayerBConnected] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const [loading, setLoading] = useState(true); // Chờ nhận từ
 
   useEffect(() => {
-    socket.emit('join-game1', { roomId, role: 'A', phrase });
+    socket.emit('join-game1', { roomId, role: 'A' });
+
+    // Nhận từ random từ server
+    socket.on('game1-phrase', ({ phrase: serverPhrase }) => {
+      setPhrase(serverPhrase);
+      setLoading(false);
+    });
 
     socket.on('game1-player-joined', ({ role }) => {
       if (role === 'B') setPlayerBConnected(true);
@@ -30,10 +34,11 @@ export default function PlayerA() {
     });
 
     return () => {
+      socket.off('game1-phrase');
       socket.off('game1-player-joined');
       socket.off('game1-complete');
     };
-  }, [roomId, phrase, navigate]);
+  }, [roomId, navigate]);
 
   const letters = phrase.split('');
 
@@ -89,8 +94,25 @@ export default function PlayerA() {
         </div>
       )}
 
+      {/* Loading State - Chờ nhận từ từ server */}
+      {loading && (
+        <div className="game-overlay">
+          <div className="overlay-card">
+            <h2 className="text-xl font-bold text-text mb-2">
+              🔄 Đang kết nối...
+            </h2>
+            <p className="text-text/70 mb-4">Đang tải từ mật mã từ server</p>
+            <div className="three-body mx-auto">
+              <div className="three-body__dot"></div>
+              <div className="three-body__dot"></div>
+              <div className="three-body__dot"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className="relative z-10 p-6 max-w-4xl mx-auto">
+      <div className="relative z-10 p-6 max-w-10xl mx-auto">
         {/* Instructions */}
         <div className="game-card mb-6">
           <h3 className="card-title">📋 Hướng dẫn</h3>
@@ -117,7 +139,6 @@ export default function PlayerA() {
                 ) : (
                   <FreemasonCipher letter={letter} size={70} />
                 )}
-                <span className="freemason-index">{index + 1}</span>
               </div>
             ))}
           </div>

@@ -6,40 +6,62 @@ import PropTypes from 'prop-types';
  */
 
 // Pigpen cipher mapping - each letter has a specific shape
+// Grid Layout:
+// A B C
+// D E F
+// G H I
 const CIPHER_PATHS = {
-  // Grid 1: No dots (A-I)
-  A: { d: 'M5 5 L5 35 L35 35', dot: false }, // ⌊
-  B: { d: 'M5 35 L35 35 L35 5', dot: false }, // ⌋ rotated
-  C: { d: 'M5 5 L5 35 L35 35 L35 5', dot: false }, // ⊔
-  D: { d: 'M5 5 L35 5 L35 35', dot: false }, // ⌐
-  E: { d: 'M35 5 L5 5 L5 35', dot: false }, // ⌐ mirror
-  F: { d: 'M5 5 L35 5 L35 35 L5 35', dot: false }, // ⊓
-  G: { d: 'M35 5 L35 35 L5 35', dot: false }, // 」
-  H: { d: 'M5 5 L5 35 L35 35', dot: false }, // 「
-  I: { d: 'M5 5 L5 35 L35 35 L35 5 L5 5', dot: false }, // □
+  // --- Grid 1: No dots (A-I) ---
+  // A: Bottom-Right corner _|
+  A: { d: 'M35 5 L35 35 L5 35', dot: false },
+  // B: Bottom U |_|
+  B: { d: 'M5 5 L5 35 L35 35 L35 5', dot: false },
+  // C: Bottom-Left corner |_
+  C: { d: 'M5 5 L5 35 L35 35', dot: false },
+  // D: Right bracket ]
+  D: { d: 'M5 5 L35 5 L35 35 L5 35', dot: false },
+  // E: Full Box []
+  E: { d: 'M5 5 L35 5 L35 35 L5 35 L5 5', dot: false },
+  // F: Left bracket [
+  F: { d: 'M35 5 L5 5 L5 35 L35 35', dot: false },
+  // G: Top-Right corner ¯|
+  G: { d: 'M5 5 L35 5 L35 35', dot: false },
+  // H: Top Cap (Upside down U)
+  H: { d: 'M5 35 L5 5 L35 5 L35 35', dot: false },
+  // I: Top-Left corner |¯
+  I: { d: 'M5 35 L5 5 L35 5', dot: false },
 
-  // Grid 2: With dots (J-R)
-  J: { d: 'M5 5 L5 35 L35 35', dot: true },
-  K: { d: 'M5 35 L35 35 L35 5', dot: true },
-  L: { d: 'M5 5 L5 35 L35 35 L35 5', dot: true },
-  M: { d: 'M5 5 L35 5 L35 35', dot: true },
-  N: { d: 'M35 5 L5 5 L5 35', dot: true },
-  O: { d: 'M5 5 L35 5 L35 35 L5 35', dot: true },
-  P: { d: 'M35 5 L35 35 L5 35', dot: true },
-  Q: { d: 'M5 5 L5 35 L35 35', dot: true },
-  R: { d: 'M5 5 L5 35 L35 35 L35 5 L5 5', dot: true },
+  // --- Grid 2: With dots (J-R) ---
+  // Same shapes as A-I but with dots
+  J: { d: 'M35 5 L35 35 L5 35', dot: true }, // A with dot
+  K: { d: 'M5 5 L5 35 L35 35 L35 5', dot: true }, // B with dot
+  L: { d: 'M5 5 L5 35 L35 35', dot: true }, // C with dot
+  M: { d: 'M5 5 L35 5 L35 35 L5 35', dot: true }, // D with dot
+  N: { d: 'M5 5 L35 5 L35 35 L5 35 L5 5', dot: true }, // E with dot
+  O: { d: 'M35 5 L5 5 L5 35 L35 35', dot: true }, // F with dot
+  P: { d: 'M5 5 L35 5 L35 35', dot: true }, // G with dot
+  Q: { d: 'M5 35 L5 5 L35 5 L35 35', dot: true }, // H with dot
+  R: { d: 'M5 35 L5 5 L35 5', dot: true }, // I with dot
 
-  // X Grid: No dots (S-V)
-  S: { d: 'M20 5 L20 35 M5 20 L20 20', dot: false, isX: true }, // ⌄ top
-  T: { d: 'M20 5 L20 35 M20 20 L35 20', dot: false, isX: true }, // ⌄ right
-  U: { d: 'M20 5 L20 35 M5 20 L35 20', dot: false, isX: true }, // +
-  V: { d: 'M5 5 L35 35 M35 5 L20 20', dot: false, isX: true }, // X partial
+  // --- X Grid: No dots (S-V) ---
+  // S: Top V shape \/
+  S: { d: 'M5 5 L20 35 L35 5', dot: false, isX: true },
+  // T: Right Arrow <
+  T: { d: 'M5 5 L35 20 L5 35', dot: false, isX: true },
+  // U: Roof ^
+  U: { d: 'M35 5 L5 20 L35 35', dot: false, isX: true },
+  // V: Left Arrow >
+  V: { d: 'M5 35 L20 5 L35 35', dot: false, isX: true },
 
-  // X Grid: With dots (W-Z)
-  W: { d: 'M20 5 L20 35 M5 20 L20 20', dot: true, isX: true },
-  X: { d: 'M20 5 L20 35 M20 20 L35 20', dot: true, isX: true },
-  Y: { d: 'M20 5 L20 35 M5 20 L35 20', dot: true, isX: true },
-  Z: { d: 'M5 5 L35 35 M35 5 L5 35', dot: true, isX: true }, // Full X
+  // --- X Grid: With dots (W-Z) ---
+  // W: Top V with dot
+  W: { d: 'M5 5 L20 35 L35 5', dot: true, isX: true },
+  // X: Right Arrow with dot
+  X: { d: 'M5 5 L35 20 L5 35', dot: true, isX: true },
+  // Y: Roof with dot
+  Y: { d: 'M35 5 L5 20 L35 35', dot: true, isX: true },
+  // Z: Left Arrow with dot
+  Z: { d: 'M5 35 L20 5 L35 35', dot: true, isX: true },
 };
 
 export default function FreemasonCipher({
