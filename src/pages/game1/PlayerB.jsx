@@ -110,7 +110,13 @@ export default function PlayerB() {
       <div className="relative z-10 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
         {/* Left - Cipher Key */}
         <div className="game-card">
-          <FreemasonCipherKey size={45} />
+          <div className="rounded-xl overflow-hidden bg-white p-4 border border-border">
+            <img
+              src="/img_game/FreemasonV2.png"
+              alt="Bảng mã Freemason"
+              className="w-full h-auto"
+            />
+          </div>
         </div>
 
         {/* Right - Answer Input */}
