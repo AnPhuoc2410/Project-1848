@@ -6,7 +6,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: ['http://localhost:1848', 'https://project-1848.vercel.app'],
+    credentials: true,
   },
 });
 
@@ -396,35 +397,38 @@ io.on('connection', (socket) => {
   socket.on('join-game1', ({ roomId, role }) => {
     socket.join(`game1-${roomId}`);
 
+    // Nếu room chưa tồn tại HOẶC là Player A join (luôn random phrase mới cho mỗi game session)
     if (!game1Rooms[roomId]) {
-      // Server random chọn từ khi tạo room mới
-      const randomPhrase =
-        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
       game1Rooms[roomId] = {
         players: {},
-        phrase: randomPhrase,
+        phrase: '',
         attempts: 0,
       };
+    }
+
+    // Khi Player A join, luôn tạo phrase mới để mỗi game là unique
+    if (role === 'A') {
+      const randomPhrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
+      game1Rooms[roomId].phrase = randomPhrase;
+      game1Rooms[roomId].attempts = 0; // Reset attempts
+
       console.log(
-        `[Game1] Room ${roomId} created with phrase: "${randomPhrase}"`
+        `[Game1] Room ${roomId} - Player A joined, new phrase: "${randomPhrase}"`
       );
+
+      // Gửi phrase cho Player A
+      socket.emit('game1-phrase', {
+        phrase: randomPhrase,
+      });
     }
 
     game1Rooms[roomId].players[role] = socket.id;
 
-    // Nếu là Player A, gửi từ về cho A hiển thị
-    if (role === 'A') {
-      socket.emit('game1-phrase', {
-        phrase: game1Rooms[roomId].phrase,
-      });
-    }
-
     // Notify other players
     io.to(`game1-${roomId}`).emit('game1-player-joined', { role });
 
-    console.log(
-      `[Game1] ${role} joined room ${roomId}, phrase: "${game1Rooms[roomId].phrase}"`
-    );
+    console.log(`[Game1] ${role} joined room ${roomId}`);
   });
 
   // Player B submits answer
