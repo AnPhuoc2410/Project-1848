@@ -114,6 +114,24 @@ const allWirePairs = [
 // Room state management
 let rooms = {};
 
+// Game 1 (Freemason Cipher) room state
+let game1Rooms = {};
+// Từ vựng liên quan đến Chủ nghĩa xã hội khoa học
+const game1Phrases = [
+  'DAN GIAU NUOC MANH',
+  'SU MENH LICH SU GIAI CAP CONG NHAN',
+  'LAM THEO NANG LUC HUONG THEO LAO DONG',
+  'THOI KY QUA DO LEN CHU NGHIA XA HOI',
+  'LIEN MINH GIAI CAP',
+  'NHA NUOC PHAP QUYEN',
+  'QUYEN LUC NHAN DAN',
+  'CACH MANG XA HOI',
+  'LIEN MINH CONG NONG TRI THUC',
+  'VAT CHAT QUYET DINH Y THUC',
+  'THUC TIEN LA TIEU CHUAN CHAN LY',
+  'CACH MANG XA HOI CHU NGHIA',
+];
+
 // Initial time in seconds (e.g., 5 minutes = 300 seconds)
 const INITIAL_TIME = 300;
 // Time penalty for wrong submission (in seconds)
@@ -229,10 +247,12 @@ io.on('connection', (socket) => {
     if (!room || !room.currentWire) return;
 
     const wire = room.currentWire;
-    const isReal = isCorrectWire(wire.from, wire.to);
 
-    // The question's correctAnswer determines what A should answer
-    // But the REAL result is whether this wire is in correctWires
+    // Player A's answer directly tells B whether to connect or not
+    // YES = B should connect this wire
+    // NO = B should NOT connect this wire
+    const shouldConnect = answer === 'YES';
+
     const result = {
       from: wire.from,
       to: wire.to,
@@ -241,8 +261,7 @@ io.on('connection', (socket) => {
       fromColor: wire.fromColor,
       toColor: wire.toColor,
       playerAAnswer: answer,
-      isReal: isReal, // Is this a real wire to connect?
-      isRequired: isReal, // Same as isReal for clarity
+      shouldConnect: shouldConnect, // What A told B to do
     };
 
     room.wireResults.push(result);
@@ -255,7 +274,30 @@ io.on('connection', (socket) => {
     });
 
     console.log(
-      `Answer: ${wire.fromLabel} → ${wire.toLabel} = ${isReal ? 'REAL' : 'FAKE'}`
+      `Answer: ${wire.fromLabel} → ${wire.toLabel} = ${answer} (${shouldConnect ? 'NỐI' : 'KHÔNG NỐI'})`
+    );
+  });
+
+  // Player A updates an existing answer
+  socket.on('update-answer', ({ roomId, wireIndex, newAnswer }) => {
+    const room = rooms[roomId];
+    if (!room || wireIndex < 0 || wireIndex >= room.wireResults.length) return;
+
+    const shouldConnect = newAnswer === 'YES';
+    room.wireResults[wireIndex].playerAAnswer = newAnswer;
+    room.wireResults[wireIndex].shouldConnect = shouldConnect;
+
+    // Notify both players of the update
+    io.to(roomId).emit('answer-updated', {
+      wireIndex,
+      newAnswer,
+      shouldConnect,
+      totalResults: room.wireResults,
+    });
+
+    const wire = room.wireResults[wireIndex];
+    console.log(
+      `Answer UPDATED: ${wire.fromLabel} → ${wire.toLabel} = ${newAnswer} (${shouldConnect ? 'NỐI' : 'KHÔNG NỐI'})`
     );
   });
 
@@ -342,6 +384,90 @@ io.on('connection', (socket) => {
         allWirePairs,
         timeRemaining: INITIAL_TIME,
         requiredWireCount: correctWires.length,
+      });
+    }
+  });
+
+  // ======================================
+  // GAME 1: FREEMASON CIPHER
+  // ======================================
+
+  // Join Game 1
+  socket.on('join-game1', ({ roomId, role }) => {
+    socket.join(`game1-${roomId}`);
+
+    if (!game1Rooms[roomId]) {
+      // Server random chọn từ khi tạo room mới
+      const randomPhrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
+      game1Rooms[roomId] = {
+        players: {},
+        phrase: randomPhrase,
+        attempts: 0,
+      };
+      console.log(
+        `[Game1] Room ${roomId} created with phrase: "${randomPhrase}"`
+      );
+    }
+
+    game1Rooms[roomId].players[role] = socket.id;
+
+    // Nếu là Player A, gửi từ về cho A hiển thị
+    if (role === 'A') {
+      socket.emit('game1-phrase', {
+        phrase: game1Rooms[roomId].phrase,
+      });
+    }
+
+    // Notify other players
+    io.to(`game1-${roomId}`).emit('game1-player-joined', { role });
+
+    console.log(
+      `[Game1] ${role} joined room ${roomId}, phrase: "${game1Rooms[roomId].phrase}"`
+    );
+  });
+
+  // Player B submits answer
+  socket.on('submit-game1-answer', ({ roomId, answer }) => {
+    const room = game1Rooms[roomId];
+    if (!room) return;
+
+    room.attempts++;
+
+    // Normalize comparison (uppercase, trim)
+    const normalizedAnswer = answer.toUpperCase().trim();
+    const normalizedPhrase = room.phrase.toUpperCase().trim();
+
+    if (normalizedAnswer === normalizedPhrase) {
+      // Correct! Notify both players to redirect to Game 2
+      io.to(`game1-${roomId}`).emit('game1-complete', {
+        message: 'Chính xác! Chuyển sang Game 2...',
+        answer: normalizedAnswer,
+      });
+      console.log(
+        `[Game1] Room ${roomId} completed! Answer: "${normalizedAnswer}"`
+      );
+    } else {
+      // Wrong answer
+      socket.emit('game1-wrong-answer', {
+        message: `Sai rồi! Thử lại. (Đã thử ${room.attempts} lần)`,
+        attempts: room.attempts,
+      });
+      console.log(
+        `[Game1] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}")`
+      );
+    }
+  });
+
+  // Reset Game 1
+  socket.on('reset-game1', ({ roomId }) => {
+    if (game1Rooms[roomId]) {
+      game1Rooms[roomId].attempts = 0;
+      game1Rooms[roomId].phrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
+
+      io.to(`game1-${roomId}`).emit('game1-reset', {
+        phraseLength: game1Rooms[roomId].phrase.length,
       });
     }
   });
