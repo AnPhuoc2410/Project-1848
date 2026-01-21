@@ -39,13 +39,25 @@ export default class Core extends Emitter {
     instance = this;
 
     this.scene = new Scene();
-    this.renderer = new WebGLRenderer({ antialias: true });
+    this.renderer = new WebGLRenderer({
+      antialias: true,
+      powerPreference: 'high-performance',
+      stencil: false,
+      depth: true,
+    });
     this.camera = new PerspectiveCamera();
     this.clock = new Clock();
     this.orbit_controls = new OrbitControls(
       this.camera,
       this.renderer.domElement
     );
+
+    // Tối ưu OrbitControls để mượt hơn
+    this.orbit_controls.enableDamping = true;
+    this.orbit_controls.dampingFactor = 0.05;
+    this.orbit_controls.maxPolarAngle = Math.PI / 1.5;
+    this.orbit_controls.minDistance = 2;
+    this.orbit_controls.maxDistance = 100;
 
     this._initScene();
     this._initCamera();
@@ -96,8 +108,8 @@ export default class Core extends Emitter {
   private _initCamera() {
     this.camera.fov = 55;
     this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.near = 0.1;
-    this.camera.far = 1000;
+    this.camera.near = 0.5; // Tăng từ 0.1 -> 0.5 để giảm z-fighting
+    this.camera.far = 500; // Giảm từ 1000 -> 500 để tối ưu frustum
     this.camera.position.set(0, 0, 3);
     this.camera.updateProjectionMatrix();
   }
@@ -106,7 +118,14 @@ export default class Core extends Emitter {
     this.renderer.shadowMap.enabled = false;
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+
+    // Performance optimizations
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap tối đa 2x
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.sortObjects = true; // Sắp xếp objects để render tốt hơn
+    this.renderer.info.autoReset = true;
+
     this.renderer.domElement.style.position = 'absolute';
     this.renderer.domElement.style.zIndex = '1';
     this.renderer.domElement.style.top = '0px';
@@ -118,7 +137,7 @@ export default class Core extends Emitter {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
   }
 }

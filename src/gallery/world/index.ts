@@ -94,12 +94,13 @@ export default class World {
   }
 
   private _onClickRayCast([object]: [object: Object3D]) {
-    this.core.ui.showBoardsBox(
-      object.userData.title,
-      object.userData.author,
-      object.userData.describe,
-      object.userData.src
-    );
+    // BỎ modal popup - chỉ giữ tooltip hover
+    // this.core.ui.showBoardsBox(
+    //   object.userData.title,
+    //   object.userData.author,
+    //   object.userData.describe,
+    //   object.userData.src
+    // );
   }
 
   private _onShowTooltip([{ msg, show_preview_tips }]: [

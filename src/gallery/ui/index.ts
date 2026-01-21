@@ -36,7 +36,9 @@ export default class UI {
       loading: document.querySelector('.loading')!,
       loading_complete: document.querySelector('.loading-complete')!,
       preview_tooltip: document.querySelector('.preview-tooltip')!,
-      preview_tips: document.querySelector('.preview-tips')!,
+      preview_tips:
+        document.querySelector('.preview-tips') ||
+        document.createElement('div'), // Fallback nếu không có
       boards_dialog: document.querySelector('.boards-info')!,
       boards_container: document.querySelector(
         '.boards-info .boards-container'

@@ -65,9 +65,10 @@ const Gallery3D = () => {
 
       {/* Tooltip */}
       <div className="preview-tooltip hide"></div>
-      <div className="preview-tips hide">
+      {/* Xóa tip không cần thiết */}
+      {/* <div className="preview-tips hide">
         Tips: Click on artwork to view details
-      </div>
+      </div> */}
 
       {/* Artwork Details Dialog */}
       <div className="boards-info" style={{ visibility: 'hidden' }}>

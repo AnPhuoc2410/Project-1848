@@ -346,12 +346,20 @@ export default class Environment {
             if (isMesh(item)) {
               item.castShadow = false;
               item.receiveShadow = false;
-
-              // Assign userData cho raycast interaction
+              // Simplify geometry để giảm lag
+              if (item.geometry) {
+                item.geometry.computeBoundingSphere();
+              }
+              // Assign userData cho từng mesh để tooltip hiện đúng
               item.userData = { ...userData };
             }
-            this.raycast_objects.push(item);
           });
+
+          // Assign userData cho model group
+          model.userData = { ...userData };
+
+          // CHỈ PUSH MODEL GROUP vào raycast - giảm objects nhưng vẫn raycast children
+          this.raycast_objects.push(model);
 
           // Store reference và add to scene
           this.loaded_models[modelKey] = model;
@@ -379,67 +387,47 @@ export default class Environment {
    * Setup Gallery Lighting - Ánh sáng chuyên nghiệp cho gallery
    */
   private _setupGalleryLighting() {
-    // Ambient light - ánh sáng nền
-    const ambientLight = new AmbientLight(0xffffff, 0.4);
+    // Ambient light - tăng intensity để giảm số light khác
+    const ambientLight = new AmbientLight(0xffffff, 0.6);
     this.core.scene.add(ambientLight);
 
-    // Directional light - ánh sáng chính
-    const mainLight = new DirectionalLight(0xffffff, 0.8);
+    // Directional light - ánh sáng chính mạnh hơn
+    const mainLight = new DirectionalLight(0xffffff, 1.0);
     mainLight.position.set(0, 20, 10);
     this.core.scene.add(mainLight);
 
-    // Spot lights cho các model quan trọng
+    // CHỈ 2 spotlight cho Karl Marx (trung tâm) - giảm lag
     const spotlightConfigs = [
       {
         position: new Vector3(0, 15, 28),
         target: new Vector3(0, 0, 28),
-        intensity: 1.2,
-      }, // Karl Marx
+        intensity: 1.0,
+      }, // Karl Marx spotlight 1
       {
-        position: new Vector3(-18, 12, 15),
-        target: new Vector3(-18, 0, 15),
+        position: new Vector3(5, 12, 25),
+        target: new Vector3(0, 0, 28),
         intensity: 0.8,
-      }, // Engels
-      {
-        position: new Vector3(-22, 12, 10),
-        target: new Vector3(-22, 0, 10),
-        intensity: 0.8,
-      }, // Lenin
-      {
-        position: new Vector3(18, 12, 15),
-        target: new Vector3(18, 0, 15),
-        intensity: 0.8,
-      }, // Pháp luật
+      }, // Karl Marx spotlight 2 - góc khác
     ];
 
-    spotlightConfigs.forEach((config, index) => {
+    spotlightConfigs.forEach((config) => {
       const spotlight = new SpotLight(0xfff5e6, config.intensity);
       spotlight.position.copy(config.position);
       spotlight.target.position.copy(config.target);
-      spotlight.angle = Math.PI / 6;
-      spotlight.penumbra = 0.3;
+      spotlight.angle = Math.PI / 5;
+      spotlight.penumbra = 0.4;
       spotlight.decay = 2;
-      spotlight.distance = 30;
+      spotlight.distance = 35;
       spotlight.castShadow = false;
       this.core.scene.add(spotlight);
       this.core.scene.add(spotlight.target);
     });
 
-    // Point lights cho atmosphere
-    const pointLightPositions = [
-      { position: new Vector3(-15, 8, -5), color: 0xffd4a3, intensity: 0.5 }, // Khu công nhân
-      { position: new Vector3(-20, 8, -20), color: 0xa3d4ff, intensity: 0.5 }, // Khu thành phố
-      { position: new Vector3(20, 8, -5), color: 0xffa3a3, intensity: 0.5 }, // Khu dân tộc
-      { position: new Vector3(15, 8, -18), color: 0xa3ffd4, intensity: 0.5 }, // Khu gia đình
-    ];
-
-    pointLightPositions.forEach((config) => {
-      const pointLight = new PointLight(config.color, config.intensity);
-      pointLight.position.copy(config.position);
-      pointLight.decay = 2;
-      pointLight.distance = 25;
-      this.core.scene.add(pointLight);
-    });
+    // BỎ point lights - quá nhiều light gây lag
+    // Thay bằng 1 directional light bổ sung
+    const fillLight = new DirectionalLight(0xffd4a3, 0.3);
+    fillLight.position.set(-10, 5, -10);
+    this.core.scene.add(fillLight);
   }
 
   // Load board textures
