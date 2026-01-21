@@ -44,28 +44,23 @@ export default function Lobby() {
   };
 
   return (
-    <div className="lobby-container">
-      {/* Animated Background */}
+    <div className="w-full h-full">
+      {/* Background */}
       <div className="lobby-bg">
-        <div className="lobby-bg-gradient" />
+        <div className="lobby-bg-base" />
         <div className="lobby-bg-grid" />
-        <div className="lobby-bg-glow lobby-bg-glow-1" />
-        <div className="lobby-bg-glow lobby-bg-glow-2" />
       </div>
 
       <div className="lobby-content">
         {/* Header */}
         <div className="lobby-header">
-          <div className="lobby-logo">
-            <span className="lobby-logo-icon">🔐</span>
-            <h1 className="lobby-title">
-              <span className="special-font">
-                FREE<b>M</b>ASON
-              </span>
-            </h1>
-          </div>
+          <h1 className="lobby-title">
+            <span className="special-font">
+              LOBBY <b>1848</b>
+            </span>
+          </h1>
           <p className="lobby-subtitle">
-            Giải mã mật thư • Hợp tác 2 người chơi
+            Lí luận kết hợp thực tiễn · Hợp tác 2 người chơi
           </p>
         </div>
 
@@ -77,32 +72,24 @@ export default function Lobby() {
               <h2 className="lobby-section-title">Bắt đầu trò chơi</h2>
 
               <div className="lobby-mode-buttons">
-                <button
-                  onClick={handleCreateRoom}
-                  className="lobby-mode-btn lobby-mode-create"
-                >
-                  <div className="lobby-mode-icon">🎮</div>
+                <button onClick={handleCreateRoom} className="lobby-mode-btn">
                   <div className="lobby-mode-content">
                     <span className="lobby-mode-title">Tạo phòng mới</span>
                     <span className="lobby-mode-desc">
                       Bắt đầu game mới với bạn bè
                     </span>
                   </div>
-                  <div className="lobby-mode-arrow">→</div>
+                  <span className="lobby-mode-arrow">→</span>
                 </button>
 
-                <button
-                  onClick={handleJoinRoom}
-                  className="lobby-mode-btn lobby-mode-join"
-                >
-                  <div className="lobby-mode-icon">🚪</div>
+                <button onClick={handleJoinRoom} className="lobby-mode-btn">
                   <div className="lobby-mode-content">
                     <span className="lobby-mode-title">Tham gia phòng</span>
                     <span className="lobby-mode-desc">
                       Nhập mã để vào phòng có sẵn
                     </span>
                   </div>
-                  <div className="lobby-mode-arrow">→</div>
+                  <span className="lobby-mode-arrow">→</span>
                 </button>
               </div>
             </div>
@@ -124,40 +111,50 @@ export default function Lobby() {
                     className="lobby-copy-btn"
                     title="Sao chép"
                   >
-                    📋
+                    Copy
                   </button>
                 </div>
                 <span className="lobby-room-hint">
-                  Chia sẻ mã này cho bạn chơi cùng!
+                  Chia sẻ mã này cho bạn chơi cùng
                 </span>
               </div>
 
               <div className="lobby-role-section">
-                <h3 className="lobby-role-title">Chọn vai trò của bạn</h3>
+                <h3 className="lobby-role-title">Chọn vai trò tác chiến</h3>
                 <div className="lobby-role-cards">
+                  {/* Player A - Lý Luận */}
                   <button
                     onClick={() => handleSelectRole('a')}
                     className={`lobby-role-card lobby-role-a ${selectedRole === 'a' ? 'selected' : ''}`}
                   >
-                    <div className="role-icon">📖</div>
                     <div className="role-name">Player A</div>
-                    <div className="role-desc">Mô tả mật mã</div>
+                    <div className="role-desc">Nhà Lý Luận</div>
                     <ul className="role-tasks">
-                      <li>Nhìn ký hiệu Freemason</li>
-                      <li>Mô tả hình dạng cho B</li>
+                      <li>
+                        Nắm giữ <b>thông tin mật</b> & dữ kiện
+                      </li>
+                      <li>
+                        Phân tích vấn đề & <b>định hướng</b>
+                      </li>
+                      <li>Truyền tải chỉ thị cho người thực hiện</li>
                     </ul>
                   </button>
 
+                  {/* Player B - Thực Tiễn */}
                   <button
                     onClick={() => handleSelectRole('b')}
                     className={`lobby-role-card lobby-role-b ${selectedRole === 'b' ? 'selected' : ''}`}
                   >
-                    <div className="role-icon">🔍</div>
                     <div className="role-name">Player B</div>
-                    <div className="role-desc">Giải mã</div>
+                    <div className="role-desc">Nhà Thực Tiễn</div>
                     <ul className="role-tasks">
-                      <li>Nghe A mô tả ký hiệu</li>
-                      <li>Tra bảng mã → nhập đáp án</li>
+                      <li>
+                        Nắm giữ <b>công cụ</b> & giải pháp
+                      </li>
+                      <li>
+                        Tiếp nhận thông tin & <b>xử lý</b>
+                      </li>
+                      <li>Thao tác trực tiếp để qua màn</li>
                     </ul>
                   </button>
                 </div>
@@ -168,7 +165,7 @@ export default function Lobby() {
                 disabled={!selectedRole}
                 className="lobby-start-btn"
               >
-                {selectedRole ? '🚀 Bắt đầu game' : 'Chọn vai trò để tiếp tục'}
+                {selectedRole ? 'Bắt đầu game' : 'Chọn vai trò để tiếp tục'}
               </button>
             </div>
           )}
@@ -195,13 +192,12 @@ export default function Lobby() {
 
               {roomId.length >= 4 && (
                 <div className="lobby-role-section">
-                  <h3 className="lobby-role-title">Chọn vai trò của bạn</h3>
+                  <h3 className="lobby-role-title">Chọn vai trò</h3>
                   <div className="lobby-role-cards">
                     <button
                       onClick={() => handleSelectRole('a')}
                       className={`lobby-role-card lobby-role-a ${selectedRole === 'a' ? 'selected' : ''}`}
                     >
-                      <div className="role-icon">📖</div>
                       <div className="role-name">Player A</div>
                       <div className="role-desc">Mô tả mật mã</div>
                       <ul className="role-tasks">
@@ -214,7 +210,6 @@ export default function Lobby() {
                       onClick={() => handleSelectRole('b')}
                       className={`lobby-role-card lobby-role-b ${selectedRole === 'b' ? 'selected' : ''}`}
                     >
-                      <div className="role-icon">🔍</div>
                       <div className="role-name">Player B</div>
                       <div className="role-desc">Giải mã</div>
                       <ul className="role-tasks">
@@ -235,7 +230,7 @@ export default function Lobby() {
                   ? 'Nhập mã phòng (ít nhất 4 ký tự)'
                   : !selectedRole
                     ? 'Chọn vai trò để tiếp tục'
-                    : '🚀 Vào phòng chơi'}
+                    : 'Vào phòng chơi'}
               </button>
             </div>
           )}
@@ -243,23 +238,35 @@ export default function Lobby() {
 
         {/* How to Play */}
         <div className="lobby-instructions">
-          <h3 className="lobby-instructions-title">📋 Cách chơi</h3>
-          <div className="lobby-instructions-grid">
+          <h3 className="lobby-instructions-title">Quy trình phối hợp</h3>
+          <div className="lobby-instructions-list">
             <div className="lobby-instruction-item">
               <span className="instruction-step">1</span>
-              <p>Player A nhìn các ký hiệu Freemason trên màn hình</p>
+              <p>
+                <b>Player A</b> tiếp nhận dữ liệu hoặc vấn đề cần giải quyết
+                trên màn hình.
+              </p>
             </div>
             <div className="lobby-instruction-item">
               <span className="instruction-step">2</span>
-              <p>Player A mô tả hình dạng ký hiệu cho Player B qua giọng nói</p>
+              <p>
+                <b>Player A</b> phân tích và truyền đạt "lý luận" (chỉ thị/mô
+                tả) cho B qua hội thoại.
+              </p>
             </div>
             <div className="lobby-instruction-item">
               <span className="instruction-step">3</span>
-              <p>Player B tra bảng mã để tìm chữ cái tương ứng</p>
+              <p>
+                <b>Player B</b> lắng nghe và áp dụng vào công cụ/bảng mã thực
+                tiễn đang nắm giữ.
+              </p>
             </div>
             <div className="lobby-instruction-item">
               <span className="instruction-step">4</span>
-              <p>Player B ghép các chữ và nhập đáp án để qua màn!</p>
+              <p>
+                <b>Player B</b> thực hiện thao tác xử lý cuối cùng để hoàn thành
+                nhiệm vụ chung.
+              </p>
             </div>
           </div>
         </div>
