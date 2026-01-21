@@ -15,19 +15,19 @@ export const KARL_MARX_MODEL_URL = new URL(
 ).href;
 
 /*
- * Texture Resources
+ * Texture Resources - 7 Chương CNXH Khoa học
  * */
 export const BOARD_TEXTURES = [
-  new URL('./assets/boards/1.png', import.meta.url).href,
-  new URL('./assets/boards/2.png', import.meta.url).href,
-  new URL('./assets/boards/3.jpg', import.meta.url).href,
-  new URL('./assets/boards/4.jpg', import.meta.url).href,
-  new URL('./assets/boards/5.png', import.meta.url).href,
-  new URL('./assets/boards/6.png', import.meta.url).href,
-  new URL('./assets/boards/7.png', import.meta.url).href,
-  new URL('./assets/boards/8.jpg', import.meta.url).href,
-  new URL('./assets/boards/9.jpg', import.meta.url).href,
-  new URL('./assets/boards/10.png', import.meta.url).href,
+  new URL('./assets/boards/chuong1.png', import.meta.url).href,
+  new URL('./assets/boards/chuong2.png', import.meta.url).href,
+  new URL('./assets/boards/chuong3.png', import.meta.url).href,
+  new URL('./assets/boards/chuong4.png', import.meta.url).href,
+  new URL('./assets/boards/chuong5.png', import.meta.url).href,
+  new URL('./assets/boards/chuong6.png', import.meta.url).href,
+  new URL('./assets/boards/chuong7.png', import.meta.url).href,
+  new URL('./assets/boards/overviewCNXH.png', import.meta.url).href,
+  new URL('./assets/boards/cmt10Nga.png', import.meta.url).href,
+  new URL('./assets/boards/vietnamcnxh.png', import.meta.url).href,
 ];
 
 /*
