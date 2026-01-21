@@ -3319,3 +3319,117 @@ html {
   font-size: 0.9rem;
   color: #854d0e;
 }
+
+/* ======================================
+   FREEMASON CIPHER GAME STYLES
+   ====================================== */
+
+/* Cipher Symbol */
+.freemason-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--color-text);
+  transition: all 0.2s ease;
+}
+
+.freemason-symbol svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.freemason-symbol.empty {
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+}
+
+.freemason-letter {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: var(--color-text);
+  opacity: 0.5;
+}
+
+/* Phrase Display */
+.freemason-phrase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 16px;
+  border: 2px solid #f59e0b;
+}
+
+.freemason-phrase-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 80px;
+}
+
+.freemason-phrase-item .freemason-symbol {
+  color: var(--color-primary);
+}
+
+.freemason-index {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+  opacity: 0.4;
+  background: var(--color-border);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Cipher Key Grid */
+.freemason-key {
+  padding: 20px;
+}
+
+.freemason-key-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.freemason-key-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 8px;
+}
+
+.freemason-key-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.freemason-key-item:hover {
+  background: #fff7ed;
+  border-color: #f59e0b;
+  transform: scale(1.05);
+}
+
+.freemason-key-letter {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}

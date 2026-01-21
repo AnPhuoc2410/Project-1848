@@ -114,6 +114,10 @@ const allWirePairs = [
 // Room state management
 let rooms = {};
 
+// Game 1 (Freemason Cipher) room state
+let game1Rooms = {};
+const game1Phrases = ['CONG SAN', 'MAC LENIN', 'DANG TA'];
+
 // Initial time in seconds (e.g., 5 minutes = 300 seconds)
 const INITIAL_TIME = 300;
 // Time penalty for wrong submission (in seconds)
@@ -366,6 +370,84 @@ io.on('connection', (socket) => {
         allWirePairs,
         timeRemaining: INITIAL_TIME,
         requiredWireCount: correctWires.length,
+      });
+    }
+  });
+
+  // ======================================
+  // GAME 1: FREEMASON CIPHER
+  // ======================================
+
+  // Join Game 1
+  socket.on('join-game1', ({ roomId, role, phrase }) => {
+    socket.join(`game1-${roomId}`);
+
+    if (!game1Rooms[roomId]) {
+      game1Rooms[roomId] = {
+        players: {},
+        phrase:
+          phrase ||
+          game1Phrases[Math.floor(Math.random() * game1Phrases.length)],
+        attempts: 0,
+      };
+    }
+
+    game1Rooms[roomId].players[role] = socket.id;
+
+    // If Player A joins with a phrase, update it
+    if (role === 'A' && phrase) {
+      game1Rooms[roomId].phrase = phrase;
+    }
+
+    // Notify other players
+    io.to(`game1-${roomId}`).emit('game1-player-joined', { role });
+
+    console.log(
+      `[Game1] ${role} joined room ${roomId}, phrase: "${game1Rooms[roomId].phrase}"`
+    );
+  });
+
+  // Player B submits answer
+  socket.on('submit-game1-answer', ({ roomId, answer }) => {
+    const room = game1Rooms[roomId];
+    if (!room) return;
+
+    room.attempts++;
+
+    // Normalize comparison (uppercase, trim)
+    const normalizedAnswer = answer.toUpperCase().trim();
+    const normalizedPhrase = room.phrase.toUpperCase().trim();
+
+    if (normalizedAnswer === normalizedPhrase) {
+      // Correct! Notify both players to redirect to Game 2
+      io.to(`game1-${roomId}`).emit('game1-complete', {
+        message: 'Chính xác! Chuyển sang Game 2...',
+        answer: normalizedAnswer,
+      });
+      console.log(
+        `[Game1] Room ${roomId} completed! Answer: "${normalizedAnswer}"`
+      );
+    } else {
+      // Wrong answer
+      socket.emit('game1-wrong-answer', {
+        message: `Sai rồi! Thử lại. (Đã thử ${room.attempts} lần)`,
+        attempts: room.attempts,
+      });
+      console.log(
+        `[Game1] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}")`
+      );
+    }
+  });
+
+  // Reset Game 1
+  socket.on('reset-game1', ({ roomId }) => {
+    if (game1Rooms[roomId]) {
+      game1Rooms[roomId].attempts = 0;
+      game1Rooms[roomId].phrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
+
+      io.to(`game1-${roomId}`).emit('game1-reset', {
+        phraseLength: game1Rooms[roomId].phrase.length,
       });
     }
   });
