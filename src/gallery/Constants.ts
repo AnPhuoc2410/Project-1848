@@ -85,31 +85,31 @@ export const MODEL_CONFIGS = {
 
   // Engels & Lenin - Chương 1: Bên cạnh bảng Chương 1
   engels: {
-    position: { x: -18, y: 1, z: 15 },
-    scale: 1.5,
+    position: { x: 10, y: 2, z: 30 },
+    scale: 7,
     rotation: { x: 0, y: Math.PI / 4, z: 0 },
     chapter: 1,
     description: 'Friedrich Engels - Đồng sáng lập CNXHKH',
   },
   lenin: {
-    position: { x: -22, y: 1, z: 10 },
-    scale: 1.5,
-    rotation: { x: 0, y: Math.PI / 3, z: 0 },
+    position: { x: -8, y: 1.5, z: 28 },
+    scale: 0.017,
+    rotation: { x: 0, y: -Math.PI / 4, z: 0 },
     chapter: 1,
     description: 'V.I. Lenin - Phát triển CNXHKH',
   },
 
   // Công nhân - Chương 2: Khu vực giai cấp công nhân
   congNhan1: {
-    position: { x: -15, y: 1, z: -5 },
-    scale: 1.2,
+    position: { x: -10, y: 5, z: -5 },
+    scale: 10,
     rotation: { x: 0, y: Math.PI / 6, z: 0 },
     chapter: 2,
     description: 'Công nhân - Lực lượng sản xuất tiên tiến',
   },
   congNhan2: {
-    position: { x: -18, y: 1, z: -8 },
-    scale: 1.2,
+    position: { x: -15, y: 5, z: -5 },
+    scale: 10,
     rotation: { x: 0, y: -Math.PI / 8, z: 0 },
     chapter: 2,
     description: 'Công nhân - Sứ mệnh lịch sử',
@@ -117,8 +117,8 @@ export const MODEL_CONFIGS = {
 
   // Thành phố - Chương 3: Quá độ, công nghiệp hóa
   city: {
-    position: { x: -20, y: 0.5, z: -20 },
-    scale: 0.8,
+    position: { x: 10, y: 7, z: 10 },
+    scale: 10,
     rotation: { x: 0, y: Math.PI / 4, z: 0 },
     chapter: 3,
     description: 'Thành phố công nghiệp hóa - Biểu tượng quá độ',
@@ -130,8 +130,8 @@ export const MODEL_CONFIGS = {
 
   // Biểu tượng pháp luật - Chương 4: Nhà nước pháp quyền
   phapLuat: {
-    position: { x: 18, y: 1, z: 15 },
-    scale: 1.5,
+    position: { x: 18, y: 5, z: 15 },
+    scale: 5,
     rotation: { x: 0, y: -Math.PI / 4, z: 0 },
     chapter: 4,
     description: 'Biểu tượng công lý - Nhà nước pháp quyền XHCN',
@@ -139,8 +139,8 @@ export const MODEL_CONFIGS = {
 
   // Dân tộc tôn giáo - Chương 6
   danTocTonGiao: {
-    position: { x: 20, y: 1, z: -5 },
-    scale: 1.3,
+    position: { x: 20, y: 6, z: -5 },
+    scale: 10,
     rotation: { x: 0, y: -Math.PI / 6, z: 0 },
     chapter: 6,
     description: '54 dân tộc anh em - Đoàn kết tôn giáo',
@@ -148,8 +148,8 @@ export const MODEL_CONFIGS = {
 
   // Gia đình - Chương 7: Tế bào xã hội
   family: {
-    position: { x: 15, y: 1, z: -18 },
-    scale: 1.3,
+    position: { x: 15, y: 4, z: -18 },
+    scale: 15,
     rotation: { x: 0, y: -Math.PI / 3, z: 0 },
     chapter: 7,
     description: 'Gia đình hạnh phúc - Tế bào xã hội XHCN',
