@@ -1,5 +1,12 @@
-import { Box3, Line3, Matrix4, Mesh, MeshBasicMaterial, Vector3 } from 'three';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
+import {
+  Box3,
+  Line3,
+  Matrix4,
+  Mesh,
+  MeshBasicMaterial,
+  Vector3,
+  BoxGeometry,
+} from 'three';
 import Core from '../core';
 import { ON_KEY_DOWN } from '../Constants';
 
@@ -13,7 +20,7 @@ type CharacterParams = {
 
 export default class Character {
   private core: Core;
-  private character!: Mesh<RoundedBoxGeometry, MeshBasicMaterial>;
+  private character!: Mesh<BoxGeometry, MeshBasicMaterial>;
   private capsule_info = {
     // Capsule data
     radius: 1,
@@ -72,10 +79,11 @@ export default class Character {
 
   private _createCharacter() {
     this.character = new Mesh(
-      new RoundedBoxGeometry(0.5, 2.5, 0.5, 10, 1),
+      new BoxGeometry(0.5, 2.5, 0.5),
       new MeshBasicMaterial({ color: 0x0000ff })
     );
-    this.character.geometry.translate(0, -0.25, 0);
+    // Lower the geometry a bit so the pivot sits near the feet
+    (this.character.geometry as BoxGeometry).translate(0, -0.25, 0);
     this.character.position.copy(this.reset_position);
     this.character.visible = false;
     this.core.scene.add(this.character);
@@ -103,9 +111,9 @@ export default class Character {
     this.temp_box.min.addScalar(-capsule_info.radius);
     this.temp_box.max.addScalar(capsule_info.radius);
 
-    collider.geometry?.boundsTree?.shapecast({
-      intersectsBounds: (box) => box.intersectsBox(this.temp_box),
-      intersectsTriangle: (tri) => {
+    (collider.geometry as any)?.boundsTree?.shapecast({
+      intersectsBounds: (box: any) => box.intersectsBox(this.temp_box),
+      intersectsTriangle: (tri: any) => {
         // Check if scene intersects with capsule and adjust
         const tri_point = this.temp_vector;
         const capsule_point = this.temp_vector2;

@@ -534,7 +534,7 @@ export default class Environment {
           const itemsToRemove: any[] = [];
 
           this.collision_scene.traverse((item: any) => {
-            // Bỏ ghế sofa, bàn học, cây cảnh và các object không cần thiết
+            console.log('Mesh name:', item.name, 'Type:', item.type); // LOG ĐỂ XEM
             const removeNames = [
               'sofa',
               'desk',

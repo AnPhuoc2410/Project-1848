@@ -106,7 +106,7 @@ export const MODEL_CONFIGS = {
   },
 
   city: {
-    position: { x: 10, y: 7, z: 10 },
+    position: { x: 22, y: 6, z: 45 },
     scale: 10,
     rotation: { x: 0, y: Math.PI / 4, z: 0 },
     chapter: 3,
@@ -114,9 +114,9 @@ export const MODEL_CONFIGS = {
   },
 
   phapLuat: {
-    position: { x: 18, y: 5, z: 15 },
+    position: { x: -15, y: 2, z: 49 },
     scale: 5,
-    rotation: { x: 0, y: -Math.PI / 4, z: 0 },
+    rotation: { x: 0, y: Math.PI / 2, z: 0 },
     chapter: 4,
     description: 'Biểu tượng công lý - Nhà nước pháp quyền XHCN',
   },
