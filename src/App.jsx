@@ -8,12 +8,21 @@ const MirrorHall = lazy(() => import('./pages/MirrorHall'));
 const MiniGame = lazy(() => import('./pages/MiniGame'));
 const GameRedirect = lazy(() => import('./pages/GameRedirect'));
 const Lobby = lazy(() => import('./pages/Lobby'));
-const PlayerA = lazy(() => import('./pages/game2/PlayerA'));
-const PlayerB = lazy(() => import('./pages/game2/PlayerB'));
 
 // Game 1: Freemason Cipher
 const Game1PlayerA = lazy(() => import('./pages/game1/PlayerA'));
 const Game1PlayerB = lazy(() => import('./pages/game1/PlayerB'));
+
+// Game 2: Wire Connection
+const Game2PlayerA = lazy(() => import('./pages/game2/PlayerA'));
+const Game2PlayerB = lazy(() => import('./pages/game2/PlayerB'));
+
+// Game 3: Morse Code
+const Game3PlayerA = lazy(() => import('./pages/game3/PlayerA'));
+const Game3PlayerB = lazy(() => import('./pages/game3/PlayerB'));
+
+// Leaderboard
+const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -32,11 +41,17 @@ const App = () => {
             <Route path="/mini-game" element={<MiniGame />} />
             <Route path="/game" element={<GameRedirect />} />
             <Route path="/lobby" element={<Lobby />} />
-            <Route path="/game2/a" element={<PlayerA />} />
-            <Route path="/game2/b" element={<PlayerB />} />
             {/* Game 1: Freemason Cipher */}
             <Route path="/game1/a" element={<Game1PlayerA />} />
             <Route path="/game1/b" element={<Game1PlayerB />} />
+            {/* Game 2: Wire Connection */}
+            <Route path="/game2/a" element={<Game2PlayerA />} />
+            <Route path="/game2/b" element={<Game2PlayerB />} />
+            {/* Game 3: Morse Code */}
+            <Route path="/game3/a" element={<Game3PlayerA />} />
+            <Route path="/game3/b" element={<Game3PlayerB />} />
+            {/* Leaderboard */}
+            <Route path="/leaderboard" element={<Leaderboard />} />
           </Routes>
         </Suspense>
       </main>

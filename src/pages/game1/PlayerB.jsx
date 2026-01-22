@@ -1,24 +1,71 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
-import { FreemasonCipherKey } from '../../components/FreemasonCipher';
+
+// Initial time for Game 1 (5 minutes)
+const INITIAL_TIME = 300;
 
 export default function PlayerB() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
+  const myName = params.get('myName') || 'Player B';
 
   const [answer, setAnswer] = useState('');
   const [playerAConnected, setPlayerAConnected] = useState(false);
+  const [playerAName, setPlayerAName] = useState('Player A');
   const [gameComplete, setGameComplete] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    socket.emit('join-game1', { roomId, role: 'B' });
+  // Timer state
+  const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
+  const [timerActive, setTimerActive] = useState(true);
+  const startTimeRef = useRef(Date.now());
 
-    socket.on('game1-player-joined', ({ role }) => {
-      if (role === 'A') setPlayerAConnected(true);
+  // Timer countdown
+  useEffect(() => {
+    if (!timerActive || gameComplete) return;
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          setTimerActive(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timerActive, gameComplete]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    socket.emit('join-game1', { roomId, role: 'B', playerName: myName });
+
+    socket.on(
+      'game1-player-joined',
+      ({ role, playerName, playerNames, timeRemaining: serverTime }) => {
+        if (role === 'A') {
+          setPlayerAConnected(true);
+          setPlayerAName(playerName);
+        }
+        // Sync player names
+        if (playerNames?.A) setPlayerAName(playerNames.A);
+        // Sync timer from server
+        if (serverTime !== undefined) {
+          setTimeRemaining(serverTime);
+        }
+      }
+    );
+
+    // Timer sync from other player
+    socket.on('game1-timer-update', ({ timeRemaining: newTime }) => {
+      setTimeRemaining(newTime);
     });
 
     socket.on('game1-wrong-answer', ({ message }) => {
@@ -30,17 +77,32 @@ export default function PlayerB() {
     socket.on('game1-complete', () => {
       setGameComplete(true);
       setLoading(false);
+      setTimerActive(false);
+
+      // Calculate time used
+      const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+
+      // Store time in sessionStorage for leaderboard
+      const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+      times.game1 = timeUsed;
+      times.playerA = playerAName;
+      times.playerB = myName;
+      sessionStorage.setItem('gameTimes', JSON.stringify(times));
+
       setTimeout(() => {
-        navigate(`/game2/b?room=${roomId}`);
+        navigate(
+          `/game2/b?room=${roomId}&myName=${encodeURIComponent(myName)}`
+        );
       }, 2000);
     });
 
     return () => {
       socket.off('game1-player-joined');
+      socket.off('game1-timer-update');
       socket.off('game1-wrong-answer');
       socket.off('game1-complete');
     };
-  }, [roomId, navigate]);
+  }, [roomId, navigate, myName, playerAName]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -70,8 +132,16 @@ export default function PlayerB() {
           <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
             🔓 Giải mã
           </span>
+          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
+            {myName}
+          </span>
         </div>
         <div className="flex items-center gap-3">
+          <div
+            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
+          >
+            ⏱️ {formatTime(timeRemaining)}
+          </div>
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               playerAConnected
@@ -79,7 +149,7 @@ export default function PlayerB() {
                 : 'bg-gray-100 text-gray-500'
             }`}
           >
-            {playerAConnected ? '🟢 Player A online' : '⏳ Chờ Player A...'}
+            {playerAConnected ? `🟢 ${playerAName}` : '⏳ Chờ Player A...'}
           </span>
           <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
             Room: {roomId}
@@ -125,9 +195,9 @@ export default function PlayerB() {
           <div className="game-card">
             <h3 className="card-title">📋 Hướng dẫn</h3>
             <ol className="text-sm text-text/70 space-y-2">
-              <li>1. Lắng nghe Player A mô tả ký hiệu qua lời nói</li>
+              <li>1. Lắng nghe {playerAName} mô tả ký hiệu qua lời nói</li>
               <li>2. Tra bảng mã bên trái để tìm chữ cái tương ứng</li>
-              <li>3. Nói lại chữ cái cho Player A biết</li>
+              <li>3. Nói lại chữ cái cho {playerAName} biết</li>
               <li>4. Ghép đủ các chữ → Nhập đáp án bên dưới</li>
             </ol>
           </div>

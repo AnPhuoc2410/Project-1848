@@ -133,6 +133,81 @@ const game1Phrases = [
   'CACH MANG XA HOI CHU NGHIA',
 ];
 
+// ======================================
+// GAME 3: MORSE CODE CONFIG
+// ======================================
+let game3Rooms = {};
+const game3Phrase = 'DANG CONG SAN VIET NAM MUON NAM';
+
+// Morse code mapping
+const MORSE_CODE = {
+  A: '.-',
+  B: '-...',
+  C: '-.-.',
+  D: '-..',
+  E: '.',
+  F: '..-.',
+  G: '--.',
+  H: '....',
+  I: '..',
+  J: '.---',
+  K: '-.-',
+  L: '.-..',
+  M: '--',
+  N: '-.',
+  O: '---',
+  P: '.--.',
+  Q: '--.-',
+  R: '.-.',
+  S: '...',
+  T: '-',
+  U: '..-',
+  V: '...-',
+  W: '.--',
+  X: '-..-',
+  Y: '-.--',
+  Z: '--..',
+  0: '-----',
+  1: '.----',
+  2: '..---',
+  3: '...--',
+  4: '....-',
+  5: '.....',
+  6: '-....',
+  7: '--...',
+  8: '---..',
+  9: '----.',
+};
+
+// Convert text to Morse code sequence
+// Returns array of { char, morse, type: 'letter' | 'space' }
+function textToMorse(text) {
+  const result = [];
+  const words = text.toUpperCase().split(' ');
+
+  words.forEach((word, wordIndex) => {
+    for (const char of word) {
+      if (MORSE_CODE[char]) {
+        result.push({
+          char,
+          morse: MORSE_CODE[char],
+          type: 'letter',
+        });
+      }
+    }
+    // Add word separator after each word except last
+    if (wordIndex < words.length - 1) {
+      result.push({
+        char: ' ',
+        morse: '',
+        type: 'space',
+      });
+    }
+  });
+
+  return result;
+}
+
 // Initial time in seconds (e.g., 5 minutes = 300 seconds)
 const INITIAL_TIME = 300;
 // Time penalty for wrong submission (in seconds)
@@ -157,8 +232,166 @@ function getRandomQuestion(usedQuestionIds) {
   ];
 }
 
+// ======================================
+// LOBBY: Real-time Room Management
+// ======================================
+const lobbyRooms = {};
+// Structure: { roomId: { owner: socketId, players: { A: {id, name}, B: {id, name} } } }
+
 io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
+
+  // ======================================
+  // LOBBY EVENTS
+  // ======================================
+
+  // Create a new lobby room (creator is automatically Player A)
+  socket.on('create-lobby', ({ roomId, playerName }) => {
+    socket.join(`lobby-${roomId}`);
+
+    lobbyRooms[roomId] = {
+      owner: socket.id,
+      players: {
+        A: { id: socket.id, name: playerName },
+        B: null,
+      },
+    };
+
+    console.log(`[Lobby] Room ${roomId} created by ${playerName}`);
+
+    // Send update to creator
+    socket.emit('lobby-update', {
+      roomId,
+      players: lobbyRooms[roomId].players,
+      isOwner: true,
+      myRole: 'A',
+    });
+  });
+
+  // Join an existing lobby room (joiner is automatically Player B)
+  socket.on('join-lobby', ({ roomId, playerName }) => {
+    const room = lobbyRooms[roomId];
+
+    if (!room) {
+      socket.emit('lobby-error', { message: 'Phòng không tồn tại!' });
+      return;
+    }
+
+    if (room.players.B) {
+      socket.emit('lobby-error', { message: 'Phòng đã đầy!' });
+      return;
+    }
+
+    socket.join(`lobby-${roomId}`);
+    room.players.B = { id: socket.id, name: playerName };
+
+    console.log(`[Lobby] ${playerName} joined room ${roomId}`);
+
+    // Send update to joiner
+    socket.emit('lobby-update', {
+      roomId,
+      players: room.players,
+      isOwner: false,
+      myRole: 'B',
+    });
+
+    // Broadcast to room owner
+    socket.to(`lobby-${roomId}`).emit('lobby-update', {
+      roomId,
+      players: room.players,
+      isOwner: true,
+      myRole: 'A',
+    });
+  });
+
+  // Swap roles (only owner can do this)
+  socket.on('swap-roles', ({ roomId }) => {
+    const room = lobbyRooms[roomId];
+    if (!room || room.owner !== socket.id) return;
+
+    // Swap A and B
+    const temp = room.players.A;
+    room.players.A = room.players.B;
+    room.players.B = temp;
+
+    // Update owner to new Player A
+    if (room.players.A) {
+      room.owner = room.players.A.id;
+    }
+
+    console.log(`[Lobby] Roles swapped in room ${roomId}`);
+
+    // Broadcast new state to all
+    io.to(`lobby-${roomId}`).emit('lobby-roles-swapped', {
+      players: room.players,
+    });
+  });
+
+  // Leave lobby
+  socket.on('leave-lobby', ({ roomId }) => {
+    const room = lobbyRooms[roomId];
+    if (!room) return;
+
+    socket.leave(`lobby-${roomId}`);
+
+    // Remove player from room
+    if (room.players.A?.id === socket.id) {
+      // Owner left - close room
+      io.to(`lobby-${roomId}`).emit('lobby-closed', {
+        message: 'Chủ phòng đã rời đi',
+      });
+      delete lobbyRooms[roomId];
+    } else if (room.players.B?.id === socket.id) {
+      room.players.B = null;
+      // Notify owner
+      socket.to(`lobby-${roomId}`).emit('lobby-update', {
+        roomId,
+        players: room.players,
+        isOwner: true,
+        myRole: 'A',
+      });
+    }
+  });
+
+  // Start game (both players must be ready)
+  socket.on('start-game', ({ roomId }) => {
+    const room = lobbyRooms[roomId];
+    if (!room || !room.players.A || !room.players.B) return;
+
+    console.log(`[Lobby] Game starting in room ${roomId}`);
+
+    // Emit to both players to navigate
+    io.to(`lobby-${roomId}`).emit('game-started', {
+      roomId,
+      playerA: room.players.A.name,
+      playerB: room.players.B.name,
+    });
+
+    // Clean up lobby room
+    delete lobbyRooms[roomId];
+  });
+
+  // Handle disconnect for lobby
+  socket.on('disconnect', () => {
+    // Check if user was in any lobby
+    for (const roomId in lobbyRooms) {
+      const room = lobbyRooms[roomId];
+      if (room.players.A?.id === socket.id) {
+        io.to(`lobby-${roomId}`).emit('lobby-closed', {
+          message: 'Chủ phòng đã mất kết nối',
+        });
+        delete lobbyRooms[roomId];
+      } else if (room.players.B?.id === socket.id) {
+        room.players.B = null;
+        io.to(`lobby-${roomId}`).emit('lobby-update', {
+          roomId,
+          players: room.players,
+          isOwner: true,
+          myRole: 'A',
+        });
+      }
+    }
+  });
 
   // Join room
   socket.on('join-room', ({ roomId, role }) => {
@@ -394,27 +627,36 @@ io.on('connection', (socket) => {
   // ======================================
 
   // Join Game 1
-  socket.on('join-game1', ({ roomId, role }) => {
+  socket.on('join-game1', ({ roomId, role, playerName }) => {
     socket.join(`game1-${roomId}`);
 
-    // Nếu room chưa tồn tại HOẶC là Player A join (luôn random phrase mới cho mỗi game session)
+    // Nếu room chưa tồn tại
     if (!game1Rooms[roomId]) {
       game1Rooms[roomId] = {
         players: {},
+        playerNames: {},
         phrase: '',
         attempts: 0,
+        startTime: Date.now(),
+        timeRemaining: INITIAL_TIME,
       };
     }
+
+    // Store player name
+    game1Rooms[roomId].playerNames[role] =
+      playerName || `Player ${role.toUpperCase()}`;
 
     // Khi Player A join, luôn tạo phrase mới để mỗi game là unique
     if (role === 'A') {
       const randomPhrase =
         game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
       game1Rooms[roomId].phrase = randomPhrase;
-      game1Rooms[roomId].attempts = 0; // Reset attempts
+      game1Rooms[roomId].attempts = 0;
+      game1Rooms[roomId].startTime = Date.now();
+      game1Rooms[roomId].timeRemaining = INITIAL_TIME;
 
       console.log(
-        `[Game1] Room ${roomId} - Player A joined, new phrase: "${randomPhrase}"`
+        `[Game1] Room ${roomId} - Player A (${playerName}) joined, new phrase: "${randomPhrase}"`
       );
 
       // Gửi phrase cho Player A
@@ -425,10 +667,27 @@ io.on('connection', (socket) => {
 
     game1Rooms[roomId].players[role] = socket.id;
 
-    // Notify other players
-    io.to(`game1-${roomId}`).emit('game1-player-joined', { role });
+    // Emit player info and sync to all players in room
+    io.to(`game1-${roomId}`).emit('game1-player-joined', {
+      role,
+      playerName: game1Rooms[roomId].playerNames[role],
+      playerNames: game1Rooms[roomId].playerNames,
+      timeRemaining: game1Rooms[roomId].timeRemaining,
+    });
 
-    console.log(`[Game1] ${role} joined room ${roomId}`);
+    console.log(`[Game1] ${role} (${playerName}) joined room ${roomId}`);
+  });
+
+  // Sync timer for game1
+  socket.on('game1-sync-timer', ({ roomId, timeRemaining }) => {
+    const room = game1Rooms[roomId];
+    if (room) {
+      room.timeRemaining = timeRemaining;
+      // Broadcast to other players
+      socket
+        .to(`game1-${roomId}`)
+        .emit('game1-timer-update', { timeRemaining });
+    }
   });
 
   // Player B submits answer
@@ -472,6 +731,79 @@ io.on('connection', (socket) => {
 
       io.to(`game1-${roomId}`).emit('game1-reset', {
         phraseLength: game1Rooms[roomId].phrase.length,
+      });
+    }
+  });
+
+  // ======================================
+  // GAME 3: MORSE CODE
+  // ======================================
+
+  // Join Game 3
+  socket.on('join-game3', ({ roomId, role }) => {
+    socket.join(`game3-${roomId}`);
+
+    if (!game3Rooms[roomId]) {
+      game3Rooms[roomId] = {
+        players: {},
+        phrase: game3Phrase,
+        morseSequence: textToMorse(game3Phrase),
+        attempts: 0,
+      };
+    }
+
+    game3Rooms[roomId].players[role] = socket.id;
+
+    // Send Morse sequence to Player B
+    if (role === 'B') {
+      socket.emit('game3-phrase', {
+        morseSequence: game3Rooms[roomId].morseSequence,
+        phraseLength: game3Rooms[roomId].phrase.replace(/\s/g, '').length,
+      });
+    }
+
+    // Notify other players
+    io.to(`game3-${roomId}`).emit('game3-player-joined', { role });
+
+    console.log(`[Game3] ${role} joined room ${roomId}`);
+  });
+
+  // Player B submits answer
+  socket.on('submit-game3-answer', ({ roomId, answer }) => {
+    const room = game3Rooms[roomId];
+    if (!room) return;
+
+    room.attempts++;
+
+    // Normalize: uppercase, trim, remove extra spaces
+    const normalizedAnswer = answer.toUpperCase().trim().replace(/\s+/g, ' ');
+    const normalizedPhrase = room.phrase.toUpperCase().trim();
+
+    if (normalizedAnswer === normalizedPhrase) {
+      io.to(`game3-${roomId}`).emit('game3-complete', {
+        message: 'Chính xác! Hoàn thành Game 3!',
+        answer: normalizedAnswer,
+      });
+      console.log(
+        `[Game3] Room ${roomId} completed! Answer: "${normalizedAnswer}"`
+      );
+    } else {
+      socket.emit('game3-wrong-answer', {
+        message: `Sai rồi! Thử lại. (Đã thử ${room.attempts} lần)`,
+        attempts: room.attempts,
+      });
+      console.log(
+        `[Game3] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}")`
+      );
+    }
+  });
+
+  // Reset Game 3
+  socket.on('reset-game3', ({ roomId }) => {
+    if (game3Rooms[roomId]) {
+      game3Rooms[roomId].attempts = 0;
+      io.to(`game3-${roomId}`).emit('game3-reset', {
+        morseSequence: game3Rooms[roomId].morseSequence,
       });
     }
   });
