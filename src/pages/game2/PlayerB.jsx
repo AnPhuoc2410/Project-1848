@@ -7,8 +7,7 @@ export default function PlayerB() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roomId = params.get('room');
-  const playerAName = params.get('playerA') || 'Player A';
-  const playerBName = params.get('playerB') || 'Player B';
+  const myName = params.get('myName') || 'Player B';
   const blindMode = true;
 
   // Game state
@@ -119,12 +118,9 @@ export default function PlayerB() {
 
       // Navigate to Game 3 after delay
       setTimeout(() => {
-        const urlParams = new URLSearchParams({
-          room: roomId,
-          playerA: playerAName,
-          playerB: playerBName,
-        });
-        navigate(`/game3/b?${urlParams.toString()}`);
+        navigate(
+          `/game3/b?room=${roomId}&myName=${encodeURIComponent(myName)}`
+        );
       }, 2000);
     });
 

@@ -469,27 +469,36 @@ io.on('connection', (socket) => {
   // ======================================
 
   // Join Game 1
-  socket.on('join-game1', ({ roomId, role }) => {
+  socket.on('join-game1', ({ roomId, role, playerName }) => {
     socket.join(`game1-${roomId}`);
 
-    // Nếu room chưa tồn tại HOẶC là Player A join (luôn random phrase mới cho mỗi game session)
+    // Nếu room chưa tồn tại
     if (!game1Rooms[roomId]) {
       game1Rooms[roomId] = {
         players: {},
+        playerNames: {},
         phrase: '',
         attempts: 0,
+        startTime: Date.now(),
+        timeRemaining: INITIAL_TIME,
       };
     }
+
+    // Store player name
+    game1Rooms[roomId].playerNames[role] =
+      playerName || `Player ${role.toUpperCase()}`;
 
     // Khi Player A join, luôn tạo phrase mới để mỗi game là unique
     if (role === 'A') {
       const randomPhrase =
         game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
       game1Rooms[roomId].phrase = randomPhrase;
-      game1Rooms[roomId].attempts = 0; // Reset attempts
+      game1Rooms[roomId].attempts = 0;
+      game1Rooms[roomId].startTime = Date.now();
+      game1Rooms[roomId].timeRemaining = INITIAL_TIME;
 
       console.log(
-        `[Game1] Room ${roomId} - Player A joined, new phrase: "${randomPhrase}"`
+        `[Game1] Room ${roomId} - Player A (${playerName}) joined, new phrase: "${randomPhrase}"`
       );
 
       // Gửi phrase cho Player A
@@ -500,10 +509,27 @@ io.on('connection', (socket) => {
 
     game1Rooms[roomId].players[role] = socket.id;
 
-    // Notify other players
-    io.to(`game1-${roomId}`).emit('game1-player-joined', { role });
+    // Emit player info and sync to all players in room
+    io.to(`game1-${roomId}`).emit('game1-player-joined', {
+      role,
+      playerName: game1Rooms[roomId].playerNames[role],
+      playerNames: game1Rooms[roomId].playerNames,
+      timeRemaining: game1Rooms[roomId].timeRemaining,
+    });
 
-    console.log(`[Game1] ${role} joined room ${roomId}`);
+    console.log(`[Game1] ${role} (${playerName}) joined room ${roomId}`);
+  });
+
+  // Sync timer for game1
+  socket.on('game1-sync-timer', ({ roomId, timeRemaining }) => {
+    const room = game1Rooms[roomId];
+    if (room) {
+      room.timeRemaining = timeRemaining;
+      // Broadcast to other players
+      socket
+        .to(`game1-${roomId}`)
+        .emit('game1-timer-update', { timeRemaining });
+    }
   });
 
   // Player B submits answer

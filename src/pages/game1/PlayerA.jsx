@@ -10,33 +10,38 @@ export default function PlayerA() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
-  const playerAName = params.get('playerA') || 'Player A';
-  const playerBName = params.get('playerB') || 'Player B';
+  const myName = params.get('myName') || 'Player A';
 
-  const [phrase, setPhrase] = useState(''); // Nhận từ server
+  const [phrase, setPhrase] = useState('');
   const [playerBConnected, setPlayerBConnected] = useState(false);
+  const [playerBName, setPlayerBName] = useState('Player B');
   const [gameComplete, setGameComplete] = useState(false);
-  const [loading, setLoading] = useState(true); // Chờ nhận từ
+  const [loading, setLoading] = useState(true);
 
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
   const [timerActive, setTimerActive] = useState(true);
   const startTimeRef = useRef(Date.now());
 
-  // Timer countdown
+  // Timer countdown - Player A is the master timer
   useEffect(() => {
     if (!timerActive || gameComplete || loading) return;
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
-        if (prev <= 1) {
+        const newTime = prev - 1;
+        if (newTime <= 0) {
           setTimerActive(false);
           return 0;
         }
-        return prev - 1;
+        // Sync timer to server every 5 seconds
+        if (newTime % 5 === 0) {
+          socket.emit('game1-sync-timer', { roomId, timeRemaining: newTime });
+        }
+        return newTime;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [timerActive, gameComplete, loading]);
+  }, [timerActive, gameComplete, loading, roomId]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -45,40 +50,40 @@ export default function PlayerA() {
   };
 
   useEffect(() => {
-    socket.emit('join-game1', { roomId, role: 'A' });
+    socket.emit('join-game1', { roomId, role: 'A', playerName: myName });
 
-    // Nhận từ random từ server
     socket.on('game1-phrase', ({ phrase: serverPhrase }) => {
       setPhrase(serverPhrase);
       setLoading(false);
-      startTimeRef.current = Date.now(); // Start timer when phrase received
+      startTimeRef.current = Date.now();
     });
 
-    socket.on('game1-player-joined', ({ role }) => {
-      if (role === 'B') setPlayerBConnected(true);
+    socket.on('game1-player-joined', ({ role, playerName, playerNames }) => {
+      if (role === 'B') {
+        setPlayerBConnected(true);
+        setPlayerBName(playerName);
+      }
+      // Sync player names
+      if (playerNames?.B) setPlayerBName(playerNames.B);
     });
 
     socket.on('game1-complete', () => {
       setGameComplete(true);
       setTimerActive(false);
 
-      // Calculate time used
       const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
       // Store time in sessionStorage for leaderboard
       const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
       times.game1 = timeUsed;
-      times.playerA = playerAName;
+      times.playerA = myName;
       times.playerB = playerBName;
       sessionStorage.setItem('gameTimes', JSON.stringify(times));
 
       setTimeout(() => {
-        const urlParams = new URLSearchParams({
-          room: roomId,
-          playerA: playerAName,
-          playerB: playerBName,
-        });
-        navigate(`/game2/a?${urlParams.toString()}`);
+        navigate(
+          `/game2/a?room=${roomId}&myName=${encodeURIComponent(myName)}`
+        );
       }, 2000);
     });
 
@@ -87,7 +92,7 @@ export default function PlayerA() {
       socket.off('game1-player-joined');
       socket.off('game1-complete');
     };
-  }, [roomId, navigate, playerAName, playerBName]);
+  }, [roomId, navigate, myName, playerBName]);
 
   const letters = phrase.split('');
 
@@ -108,7 +113,7 @@ export default function PlayerA() {
             🔐 Mã hóa
           </span>
           <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
-            {playerAName}
+            {myName}
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -124,7 +129,7 @@ export default function PlayerA() {
                 : 'bg-gray-100 text-gray-500'
             }`}
           >
-            {playerBConnected ? '🟢 Player B online' : '⏳ Chờ Player B...'}
+            {playerBConnected ? `🟢 ${playerBName}` : '⏳ Chờ Player B...'}
           </span>
           <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
             Room: {roomId}
@@ -151,7 +156,7 @@ export default function PlayerA() {
         </div>
       )}
 
-      {/* Loading State - Chờ nhận từ từ server */}
+      {/* Loading State */}
       {loading && (
         <div className="game-overlay">
           <div className="overlay-card">
@@ -175,9 +180,11 @@ export default function PlayerA() {
           <h3 className="card-title">📋 Hướng dẫn</h3>
           <ol className="text-sm text-text/70 space-y-2">
             <li>1. Nhìn từng ký hiệu mật mã bên dưới</li>
-            <li>2. Mô tả hình dạng ký hiệu cho Player B thông qua giao ti</li>
-            <li>3. Player B sẽ giải mã và đọc lại chữ cái</li>
-            <li>4. Khi đủ chữ, Player B nhập đáp án → Qua Game 2</li>
+            <li>
+              2. Mô tả hình dạng ký hiệu cho {playerBName} thông qua giao tiếp
+            </li>
+            <li>3. {playerBName} sẽ giải mã và đọc lại chữ cái</li>
+            <li>4. Khi đủ chữ, {playerBName} nhập đáp án → Qua Game 2</li>
           </ol>
         </div>
 
@@ -185,7 +192,7 @@ export default function PlayerA() {
         <div className="game-card">
           <h3 className="card-title">🔐 Mật mã cần giải</h3>
           <p className="text-sm text-text/50 mb-6">
-            Mô tả từng ký hiệu cho Player B
+            Mô tả từng ký hiệu cho {playerBName}
           </p>
 
           <div className="freemason-phrase">
@@ -218,7 +225,7 @@ export default function PlayerA() {
                 <div className="three-body__dot"></div>
               </div>
               <span className="text-text/70">
-                Đang chờ Player B nhập đáp án...
+                Đang chờ {playerBName} nhập đáp án...
               </span>
             </div>
           </div>

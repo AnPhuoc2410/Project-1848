@@ -9,8 +9,7 @@ export default function PlayerA() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
-  const playerAName = params.get('playerA') || 'Player A';
-  const playerBName = params.get('playerB') || 'Player B';
+  const myName = params.get('myName') || 'Player A';
 
   const [playerBConnected, setPlayerBConnected] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
@@ -87,7 +86,7 @@ export default function PlayerA() {
             📖 Bảng mã Morse
           </span>
           <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
-            {playerAName}
+            {myName}
           </span>
         </div>
         <div className="flex items-center gap-3">
