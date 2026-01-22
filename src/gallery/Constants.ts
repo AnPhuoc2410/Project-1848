@@ -157,7 +157,7 @@ export const BOARD_TEXTURES = [
 /*
  * Audio Resources
  * */
-export const AUDIO_URL = new URL('./assets/audio/music.m4a', import.meta.url)
+export const AUDIO_URL = new URL('./assets/audio/music.mp3', import.meta.url)
   .href;
 
 /*
