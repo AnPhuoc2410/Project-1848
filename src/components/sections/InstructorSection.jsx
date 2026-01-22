@@ -3,12 +3,8 @@ const InstructorSection = () => {
     <section id="instructor" className="py-16 md:py-24 scroll-mt-16">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
-          <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-gray-200">
-            <img
-              src="https://via.placeholder.com/256"
-              alt="Instructor"
-              className="w-full h-full object-cover"
-            />
+          <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+            <div className="text-6xl md:text-8xl text-white font-bold">LMT</div>
           </div>
           <div className="text-center md:text-left max-w-lg">
             <h2
