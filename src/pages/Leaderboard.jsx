@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Google Sheets Web App URL - User needs to replace this with their actual URL
-const SHEETS_API_URL = 'YOUR_GOOGLE_SHEETS_WEB_APP_URL';
+const SHEETS_API_URL = import.meta.env.VITE_SHEETS_URL;
 
 export default function Leaderboard() {
   const navigate = useNavigate();
