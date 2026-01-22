@@ -107,9 +107,14 @@ export default class UI {
   }
 
   onClickEnterApp() {
-    this.doms.loading_complete.classList.remove('display-none');
-    this.doms.loading_complete.remove();
-    this.core.$emit(ON_ENTER_APP);
+    // Add curtain open animation
+    this.doms.loading_complete.classList.add('curtain-open');
+
+    // Wait for curtain animation to complete then remove
+    setTimeout(() => {
+      this.doms.loading_complete.remove();
+      this.core.$emit(ON_ENTER_APP);
+    }, 1500);
   }
 
   showHelp() {

@@ -34,27 +34,71 @@ const Gallery3D = () => {
         <div className="progress"></div>
       </div>
 
-      {/* Loading Complete UI */}
+      {/* Loading Complete UI - Curtain Intro */}
       <div className="loading-complete display-none">
-        <p>
-          Loading Complete
-          <svg
-            t="1677233206130"
-            className="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-          >
-            <path
-              d="M537.6 102.4c73.5744 0 142.336 20.6848 200.704 56.576 15.872 9.6256 16.7936 23.1424 2.9696 40.5504-14.08 16.2816-43.008 13.2608-86.8352-9.216l-0.0512 0.0512a318.1568 318.1568 0 1 0 104.8064 524.3904h0.3584c19.456-26.7776 40.5504-40.192 63.1296-40.2432l6.8096 0.4096c24.064 4.4032 30.4128 16.6912 19.0464 36.864l0.2048-0.3584-0.1536 0.1536-0.0512 0.2048h-0.1024l-7.936 10.5984A384 384 0 1 1 537.6 102.4z m332.288 201.0112a33.28 33.28 0 0 1 0 47.104l-276.48 276.48a31.2832 31.2832 0 0 1-0.512 0.4608l-3.584 3.584a30.72 30.72 0 0 1-43.4176 0l-1.8432-1.792-0.4096-0.512-135.3216-135.2704a30.72 30.72 0 0 1 0-43.4176l3.584-3.584a30.72 30.72 0 0 1 43.4688 0l112.2304 112.128 255.232-255.1808a33.28 33.28 0 0 1 47.104 0z"
-              fill="#ffffff"
-            ></path>
-          </svg>
-        </p>
-        <p>Tips: (Double-click screen for fullscreen experience!)</p>
-        <div className="start">Enter Gallery</div>
+        {/* Curtain Left */}
+        <div className="curtain curtain-left">
+          <div className="curtain-inner">
+            <div className="curtain-fold"></div>
+            <div className="curtain-fold"></div>
+            <div className="curtain-fold"></div>
+          </div>
+        </div>
+
+        {/* Curtain Right */}
+        <div className="curtain curtain-right">
+          <div className="curtain-inner">
+            <div className="curtain-fold"></div>
+            <div className="curtain-fold"></div>
+            <div className="curtain-fold"></div>
+          </div>
+        </div>
+
+        {/* Center Content */}
+        <div className="intro-content">
+          <div className="intro-emblem">
+            <span className="emblem-icon">☭</span>
+            <div className="emblem-ring"></div>
+            <div className="emblem-ring emblem-ring-2"></div>
+          </div>
+
+          <h1 className="intro-title">TRIỂN LÃM 3D</h1>
+          <p className="intro-subtitle">Chủ Nghĩa Xã Hội Khoa Học</p>
+
+          <div className="intro-divider">
+            <span></span>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+            </svg>
+            <span></span>
+          </div>
+
+          <button className="start">
+            <span className="btn-text">Vào Triển Lãm</span>
+            <span className="btn-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </span>
+          </button>
+
+          <p className="intro-tip">💡 Nhấp đôi để xem toàn màn hình</p>
+        </div>
+
+        {/* Decorative particles */}
+        <div className="particles">
+          <div className="particle"></div>
+          <div className="particle"></div>
+          <div className="particle"></div>
+          <div className="particle"></div>
+          <div className="particle"></div>
+          <div className="particle"></div>
+        </div>
       </div>
 
       {/* CSS3D Renderer */}
