@@ -6,6 +6,8 @@ export default function Lobby() {
   const [mode, setMode] = useState('select'); // 'select', 'create', 'join'
   const [roomId, setRoomId] = useState('');
   const [selectedRole, setSelectedRole] = useState(null);
+  const [playerAName, setPlayerAName] = useState('');
+  const [playerBName, setPlayerBName] = useState('');
 
   // Generate random room ID
   const generateRoomId = () => {
@@ -33,8 +35,19 @@ export default function Lobby() {
   };
 
   const handleStartGame = () => {
-    if (!roomId.trim() || !selectedRole) return;
-    nav(`/game1/${selectedRole}?room=${roomId.toUpperCase()}`);
+    if (
+      !roomId.trim() ||
+      !selectedRole ||
+      !playerAName.trim() ||
+      !playerBName.trim()
+    )
+      return;
+    const params = new URLSearchParams({
+      room: roomId.toUpperCase(),
+      playerA: playerAName.trim(),
+      playerB: playerBName.trim(),
+    });
+    nav(`/game1/${selectedRole}?${params.toString()}`);
   };
 
   const handleBack = () => {

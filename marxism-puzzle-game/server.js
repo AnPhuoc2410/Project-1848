@@ -133,6 +133,81 @@ const game1Phrases = [
   'CACH MANG XA HOI CHU NGHIA',
 ];
 
+// ======================================
+// GAME 3: MORSE CODE CONFIG
+// ======================================
+let game3Rooms = {};
+const game3Phrase = 'DANG CONG SAN VIET NAM MUON NAM';
+
+// Morse code mapping
+const MORSE_CODE = {
+  A: '.-',
+  B: '-...',
+  C: '-.-.',
+  D: '-..',
+  E: '.',
+  F: '..-.',
+  G: '--.',
+  H: '....',
+  I: '..',
+  J: '.---',
+  K: '-.-',
+  L: '.-..',
+  M: '--',
+  N: '-.',
+  O: '---',
+  P: '.--.',
+  Q: '--.-',
+  R: '.-.',
+  S: '...',
+  T: '-',
+  U: '..-',
+  V: '...-',
+  W: '.--',
+  X: '-..-',
+  Y: '-.--',
+  Z: '--..',
+  0: '-----',
+  1: '.----',
+  2: '..---',
+  3: '...--',
+  4: '....-',
+  5: '.....',
+  6: '-....',
+  7: '--...',
+  8: '---..',
+  9: '----.',
+};
+
+// Convert text to Morse code sequence
+// Returns array of { char, morse, type: 'letter' | 'space' }
+function textToMorse(text) {
+  const result = [];
+  const words = text.toUpperCase().split(' ');
+
+  words.forEach((word, wordIndex) => {
+    for (const char of word) {
+      if (MORSE_CODE[char]) {
+        result.push({
+          char,
+          morse: MORSE_CODE[char],
+          type: 'letter',
+        });
+      }
+    }
+    // Add word separator after each word except last
+    if (wordIndex < words.length - 1) {
+      result.push({
+        char: ' ',
+        morse: '',
+        type: 'space',
+      });
+    }
+  });
+
+  return result;
+}
+
 // Initial time in seconds (e.g., 5 minutes = 300 seconds)
 const INITIAL_TIME = 300;
 // Time penalty for wrong submission (in seconds)
@@ -472,6 +547,79 @@ io.on('connection', (socket) => {
 
       io.to(`game1-${roomId}`).emit('game1-reset', {
         phraseLength: game1Rooms[roomId].phrase.length,
+      });
+    }
+  });
+
+  // ======================================
+  // GAME 3: MORSE CODE
+  // ======================================
+
+  // Join Game 3
+  socket.on('join-game3', ({ roomId, role }) => {
+    socket.join(`game3-${roomId}`);
+
+    if (!game3Rooms[roomId]) {
+      game3Rooms[roomId] = {
+        players: {},
+        phrase: game3Phrase,
+        morseSequence: textToMorse(game3Phrase),
+        attempts: 0,
+      };
+    }
+
+    game3Rooms[roomId].players[role] = socket.id;
+
+    // Send Morse sequence to Player B
+    if (role === 'B') {
+      socket.emit('game3-phrase', {
+        morseSequence: game3Rooms[roomId].morseSequence,
+        phraseLength: game3Rooms[roomId].phrase.replace(/\s/g, '').length,
+      });
+    }
+
+    // Notify other players
+    io.to(`game3-${roomId}`).emit('game3-player-joined', { role });
+
+    console.log(`[Game3] ${role} joined room ${roomId}`);
+  });
+
+  // Player B submits answer
+  socket.on('submit-game3-answer', ({ roomId, answer }) => {
+    const room = game3Rooms[roomId];
+    if (!room) return;
+
+    room.attempts++;
+
+    // Normalize: uppercase, trim, remove extra spaces
+    const normalizedAnswer = answer.toUpperCase().trim().replace(/\s+/g, ' ');
+    const normalizedPhrase = room.phrase.toUpperCase().trim();
+
+    if (normalizedAnswer === normalizedPhrase) {
+      io.to(`game3-${roomId}`).emit('game3-complete', {
+        message: 'Chính xác! Hoàn thành Game 3!',
+        answer: normalizedAnswer,
+      });
+      console.log(
+        `[Game3] Room ${roomId} completed! Answer: "${normalizedAnswer}"`
+      );
+    } else {
+      socket.emit('game3-wrong-answer', {
+        message: `Sai rồi! Thử lại. (Đã thử ${room.attempts} lần)`,
+        attempts: room.attempts,
+      });
+      console.log(
+        `[Game3] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}")`
+      );
+    }
+  });
+
+  // Reset Game 3
+  socket.on('reset-game3', ({ roomId }) => {
+    if (game3Rooms[roomId]) {
+      game3Rooms[roomId].attempts = 0;
+      io.to(`game3-${roomId}`).emit('game3-reset', {
+        morseSequence: game3Rooms[roomId].morseSequence,
       });
     }
   });
