@@ -21,6 +21,9 @@ const Game2PlayerB = lazy(() => import('./pages/game2/PlayerB'));
 const Game3PlayerA = lazy(() => import('./pages/game3/PlayerA'));
 const Game3PlayerB = lazy(() => import('./pages/game3/PlayerB'));
 
+// Leaderboard
+const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
@@ -47,6 +50,8 @@ const App = () => {
             {/* Game 3: Morse Code */}
             <Route path="/game3/a" element={<Game3PlayerA />} />
             <Route path="/game3/b" element={<Game3PlayerB />} />
+            {/* Leaderboard */}
+            <Route path="/leaderboard" element={<Leaderboard />} />
           </Routes>
         </Suspense>
       </main>

@@ -35,19 +35,8 @@ export default function Lobby() {
   };
 
   const handleStartGame = () => {
-    if (
-      !roomId.trim() ||
-      !selectedRole ||
-      !playerAName.trim() ||
-      !playerBName.trim()
-    )
-      return;
-    const params = new URLSearchParams({
-      room: roomId.toUpperCase(),
-      playerA: playerAName.trim(),
-      playerB: playerBName.trim(),
-    });
-    nav(`/game1/${selectedRole}?${params.toString()}`);
+    if (!roomId.trim() || !selectedRole) return;
+    nav(`/game1/${selectedRole}?room=${roomId.toUpperCase()}`);
   };
 
   const handleBack = () => {
@@ -127,6 +116,36 @@ export default function Lobby() {
                     Copy
                   </button>
                 </div>
+                <h3 className="lobby-role-title">Nhập tên cặp đôi</h3>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-text/70 mb-2">
+                      👤 Tên Player A
+                    </label>
+                    <input
+                      type="text"
+                      value={playerAName}
+                      onChange={(e) => setPlayerAName(e.target.value)}
+                      placeholder="VD: Phuoc"
+                      className="lobby-room-input"
+                      maxLength={20}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text/70 mb-2">
+                      👤 Tên Player B
+                    </label>
+                    <input
+                      type="text"
+                      value={playerBName}
+                      onChange={(e) => setPlayerBName(e.target.value)}
+                      placeholder="VD: Ngan"
+                      className="lobby-room-input"
+                      maxLength={20}
+                    />
+                  </div>
+                </div>
+
                 <span className="lobby-room-hint">
                   Chia sẻ mã này cho bạn chơi cùng
                 </span>
@@ -175,10 +194,16 @@ export default function Lobby() {
 
               <button
                 onClick={handleStartGame}
-                disabled={!selectedRole}
+                disabled={
+                  !selectedRole || !playerAName.trim() || !playerBName.trim()
+                }
                 className="lobby-start-btn"
               >
-                {selectedRole ? 'Bắt đầu game' : 'Chọn vai trò để tiếp tục'}
+                {!playerAName.trim() || !playerBName.trim()
+                  ? 'Nhập tên cả 2 người chơi'
+                  : !selectedRole
+                    ? 'Chọn vai trò để tiếp tục'
+                    : 'Bắt đầu game'}
               </button>
             </div>
           )}
@@ -205,6 +230,36 @@ export default function Lobby() {
 
               {roomId.length >= 4 && (
                 <div className="lobby-role-section">
+                  <h3 className="lobby-role-title">Nhập tên cặp đôi</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-text/70 mb-2">
+                        👤 Tên Player A
+                      </label>
+                      <input
+                        type="text"
+                        value={playerAName}
+                        onChange={(e) => setPlayerAName(e.target.value)}
+                        placeholder="VD: Minh"
+                        className="lobby-room-input"
+                        maxLength={20}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-text/70 mb-2">
+                        👤 Tên Player B
+                      </label>
+                      <input
+                        type="text"
+                        value={playerBName}
+                        onChange={(e) => setPlayerBName(e.target.value)}
+                        placeholder="VD: Lan"
+                        className="lobby-room-input"
+                        maxLength={20}
+                      />
+                    </div>
+                  </div>
+
                   <h3 className="lobby-role-title">Chọn vai trò</h3>
                   <div className="lobby-role-cards">
                     <button
@@ -236,14 +291,22 @@ export default function Lobby() {
 
               <button
                 onClick={handleStartGame}
-                disabled={!roomId.trim() || roomId.length < 4 || !selectedRole}
+                disabled={
+                  !roomId.trim() ||
+                  roomId.length < 4 ||
+                  !selectedRole ||
+                  !playerAName.trim() ||
+                  !playerBName.trim()
+                }
                 className="lobby-start-btn"
               >
                 {!roomId.trim() || roomId.length < 4
                   ? 'Nhập mã phòng (ít nhất 4 ký tự)'
-                  : !selectedRole
-                    ? 'Chọn vai trò để tiếp tục'
-                    : 'Vào phòng chơi'}
+                  : !playerAName.trim() || !playerBName.trim()
+                    ? 'Nhập tên cả 2 người chơi'
+                    : !selectedRole
+                      ? 'Chọn vai trò để tiếp tục'
+                      : 'Vào phòng chơi'}
               </button>
             </div>
           )}
