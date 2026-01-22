@@ -67,55 +67,44 @@ export const FAMILY_MODEL_URL = new URL(
  * Thư viện được chia thành các khu vực theo chủ đề
  * */
 export const MODEL_CONFIGS = {
-  // ==========================================
-  // KHU VỰC TRUNG TÂM - TỔNG QUAN
-  // Karl Marx đặt ở vị trí trung tâm, đón khách
-  // ==========================================
   karlMarx: {
-    position: { x: 0, y: 1, z: 28 },
+    position: { x: 0, y: 0.0005, z: 48 },
     scale: 0.3,
     rotation: { x: 0, y: Math.PI, z: 0 },
     chapter: 'overview',
     description: 'Karl Marx - Trung tâm thư viện',
   },
 
-  // ==========================================
-  // CÁNH TRÁI - CHƯƠNG 1, 2, 3
-  // ==========================================
-
-  // Engels & Lenin - Chương 1: Bên cạnh bảng Chương 1
   engels: {
-    position: { x: 10, y: 2, z: 30 },
+    position: { x: 10, y: 2, z: 49 },
     scale: 7,
-    rotation: { x: 0, y: Math.PI / 4, z: 0 },
+    rotation: { x: 0, y: Math.PI / 2, z: 0 },
     chapter: 1,
     description: 'Friedrich Engels - Đồng sáng lập CNXHKH',
   },
   lenin: {
-    position: { x: -8, y: 1.5, z: 28 },
+    position: { x: -8, y: 0.5, z: 49 },
     scale: 0.017,
-    rotation: { x: 0, y: -Math.PI / 4, z: 0 },
+    rotation: { x: 0, y: Math.PI / 2, z: 0 },
     chapter: 1,
     description: 'V.I. Lenin - Phát triển CNXHKH',
   },
 
-  // Công nhân - Chương 2: Khu vực giai cấp công nhân
   congNhan1: {
-    position: { x: -10, y: 5, z: -5 },
+    position: { x: -0.1, y: 5, z: -14 },
     scale: 10,
-    rotation: { x: 0, y: Math.PI / 6, z: 0 },
+    rotation: { x: 0, y: -Math.PI / 2, z: 0 },
     chapter: 2,
     description: 'Công nhân - Lực lượng sản xuất tiên tiến',
   },
   congNhan2: {
-    position: { x: -15, y: 5, z: -5 },
+    position: { x: -11.5, y: 5, z: -14 },
     scale: 10,
-    rotation: { x: 0, y: -Math.PI / 8, z: 0 },
+    rotation: { x: 0, y: -Math.PI / 2, z: 0 },
     chapter: 2,
     description: 'Công nhân - Sứ mệnh lịch sử',
   },
 
-  // Thành phố - Chương 3: Quá độ, công nghiệp hóa
   city: {
     position: { x: 10, y: 7, z: 10 },
     scale: 10,
@@ -124,11 +113,6 @@ export const MODEL_CONFIGS = {
     description: 'Thành phố công nghiệp hóa - Biểu tượng quá độ',
   },
 
-  // ==========================================
-  // CÁNH PHẢI - CHƯƠNG 4, 5, 6, 7
-  // ==========================================
-
-  // Biểu tượng pháp luật - Chương 4: Nhà nước pháp quyền
   phapLuat: {
     position: { x: 18, y: 5, z: 15 },
     scale: 5,
@@ -137,20 +121,18 @@ export const MODEL_CONFIGS = {
     description: 'Biểu tượng công lý - Nhà nước pháp quyền XHCN',
   },
 
-  // Dân tộc tôn giáo - Chương 6
   danTocTonGiao: {
-    position: { x: 20, y: 6, z: -5 },
+    position: { x: -12, y: 6, z: 4 },
     scale: 10,
-    rotation: { x: 0, y: -Math.PI / 6, z: 0 },
+    rotation: { x: 0, y: -Math.PI / 2, z: 0 },
     chapter: 6,
     description: '54 dân tộc anh em - Đoàn kết tôn giáo',
   },
 
-  // Gia đình - Chương 7: Tế bào xã hội
   family: {
-    position: { x: 15, y: 4, z: -18 },
+    position: { x: -5, y: 4, z: 15 },
     scale: 15,
-    rotation: { x: 0, y: -Math.PI / 3, z: 0 },
+    rotation: { x: 0, y: Math.PI, z: 0 },
     chapter: 7,
     description: 'Gia đình hạnh phúc - Tế bào xã hội XHCN',
   },
