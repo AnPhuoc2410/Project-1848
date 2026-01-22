@@ -1,12 +1,20 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { socket } from '../socket';
 
 export default function Lobby() {
   const nav = useNavigate();
   const [mode, setMode] = useState('select'); // 'select', 'create', 'join'
   const [roomId, setRoomId] = useState('');
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [myName, setMyName] = useState(''); // Only enter your own name
+  const [myName, setMyName] = useState('');
+  const [joinRoomInput, setJoinRoomInput] = useState('');
+
+  // Real-time lobby state
+  const [players, setPlayers] = useState({ A: null, B: null });
+  const [isOwner, setIsOwner] = useState(false);
+  const [myRole, setMyRole] = useState(null);
+  const [lobbyError, setLobbyError] = useState('');
+  const [inLobby, setInLobby] = useState(false);
 
   // Generate random room ID
   const generateRoomId = () => {
@@ -20,32 +28,102 @@ export default function Lobby() {
 
   const generatedRoomId = useMemo(() => generateRoomId(), []);
 
+  // Socket event listeners
+  useEffect(() => {
+    socket.on(
+      'lobby-update',
+      ({ roomId: rid, players: p, isOwner: owner, myRole: role }) => {
+        setRoomId(rid);
+        setPlayers(p);
+        setIsOwner(owner);
+        setMyRole(role);
+        setInLobby(true);
+        setLobbyError('');
+      }
+    );
+
+    socket.on('lobby-roles-swapped', ({ players: p }) => {
+      setPlayers(p);
+      // Swap my role
+      setMyRole((prev) => (prev === 'A' ? 'B' : 'A'));
+      setIsOwner((prev) => !prev);
+    });
+
+    socket.on('lobby-error', ({ message }) => {
+      setLobbyError(message);
+      setTimeout(() => setLobbyError(''), 3000);
+    });
+
+    socket.on('lobby-closed', ({ message }) => {
+      setLobbyError(message);
+      setInLobby(false);
+      setMode('select');
+      setPlayers({ A: null, B: null });
+    });
+
+    socket.on('game-started', ({ roomId: rid, playerA, playerB }) => {
+      // Navigate based on my role
+      if (myRole === 'A') {
+        nav(`/game1/a?room=${rid}&myName=${encodeURIComponent(playerA)}`);
+      } else {
+        nav(`/game1/b?room=${rid}&myName=${encodeURIComponent(playerB)}`);
+      }
+    });
+
+    return () => {
+      socket.off('lobby-update');
+      socket.off('lobby-roles-swapped');
+      socket.off('lobby-error');
+      socket.off('lobby-closed');
+      socket.off('game-started');
+    };
+  }, [nav, myRole]);
+
   const handleCreateRoom = () => {
-    setRoomId(generatedRoomId);
     setMode('create');
+    setRoomId(generatedRoomId);
   };
 
   const handleJoinRoom = () => {
     setMode('join');
   };
 
-  const handleSelectRole = (role) => {
-    setSelectedRole(role);
+  const handleConfirmCreate = () => {
+    if (!myName.trim()) return;
+    socket.emit('create-lobby', {
+      roomId: generatedRoomId,
+      playerName: myName.trim(),
+    });
+  };
+
+  const handleConfirmJoin = () => {
+    if (!myName.trim() || joinRoomInput.length < 4) return;
+    socket.emit('join-lobby', {
+      roomId: joinRoomInput.toUpperCase(),
+      playerName: myName.trim(),
+    });
+  };
+
+  const handleSwapRoles = () => {
+    if (!isOwner) return;
+    socket.emit('swap-roles', { roomId });
   };
 
   const handleStartGame = () => {
-    if (!roomId.trim() || !selectedRole || !myName.trim()) return;
-    // Pass my name with role indicator so the game knows which player I am
-    nav(
-      `/game1/${selectedRole}?room=${roomId.toUpperCase()}&myName=${encodeURIComponent(myName.trim())}`
-    );
+    if (!players.A || !players.B) return;
+    socket.emit('start-game', { roomId });
   };
 
   const handleBack = () => {
+    if (inLobby) {
+      socket.emit('leave-lobby', { roomId });
+    }
     setMode('select');
-    setSelectedRole(null);
-    setRoomId('');
     setMyName('');
+    setJoinRoomInput('');
+    setInLobby(false);
+    setPlayers({ A: null, B: null });
+    setLobbyError('');
   };
 
   return (
@@ -100,8 +178,8 @@ export default function Lobby() {
             </div>
           )}
 
-          {/* Create Room Flow */}
-          {mode === 'create' && (
+          {/* Create Room - Not in lobby yet */}
+          {mode === 'create' && !inLobby && (
             <div className="lobby-room-flow">
               <button onClick={handleBack} className="lobby-back-btn">
                 ← Quay lại
@@ -110,9 +188,13 @@ export default function Lobby() {
               <div className="lobby-room-display">
                 <span className="lobby-room-label">Mã phòng của bạn</span>
                 <div className="lobby-room-code">
-                  <span className="lobby-room-code-text">{roomId}</span>
+                  <span className="lobby-room-code-text">
+                    {generatedRoomId}
+                  </span>
                   <button
-                    onClick={() => navigator.clipboard.writeText(roomId)}
+                    onClick={() =>
+                      navigator.clipboard.writeText(generatedRoomId)
+                    }
                     className="lobby-copy-btn"
                     title="Sao chép"
                   >
@@ -134,65 +216,25 @@ export default function Lobby() {
                     placeholder="Tên của bạn..."
                     className="lobby-room-input"
                     maxLength={20}
+                    autoFocus
                   />
                 </div>
 
-                <h3 className="lobby-role-title">Chọn vai trò tác chiến</h3>
-                <div className="lobby-role-cards">
-                  {/* Player A - Lý Luận */}
-                  <button
-                    onClick={() => handleSelectRole('a')}
-                    className={`lobby-role-card lobby-role-a ${selectedRole === 'a' ? 'selected' : ''}`}
-                  >
-                    <div className="role-name">Player A</div>
-                    <div className="role-desc">Nhà Lý Luận</div>
-                    <ul className="role-tasks">
-                      <li>
-                        Nắm giữ <b>thông tin mật</b> & dữ kiện
-                      </li>
-                      <li>
-                        Phân tích vấn đề & <b>định hướng</b>
-                      </li>
-                      <li>Truyền tải chỉ thị cho người thực hiện</li>
-                    </ul>
-                  </button>
-
-                  {/* Player B - Thực Tiễn */}
-                  <button
-                    onClick={() => handleSelectRole('b')}
-                    className={`lobby-role-card lobby-role-b ${selectedRole === 'b' ? 'selected' : ''}`}
-                  >
-                    <div className="role-name">Player B</div>
-                    <div className="role-desc">Nhà Thực Tiễn</div>
-                    <ul className="role-tasks">
-                      <li>
-                        Nắm giữ <b>công cụ</b> & giải pháp
-                      </li>
-                      <li>
-                        Tiếp nhận thông tin & <b>xử lý</b>
-                      </li>
-                      <li>Thao tác trực tiếp để qua màn</li>
-                    </ul>
-                  </button>
-                </div>
+                <button
+                  onClick={handleConfirmCreate}
+                  disabled={!myName.trim()}
+                  className="lobby-start-btn"
+                >
+                  {!myName.trim()
+                    ? 'Nhập tên để tiếp tục'
+                    : 'Tạo phòng & Chờ bạn chơi'}
+                </button>
               </div>
-
-              <button
-                onClick={handleStartGame}
-                disabled={!selectedRole || !myName.trim()}
-                className="lobby-start-btn"
-              >
-                {!myName.trim()
-                  ? 'Nhập tên của bạn'
-                  : !selectedRole
-                    ? 'Chọn vai trò để tiếp tục'
-                    : 'Bắt đầu game'}
-              </button>
             </div>
           )}
 
-          {/* Join Room Flow */}
-          {mode === 'join' && (
+          {/* Join Room - Not in lobby yet */}
+          {mode === 'join' && !inLobby && (
             <div className="lobby-room-flow">
               <button onClick={handleBack} className="lobby-back-btn">
                 ← Quay lại
@@ -202,8 +244,10 @@ export default function Lobby() {
                 <label className="lobby-input-label">Nhập mã phòng</label>
                 <input
                   type="text"
-                  value={roomId}
-                  onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                  value={joinRoomInput}
+                  onChange={(e) =>
+                    setJoinRoomInput(e.target.value.toUpperCase())
+                  }
                   placeholder="VD: ABC123"
                   className="lobby-room-input"
                   maxLength={6}
@@ -211,7 +255,7 @@ export default function Lobby() {
                 />
               </div>
 
-              {roomId.length >= 4 && (
+              {joinRoomInput.length >= 4 && (
                 <div className="lobby-role-section">
                   <h3 className="lobby-role-title">Nhập tên của bạn</h3>
                   <div className="mb-6">
@@ -224,53 +268,121 @@ export default function Lobby() {
                       maxLength={20}
                     />
                   </div>
+                </div>
+              )}
 
-                  <h3 className="lobby-role-title">Chọn vai trò</h3>
-                  <div className="lobby-role-cards">
-                    <button
-                      onClick={() => handleSelectRole('a')}
-                      className={`lobby-role-card lobby-role-a ${selectedRole === 'a' ? 'selected' : ''}`}
-                    >
-                      <div className="role-name">Player A</div>
-                      <div className="role-desc">Mô tả mật mã</div>
-                      <ul className="role-tasks">
-                        <li>Nhìn ký hiệu Freemason</li>
-                        <li>Mô tả hình dạng cho B</li>
-                      </ul>
-                    </button>
-
-                    <button
-                      onClick={() => handleSelectRole('b')}
-                      className={`lobby-role-card lobby-role-b ${selectedRole === 'b' ? 'selected' : ''}`}
-                    >
-                      <div className="role-name">Player B</div>
-                      <div className="role-desc">Giải mã</div>
-                      <ul className="role-tasks">
-                        <li>Nghe A mô tả ký hiệu</li>
-                        <li>Tra bảng mã → nhập đáp án</li>
-                      </ul>
-                    </button>
-                  </div>
+              {lobbyError && (
+                <div className="p-4 bg-red-100 text-red-700 rounded-xl mb-4">
+                  ❌ {lobbyError}
                 </div>
               )}
 
               <button
-                onClick={handleStartGame}
-                disabled={
-                  !roomId.trim() ||
-                  roomId.length < 4 ||
-                  !selectedRole ||
-                  !myName.trim()
-                }
+                onClick={handleConfirmJoin}
+                disabled={joinRoomInput.length < 4 || !myName.trim()}
                 className="lobby-start-btn"
               >
-                {!roomId.trim() || roomId.length < 4
+                {joinRoomInput.length < 4
                   ? 'Nhập mã phòng (ít nhất 4 ký tự)'
                   : !myName.trim()
-                    ? 'Nhập tên của bạn'
-                    : !selectedRole
-                      ? 'Chọn vai trò để tiếp tục'
-                      : 'Vào phòng chơi'}
+                    ? 'Nhập tên để tiếp tục'
+                    : 'Vào phòng'}
+              </button>
+            </div>
+          )}
+
+          {/* In Lobby - Waiting room */}
+          {inLobby && (
+            <div className="lobby-room-flow">
+              <button onClick={handleBack} className="lobby-back-btn">
+                ← Rời phòng
+              </button>
+
+              <div className="lobby-room-display">
+                <span className="lobby-room-label">Phòng</span>
+                <div className="lobby-room-code">
+                  <span className="lobby-room-code-text">{roomId}</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(roomId)}
+                    className="lobby-copy-btn"
+                    title="Sao chép"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              {/* Players Display */}
+              <div className="lobby-role-section">
+                <h3 className="lobby-role-title">Người chơi trong phòng</h3>
+                <div className="lobby-role-cards">
+                  {/* Player A */}
+                  <div
+                    className={`lobby-role-card lobby-role-a ${myRole === 'A' ? 'selected' : ''}`}
+                  >
+                    <div className="role-name">Player A</div>
+                    <div className="role-desc">Nhà Lý Luận</div>
+                    {players.A ? (
+                      <div className="mt-4 p-3 bg-green-100 rounded-lg text-green-700 font-bold text-lg">
+                        ✓ {players.A.name}
+                        {myRole === 'A' && (
+                          <span className="text-sm"> (Bạn)</span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-4 p-3 bg-gray-100 rounded-lg text-gray-500">
+                        ⏳ Đang chờ...
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Player B */}
+                  <div
+                    className={`lobby-role-card lobby-role-b ${myRole === 'B' ? 'selected' : ''}`}
+                  >
+                    <div className="role-name">Player B</div>
+                    <div className="role-desc">Nhà Thực Tiễn</div>
+                    {players.B ? (
+                      <div className="mt-4 p-3 bg-green-100 rounded-lg text-green-700 font-bold text-lg">
+                        ✓ {players.B.name}
+                        {myRole === 'B' && (
+                          <span className="text-sm"> (Bạn)</span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-4 p-3 bg-gray-100 rounded-lg text-gray-500">
+                        ⏳ Đang chờ...
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Swap roles button (owner only) */}
+                {isOwner && players.B && (
+                  <button
+                    onClick={handleSwapRoles}
+                    className="mt-4 px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
+                  >
+                    🔄 Đổi vai trò
+                  </button>
+                )}
+              </div>
+
+              {lobbyError && (
+                <div className="p-4 bg-red-100 text-red-700 rounded-xl mb-4">
+                  ❌ {lobbyError}
+                </div>
+              )}
+
+              {/* Start Game Button */}
+              <button
+                onClick={handleStartGame}
+                disabled={!players.A || !players.B}
+                className="lobby-start-btn"
+              >
+                {!players.B
+                  ? '⏳ Đang chờ người chơi thứ 2...'
+                  : '🎮 Bắt đầu Game!'}
               </button>
             </div>
           )}

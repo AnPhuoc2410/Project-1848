@@ -232,8 +232,166 @@ function getRandomQuestion(usedQuestionIds) {
   ];
 }
 
+// ======================================
+// LOBBY: Real-time Room Management
+// ======================================
+const lobbyRooms = {};
+// Structure: { roomId: { owner: socketId, players: { A: {id, name}, B: {id, name} } } }
+
 io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
+
+  // ======================================
+  // LOBBY EVENTS
+  // ======================================
+
+  // Create a new lobby room (creator is automatically Player A)
+  socket.on('create-lobby', ({ roomId, playerName }) => {
+    socket.join(`lobby-${roomId}`);
+
+    lobbyRooms[roomId] = {
+      owner: socket.id,
+      players: {
+        A: { id: socket.id, name: playerName },
+        B: null,
+      },
+    };
+
+    console.log(`[Lobby] Room ${roomId} created by ${playerName}`);
+
+    // Send update to creator
+    socket.emit('lobby-update', {
+      roomId,
+      players: lobbyRooms[roomId].players,
+      isOwner: true,
+      myRole: 'A',
+    });
+  });
+
+  // Join an existing lobby room (joiner is automatically Player B)
+  socket.on('join-lobby', ({ roomId, playerName }) => {
+    const room = lobbyRooms[roomId];
+
+    if (!room) {
+      socket.emit('lobby-error', { message: 'Phòng không tồn tại!' });
+      return;
+    }
+
+    if (room.players.B) {
+      socket.emit('lobby-error', { message: 'Phòng đã đầy!' });
+      return;
+    }
+
+    socket.join(`lobby-${roomId}`);
+    room.players.B = { id: socket.id, name: playerName };
+
+    console.log(`[Lobby] ${playerName} joined room ${roomId}`);
+
+    // Send update to joiner
+    socket.emit('lobby-update', {
+      roomId,
+      players: room.players,
+      isOwner: false,
+      myRole: 'B',
+    });
+
+    // Broadcast to room owner
+    socket.to(`lobby-${roomId}`).emit('lobby-update', {
+      roomId,
+      players: room.players,
+      isOwner: true,
+      myRole: 'A',
+    });
+  });
+
+  // Swap roles (only owner can do this)
+  socket.on('swap-roles', ({ roomId }) => {
+    const room = lobbyRooms[roomId];
+    if (!room || room.owner !== socket.id) return;
+
+    // Swap A and B
+    const temp = room.players.A;
+    room.players.A = room.players.B;
+    room.players.B = temp;
+
+    // Update owner to new Player A
+    if (room.players.A) {
+      room.owner = room.players.A.id;
+    }
+
+    console.log(`[Lobby] Roles swapped in room ${roomId}`);
+
+    // Broadcast new state to all
+    io.to(`lobby-${roomId}`).emit('lobby-roles-swapped', {
+      players: room.players,
+    });
+  });
+
+  // Leave lobby
+  socket.on('leave-lobby', ({ roomId }) => {
+    const room = lobbyRooms[roomId];
+    if (!room) return;
+
+    socket.leave(`lobby-${roomId}`);
+
+    // Remove player from room
+    if (room.players.A?.id === socket.id) {
+      // Owner left - close room
+      io.to(`lobby-${roomId}`).emit('lobby-closed', {
+        message: 'Chủ phòng đã rời đi',
+      });
+      delete lobbyRooms[roomId];
+    } else if (room.players.B?.id === socket.id) {
+      room.players.B = null;
+      // Notify owner
+      socket.to(`lobby-${roomId}`).emit('lobby-update', {
+        roomId,
+        players: room.players,
+        isOwner: true,
+        myRole: 'A',
+      });
+    }
+  });
+
+  // Start game (both players must be ready)
+  socket.on('start-game', ({ roomId }) => {
+    const room = lobbyRooms[roomId];
+    if (!room || !room.players.A || !room.players.B) return;
+
+    console.log(`[Lobby] Game starting in room ${roomId}`);
+
+    // Emit to both players to navigate
+    io.to(`lobby-${roomId}`).emit('game-started', {
+      roomId,
+      playerA: room.players.A.name,
+      playerB: room.players.B.name,
+    });
+
+    // Clean up lobby room
+    delete lobbyRooms[roomId];
+  });
+
+  // Handle disconnect for lobby
+  socket.on('disconnect', () => {
+    // Check if user was in any lobby
+    for (const roomId in lobbyRooms) {
+      const room = lobbyRooms[roomId];
+      if (room.players.A?.id === socket.id) {
+        io.to(`lobby-${roomId}`).emit('lobby-closed', {
+          message: 'Chủ phòng đã mất kết nối',
+        });
+        delete lobbyRooms[roomId];
+      } else if (room.players.B?.id === socket.id) {
+        room.players.B = null;
+        io.to(`lobby-${roomId}`).emit('lobby-update', {
+          roomId,
+          players: room.players,
+          isOwner: true,
+          myRole: 'A',
+        });
+      }
+    }
+  });
 
   // Join room
   socket.on('join-room', ({ roomId, role }) => {
