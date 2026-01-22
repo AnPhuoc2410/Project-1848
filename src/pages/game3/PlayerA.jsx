@@ -1,13 +1,45 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+
+// Initial time for Game 3 (5 minutes)
+const INITIAL_TIME = 300;
 
 export default function PlayerA() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
+  const playerAName = params.get('playerA') || 'Player A';
+  const playerBName = params.get('playerB') || 'Player B';
 
   const [playerBConnected, setPlayerBConnected] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+
+  // Timer state
+  const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
+  const [timerActive, setTimerActive] = useState(true);
+  const startTimeRef = useRef(Date.now());
+
+  // Timer countdown
+  useEffect(() => {
+    if (!timerActive || gameComplete) return;
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          setTimerActive(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timerActive, gameComplete]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     socket.emit('join-game3', { roomId, role: 'A' });
@@ -18,13 +50,25 @@ export default function PlayerA() {
 
     socket.on('game3-complete', () => {
       setGameComplete(true);
+      setTimerActive(false);
+
+      // Calculate time used for Game 3
+      const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+      times.game3 = timeUsed;
+      sessionStorage.setItem('gameTimes', JSON.stringify(times));
+
+      // Navigate to Leaderboard after delay
+      setTimeout(() => {
+        navigate('/leaderboard');
+      }, 2000);
     });
 
     return () => {
       socket.off('game3-player-joined');
       socket.off('game3-complete');
     };
-  }, [roomId]);
+  }, [roomId, navigate]);
 
   return (
     <div className="game-page">
@@ -42,8 +86,16 @@ export default function PlayerA() {
           <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm font-medium">
             📖 Bảng mã Morse
           </span>
+          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
+            {playerAName}
+          </span>
         </div>
         <div className="flex items-center gap-3">
+          <div
+            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
+          >
+            ⏱️ {formatTime(timeRemaining)}
+          </div>
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               playerBConnected
@@ -66,9 +118,7 @@ export default function PlayerA() {
             <h2 className="text-2xl font-bold text-green-600 mb-2">
               🎉 Hoàn thành Game 3!
             </h2>
-            <p className="text-text/70 mb-4">
-              Cả hai đã giải mã thành công mã Morse!
-            </p>
+            <p className="text-text/70 mb-4">Đang chuyển đến Leaderboard...</p>
             <div className="three-body mx-auto">
               <div className="three-body__dot"></div>
               <div className="three-body__dot"></div>

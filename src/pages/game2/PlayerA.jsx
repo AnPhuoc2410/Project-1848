@@ -1,11 +1,14 @@
 import { socket } from '../../socket';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import LightBoard from '../../components/LightBoard';
 
 export default function PlayerA() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const roomId = params.get('room');
+  const playerAName = params.get('playerA') || 'Player A';
+  const playerBName = params.get('playerB') || 'Player B';
 
   // Game state
   const [lightNodes, setLightNodes] = useState([]);
@@ -23,6 +26,7 @@ export default function PlayerA() {
   // Game status
   const [levelComplete, setLevelComplete] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     socket.emit('join-room', { roomId, role: 'A' });
@@ -52,7 +56,25 @@ export default function PlayerA() {
       setEditingIndex(null);
     });
 
-    socket.on('level-complete', () => setLevelComplete(true));
+    socket.on('level-complete', () => {
+      setLevelComplete(true);
+
+      // Calculate time used for Game 2
+      const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+      times.game2 = timeUsed;
+      sessionStorage.setItem('gameTimes', JSON.stringify(times));
+
+      // Navigate to Game 3 after delay
+      setTimeout(() => {
+        const urlParams = new URLSearchParams({
+          room: roomId,
+          playerA: playerAName,
+          playerB: playerBName,
+        });
+        navigate(`/game3/a?${urlParams.toString()}`);
+      }, 2000);
+    });
     socket.on('game-over', () => setGameOver(true));
 
     socket.on('game-reset', (data) => {

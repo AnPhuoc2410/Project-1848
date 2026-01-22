@@ -1,11 +1,14 @@
 import { socket } from '../../socket';
-import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import LightBoard from '../../components/LightBoard';
 
 export default function PlayerB() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const roomId = params.get('room');
+  const playerAName = params.get('playerA') || 'Player A';
+  const playerBName = params.get('playerB') || 'Player B';
   const blindMode = true;
 
   // Game state
@@ -23,6 +26,7 @@ export default function PlayerB() {
   const [checkResult, setCheckResult] = useState(null);
   const [levelComplete, setLevelComplete] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const startTimeRef = useRef(Date.now());
 
   // Timer countdown
   useEffect(() => {
@@ -106,6 +110,22 @@ export default function PlayerB() {
       setLevelComplete(true);
       setTimerActive(false);
       setCheckResult({ type: 'success', message, nextLevel });
+
+      // Calculate time used for Game 2
+      const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+      times.game2 = timeUsed;
+      sessionStorage.setItem('gameTimes', JSON.stringify(times));
+
+      // Navigate to Game 3 after delay
+      setTimeout(() => {
+        const urlParams = new URLSearchParams({
+          room: roomId,
+          playerA: playerAName,
+          playerB: playerBName,
+        });
+        navigate(`/game3/b?${urlParams.toString()}`);
+      }, 2000);
     });
 
     socket.on('game-over', () => {

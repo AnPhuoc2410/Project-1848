@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 
 // Timing constants (in milliseconds)
@@ -9,9 +9,15 @@ const ELEMENT_GAP = 400;
 const LETTER_GAP = 1200;
 const WORD_GAP = 2800;
 
+// Initial time for Game 3 (5 minutes)
+const INITIAL_TIME = 300;
+
 export default function PlayerB() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
+  const playerAName = params.get('playerA') || 'Player A';
+  const playerBName = params.get('playerB') || 'Player B';
 
   const [answer, setAnswer] = useState('');
   const [playerAConnected, setPlayerAConnected] = useState(false);
@@ -27,6 +33,32 @@ export default function PlayerB() {
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [currentElement, setCurrentElement] = useState('');
   const playingRef = useRef(false);
+
+  // Timer state
+  const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
+  const [timerActive, setTimerActive] = useState(true);
+  const startTimeRef = useRef(Date.now());
+
+  // Timer countdown
+  useEffect(() => {
+    if (!timerActive || gameComplete) return;
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          setTimerActive(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timerActive, gameComplete]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     socket.emit('join-game3', { roomId, role: 'B' });
@@ -49,6 +81,18 @@ export default function PlayerB() {
     socket.on('game3-complete', () => {
       setGameComplete(true);
       setLoading(false);
+      setTimerActive(false);
+
+      // Calculate time used for Game 3
+      const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+      times.game3 = timeUsed;
+      sessionStorage.setItem('gameTimes', JSON.stringify(times));
+
+      // Navigate to Leaderboard after delay
+      setTimeout(() => {
+        navigate('/leaderboard');
+      }, 2000);
     });
 
     socket.on('game3-reset', ({ morseSequence: seq }) => {
@@ -160,8 +204,16 @@ export default function PlayerB() {
           <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
             💡 Đèn Morse
           </span>
+          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
+            {playerBName}
+          </span>
         </div>
         <div className="flex items-center gap-3">
+          <div
+            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
+          >
+            ⏱️ {formatTime(timeRemaining)}
+          </div>
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               playerAConnected
