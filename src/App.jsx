@@ -24,6 +24,9 @@ const Game3PlayerB = lazy(() => import('./pages/game3/PlayerB'));
 // Leaderboard
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 
+// Test Sheets (dev only)
+const TestSheets = lazy(() => import('./pages/TestSheets'));
+
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
@@ -52,6 +55,8 @@ const App = () => {
             <Route path="/game3/b" element={<Game3PlayerB />} />
             {/* Leaderboard */}
             <Route path="/leaderboard" element={<Leaderboard />} />
+            {/* Test Sheets API */}
+            <Route path="/test-sheets" element={<TestSheets />} />
           </Routes>
         </Suspense>
       </main>
