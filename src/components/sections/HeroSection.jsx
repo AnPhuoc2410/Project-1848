@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/all';
 import { TiLocationArrow } from 'react-icons/ti';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import Button from '../Button';
 
@@ -11,36 +11,58 @@ gsap.registerPlugin(ScrollTrigger);
 const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
-  const [loadedVideos, setLoadedVideos] = useState(0);
+  const [loadedCount, setLoadedCount] = useState(0);
 
-  const totalVideos = 4;
-  const nextVdRef = useRef(null);
+  const mediaResources = [
+    { type: 'image', src: '/img/1.jpg' },
+    { type: 'image', src: '/img/2.jpg' },
+    { type: 'image', src: '/img/3.jpeg' },
+    { type: 'image', src: '/img/4.png' },
+  ];
 
-  const handleVideoLoad = () => {
-    setLoadedVideos((prev) => prev + 1);
+  const totalSlides = mediaResources.length;
+  const nextMediaRef = useRef(null);
+
+  const handleMediaLoad = () => {
+    setLoadedCount((prev) => prev + 1);
   };
 
-  const isLoading = loadedVideos < totalVideos - 1;
+  // 0-based index helper for mediaResources
+  const getMediaResource = (index) => mediaResources[(index - 1) % totalSlides];
+
+  const isLoading = loadedCount < totalSlides;
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
-    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
+    setCurrentIndex((prevIndex) => (prevIndex % totalSlides) + 1);
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleMiniVdClick();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex]);
 
   useGSAP(
     () => {
       if (hasClicked) {
-        gsap.set('#next-video', { visibility: 'visible' });
-        gsap.to('#next-video', {
+        gsap.set('#next-media', { visibility: 'visible' });
+        gsap.to('#next-media', {
           transformOrigin: 'center center',
           scale: 1,
           width: '100%',
           height: '100%',
           duration: 1,
           ease: 'power1.inOut',
-          onStart: () => nextVdRef.current.play(),
+          onStart: () => {
+            if (nextMediaRef.current && nextMediaRef.current.play) {
+              nextMediaRef.current.play();
+            }
+          },
         });
-        gsap.from('#current-video', {
+        gsap.from('#current-media', {
           transformOrigin: 'center center',
           scale: 0,
           duration: 1.5,
@@ -72,7 +94,42 @@ const HeroSection = () => {
     });
   });
 
-  const getVideoSrc = (index) => `videos/hero-${index}.webm`;
+  const renderMedia = (
+    index,
+    className,
+    id,
+    ref = null,
+    isBackground = false
+  ) => {
+    const resource = getMediaResource(index);
+    if (!resource) return null;
+
+    if (resource.type === 'video') {
+      return (
+        <video
+          ref={ref}
+          src={resource.src}
+          className={className}
+          id={id}
+          loop
+          muted
+          autoPlay={isBackground} // Only autoplay if it's the background
+          onLoadedData={handleMediaLoad}
+        />
+      );
+    }
+
+    return (
+      <img
+        ref={ref}
+        src={resource.src}
+        className={className}
+        id={id}
+        onLoad={handleMediaLoad}
+        alt="Hero content"
+      />
+    );
+  };
 
   return (
     <header id="home" className="relative h-dvh w-screen overflow-x-hidden">
@@ -101,37 +158,31 @@ const HeroSection = () => {
                 onClick={handleMiniVdClick}
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
-                <video
-                  ref={nextVdRef}
-                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
-                  loop
-                  muted
-                  id="current-video"
-                  className="size-64 origin-center scale-150 object-cover object-center"
-                  onLoadedData={handleVideoLoad}
-                />
+                {/* Mini Media: Shows next (index + 1) */}
+                {renderMedia(
+                  (currentIndex % totalSlides) + 1,
+                  'size-64 origin-center scale-150 object-cover object-center',
+                  'current-media'
+                )}
               </div>
             </div>
 
-            <video
-              ref={nextVdRef}
-              src={getVideoSrc(currentIndex)}
-              loop
-              muted
-              id="next-video"
-              className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-              onLoadedData={handleVideoLoad}
-            />
-            <video
-              src={getVideoSrc(
-                currentIndex === totalVideos - 1 ? 1 : currentIndex
-              )}
-              autoPlay
-              loop
-              muted
-              className="absolute left-0 top-0 size-full object-cover object-center"
-              onLoadedData={handleVideoLoad}
-            />
+            {/* Next Media: animating in (current index) */}
+            {renderMedia(
+              currentIndex,
+              'absolute-center invisible absolute z-20 size-64 object-cover object-center',
+              'next-media',
+              nextMediaRef
+            )}
+
+            {/* Background Media: current index */}
+            {renderMedia(
+              currentIndex,
+              'absolute left-0 top-0 size-full object-cover object-center',
+              'bg-media',
+              null,
+              true
+            )}
           </div>
 
           <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-primary">
