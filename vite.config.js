@@ -20,7 +20,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // Giờ dòng này sẽ chạy ngon lành
+      '@': path.resolve(__dirname, './src'),
     },
   },
   esbuild: {
