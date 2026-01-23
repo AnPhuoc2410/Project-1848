@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/all';
 import { TiLocationArrow } from 'react-icons/ti';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import Button from '../Button';
 
@@ -11,36 +11,76 @@ gsap.registerPlugin(ScrollTrigger);
 const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
-  const [loadedVideos, setLoadedVideos] = useState(0);
+  const [loadedCount, setLoadedCount] = useState(0);
 
-  const totalVideos = 4;
-  const nextVdRef = useRef(null);
+  // Fallback to ensure loading screen doesn't get stuck
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoadedCount(100); // Checkmate mechanism to force "loaded"
+    }, 5000); // 5 seconds max wait
 
-  const handleVideoLoad = () => {
-    setLoadedVideos((prev) => prev + 1);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const mediaResources = [
+    { type: 'image', src: '/img/1.jpg' },
+    { type: 'image', src: '/img/2.jpg' },
+    { type: 'image', src: '/img/3.jpeg' },
+    { type: 'image', src: '/img/4.png' },
+    { type: 'image', src: '/img/6.webp' },
+    { type: 'image', src: '/img/7.jpeg' },
+    { type: 'image', src: '/img/8.jpg' },
+    { type: 'image', src: '/img/9.jpeg' },
+  ];
+
+  const totalSlides = mediaResources.length;
+  const nextMediaRef = useRef(null);
+
+  const handleMediaLoad = () => {
+    setLoadedCount((prev) => prev + 1);
   };
 
-  const isLoading = loadedVideos < totalVideos - 1;
+  const handleMediaError = () => {
+    console.warn('HeroSection: A media resource failed to load, skipping...');
+    setLoadedCount((prev) => prev + 1);
+  };
+
+  // 0-based index helper for mediaResources
+  const getMediaResource = (index) => mediaResources[(index - 1) % totalSlides];
+
+  const isLoading = loadedCount < totalSlides;
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
-    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
+    setCurrentIndex((prevIndex) => (prevIndex % totalSlides) + 1);
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleMiniVdClick();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex]);
 
   useGSAP(
     () => {
       if (hasClicked) {
-        gsap.set('#next-video', { visibility: 'visible' });
-        gsap.to('#next-video', {
+        gsap.set('#next-media', { visibility: 'visible' });
+        gsap.to('#next-media', {
           transformOrigin: 'center center',
           scale: 1,
           width: '100%',
           height: '100%',
           duration: 1,
           ease: 'power1.inOut',
-          onStart: () => nextVdRef.current.play(),
+          onStart: () => {
+            if (nextMediaRef.current && nextMediaRef.current.play) {
+              nextMediaRef.current.play();
+            }
+          },
         });
-        gsap.from('#current-video', {
+        gsap.from('#current-media', {
           transformOrigin: 'center center',
           scale: 0,
           duration: 1.5,
@@ -72,7 +112,44 @@ const HeroSection = () => {
     });
   });
 
-  const getVideoSrc = (index) => `videos/hero-${index}.webm`;
+  const renderMedia = (
+    index,
+    className,
+    id,
+    ref = null,
+    isBackground = false
+  ) => {
+    const resource = getMediaResource(index);
+    if (!resource) return null;
+
+    if (resource.type === 'video') {
+      return (
+        <video
+          ref={ref}
+          src={resource.src}
+          className={className}
+          id={id}
+          loop
+          muted
+          autoPlay={isBackground} // Only autoplay if it's the background
+          onLoadedData={handleMediaLoad}
+          onError={handleMediaError}
+        />
+      );
+    }
+
+    return (
+      <img
+        ref={ref}
+        src={resource.src}
+        className={className}
+        id={id}
+        onLoad={handleMediaLoad}
+        onError={handleMediaError}
+        alt="Hero content"
+      />
+    );
+  };
 
   return (
     <header id="home" className="relative h-dvh w-screen overflow-x-hidden">
@@ -101,37 +178,34 @@ const HeroSection = () => {
                 onClick={handleMiniVdClick}
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
-                <video
-                  ref={nextVdRef}
-                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
-                  loop
-                  muted
-                  id="current-video"
-                  className="size-64 origin-center scale-150 object-cover object-center"
-                  onLoadedData={handleVideoLoad}
-                />
+                {/* Mini Media: Shows next (index + 1) */}
+                {renderMedia(
+                  (currentIndex % totalSlides) + 1,
+                  'size-64 origin-center scale-150 object-cover object-center',
+                  'current-media'
+                )}
               </div>
             </div>
 
-            <video
-              ref={nextVdRef}
-              src={getVideoSrc(currentIndex)}
-              loop
-              muted
-              id="next-video"
-              className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-              onLoadedData={handleVideoLoad}
-            />
-            <video
-              src={getVideoSrc(
-                currentIndex === totalVideos - 1 ? 1 : currentIndex
-              )}
-              autoPlay
-              loop
-              muted
-              className="absolute left-0 top-0 size-full object-cover object-center"
-              onLoadedData={handleVideoLoad}
-            />
+            {/* Next Media: animating in (current index) */}
+            {renderMedia(
+              currentIndex,
+              'absolute-center invisible absolute z-20 size-64 object-cover object-center',
+              'next-media',
+              nextMediaRef
+            )}
+
+            {/* Background Media: current index */}
+            {renderMedia(
+              currentIndex,
+              'absolute left-0 top-0 size-full object-cover object-center',
+              'bg-media',
+              null,
+              true
+            )}
+
+            {/* Dark Overlay */}
+            <div className="absolute left-0 top-0 size-full bg-black/40 z-10 pointer-events-none" />
           </div>
 
           <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-primary">
@@ -144,7 +218,7 @@ const HeroSection = () => {
                 CH<b>Ủ</b> NGH<b>Ĩ</b>A <br /> X<b>Ã</b> HỘ<b>I</b>
               </h1>
 
-              <p className="mb-5 max-w-72 font-robert-regular text-text">
+              <p className="mb-5 max-w-72 font-robert-regular text-white">
                 Khóa học nền tảng về tư tưởng và lý luận <br />
                 Củng cố kiến thức, mở rộng tầm nhìn.
               </p>

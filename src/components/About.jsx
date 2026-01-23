@@ -59,7 +59,7 @@ const About = () => {
       <div className="relative z-10 h-dvh w-screen" id="clip">
         <div className="mask-clip-path about-image">
           <img
-            src="img/about.jpg"
+            src="img/nganh-chu-nghia-xa-hoi-khoa-hoc.jpg"
             alt="Scientific Socialism"
             className="absolute left-0 top-0 size-full object-cover"
           />
