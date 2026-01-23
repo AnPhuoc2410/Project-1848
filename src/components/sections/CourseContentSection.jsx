@@ -2,8 +2,15 @@ import AnimatedTitle from '../AnimatedTitle';
 
 const CourseContentSection = ({ modules }) => {
   return (
-    <section id="content" className="py-16 md:py-24 bg-gray-50 scroll-mt-16">
-      <div className="container mx-auto px-4">
+    <section
+      id="content"
+      className="relative py-16 md:py-24 scroll-mt-16 overflow-hidden"
+    >
+      <div className="absolute inset-0 z-0 bg-background">
+        <div className="absolute inset-0 bg-grid-pattern" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4">
         <div className="text-center mb-12">
           <AnimatedTitle
             title="NỘI DUNG <b>KHÓA</b> HỌC <br /> KẾT CẤU <b>CHUYÊN</b> ĐỀ"

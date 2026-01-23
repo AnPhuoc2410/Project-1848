@@ -5,6 +5,7 @@
   /* --- NEW FONTS --- */
   --font-crimson-pro: 'Crimson Pro', serif;
   --font-atkinson: 'Atkinson Hyperlegible', sans-serif;
+  --font-opsilon: 'opsilon', 'Crimson Pro';
   --font-zentry: 'zentry', sans-serif;
   --font-general: 'general', sans-serif;
   --font-robert-medium: 'robert-medium', sans-serif;
@@ -12,7 +13,7 @@
   --font-circular-web: 'circular-web', sans-serif;
 
   /* --- NEW COLORS --- */
-  --color-primary: #b91c1c;
+  --color-primary: red;
   /* Red */
   --color-secondary: #fbbf24;
   /* Gold/Yellow */
@@ -38,6 +39,10 @@ body {
     src: url('/fonts/circularweb-book.woff2') format('woff2');
   }
 
+  @font-face {
+    font-family: 'opsilon';
+    src: url('/fonts/opsilon-italic.ttf') format('truetype');
+  }
   @font-face {
     font-family: 'general';
     src: url('/fonts/general.woff2') format('woff2');
@@ -73,13 +78,13 @@ body {
   }
 
   .special-font b {
-    font-family: var(--font-crimson-pro);
+    font-family: var(--font-opsilon);
     font-feature-settings: 'ss01' on;
   }
 
   .hero-heading {
-    @apply font-black uppercase text-5xl sm:right-10 sm:text-7xl md:text-9xl lg:text-[12rem];
-    font-family: var(--font-crimson-pro);
+    @apply font-black uppercase text-5xl sm:right-10 sm:text-7xl md:text-9xl lg:text-[9rem];
+    font-family: var(--font-opsilon);
   }
 
   .about-subtext {

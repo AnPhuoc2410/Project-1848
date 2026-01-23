@@ -1,7 +1,14 @@
 const InstructorSection = () => {
   return (
-    <section id="instructor" className="py-16 md:py-24 scroll-mt-16">
-      <div className="container mx-auto px-4">
+    <section
+      id="instructor"
+      className="relative py-16 md:py-24 scroll-mt-16 overflow-hidden"
+    >
+      <div className="absolute inset-0 z-0 bg-background">
+        <div className="absolute inset-0 bg-grid-pattern" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4">
         <div className="flex flex-col items-center justify-center">
           <h2
             className="text-3xl md:text-4xl font-bold text-text mb-8 text-center"
