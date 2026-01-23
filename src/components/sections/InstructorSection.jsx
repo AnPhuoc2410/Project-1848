@@ -2,27 +2,91 @@ const InstructorSection = () => {
   return (
     <section id="instructor" className="py-16 md:py-24 scroll-mt-16">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
-          <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <div className="text-6xl md:text-8xl text-white font-bold">LMT</div>
-          </div>
-          <div className="text-center md:text-left max-w-lg">
-            <h2
-              className="text-3xl md:text-4xl font-bold text-text mb-4"
-              style={{ fontFamily: 'var(--font-crimson-pro)' }}
-            >
-              Giảng viên
-            </h2>
-            <h3 className="text-xl font-bold text-primary mb-2">
-              Thầy Lê Minh Trí
-            </h3>
-            <p className="text-base text-text leading-relaxed">
-              Với hơn 100 năm kinh nghiệm giảng dạy và nghiên cứu về chủ nghĩa
-              Mác - Lênin, Thầy Lê Minh Trí sẽ mang đến cho bạn những bài giảng
-              sâu sắc, dễ hiểu và gắn liền với thực tiễn Việt Nam. Cùng những
-              game tương tác thú vị, thầy sẽ giúp bạn nắm vững kiến thức và áp
-              dụng hiệu quả vào cuộc sống.
-            </p>
+        <div className="flex flex-col items-center justify-center">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-text mb-8 text-center"
+            style={{ fontFamily: 'var(--font-crimson-pro)' }}
+          >
+            Thành viên nhóm
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 w-full max-w-4xl">
+            {/* Member 1 */}
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src="https://via.placeholder.com/160"
+                  alt="Thành viên 1"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="font-bold text-primary text-lg">Thành viên 1</h3>
+              <p className="text-gray-600 text-sm">MSSV: ...</p>
+            </div>
+
+            {/* Member 2 */}
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src="https://via.placeholder.com/160"
+                  alt="Thành viên 2"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="font-bold text-primary text-lg">Thành viên 2</h3>
+              <p className="text-gray-600 text-sm">MSSV: ...</p>
+            </div>
+
+            {/* Member 3 */}
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src="https://via.placeholder.com/160"
+                  alt="Thành viên 3"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="font-bold text-primary text-lg">Thành viên 3</h3>
+              <p className="text-gray-600 text-sm">MSSV: ...</p>
+            </div>
+
+            {/* Member 4 */}
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src="https://via.placeholder.com/160"
+                  alt="Thành viên 4"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="font-bold text-primary text-lg">Thành viên 4</h3>
+              <p className="text-gray-600 text-sm">MSSV: ...</p>
+            </div>
+
+            {/* Member 5 */}
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src="https://via.placeholder.com/160"
+                  alt="Thành viên 5"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="font-bold text-primary text-lg">Thành viên 5</h3>
+              <p className="text-gray-600 text-sm">MSSV: ...</p>
+            </div>
+
+            {/* Member 6 */}
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src="https://via.placeholder.com/160"
+                  alt="Thành viên 6"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="font-bold text-primary text-lg">Thành viên 6</h3>
+              <p className="text-gray-600 text-sm">MSSV: ...</p>
+            </div>
           </div>
         </div>
       </div>
