@@ -13,17 +13,35 @@ const HeroSection = () => {
   const [hasClicked, setHasClicked] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
 
+  // Fallback to ensure loading screen doesn't get stuck
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoadedCount(100); // Checkmate mechanism to force "loaded"
+    }, 5000); // 5 seconds max wait
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const mediaResources = [
     { type: 'image', src: '/img/1.jpg' },
     { type: 'image', src: '/img/2.jpg' },
     { type: 'image', src: '/img/3.jpeg' },
     { type: 'image', src: '/img/4.png' },
+    { type: 'image', src: '/img/6.webp' },
+    { type: 'image', src: '/img/7.jpeg' },
+    { type: 'image', src: '/img/8.jpg' },
+    { type: 'image', src: '/img/9.jpeg' },
   ];
 
   const totalSlides = mediaResources.length;
   const nextMediaRef = useRef(null);
 
   const handleMediaLoad = () => {
+    setLoadedCount((prev) => prev + 1);
+  };
+
+  const handleMediaError = () => {
+    console.warn('HeroSection: A media resource failed to load, skipping...');
     setLoadedCount((prev) => prev + 1);
   };
 
@@ -115,6 +133,7 @@ const HeroSection = () => {
           muted
           autoPlay={isBackground} // Only autoplay if it's the background
           onLoadedData={handleMediaLoad}
+          onError={handleMediaError}
         />
       );
     }
@@ -126,6 +145,7 @@ const HeroSection = () => {
         className={className}
         id={id}
         onLoad={handleMediaLoad}
+        onError={handleMediaError}
         alt="Hero content"
       />
     );
@@ -183,6 +203,9 @@ const HeroSection = () => {
               null,
               true
             )}
+
+            {/* Dark Overlay */}
+            <div className="absolute left-0 top-0 size-full bg-black/40 z-10 pointer-events-none" />
           </div>
 
           <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-primary">
@@ -195,7 +218,7 @@ const HeroSection = () => {
                 CH<b>Ủ</b> NGH<b>Ĩ</b>A <br /> X<b>Ã</b> HỘ<b>I</b>
               </h1>
 
-              <p className="mb-5 max-w-72 font-robert-regular text-text">
+              <p className="mb-5 max-w-72 font-robert-regular text-white">
                 Khóa học nền tảng về tư tưởng và lý luận <br />
                 Củng cố kiến thức, mở rộng tầm nhìn.
               </p>
