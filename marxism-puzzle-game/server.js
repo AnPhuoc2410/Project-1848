@@ -2,13 +2,28 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 
+const allowedOrigins = [
+  'http://localhost:1848',
+  'http://localhost:3000',
+  'https://project-1848.vercel.app',
+];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:1848', 'https://project-1848.vercel.app'],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    methods: ['GET', 'POST'],
     credentials: true,
   },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
 });
 
 // Philosophy questions database
@@ -138,6 +153,16 @@ const game1Phrases = [
 // ======================================
 let game3Rooms = {};
 const game3Phrase = 'DANG CONG SAN VIET NAM MUON NAM';
+
+// ======================================
+// GAME SESSION: Track progress across all games
+// ======================================
+// Structure: { roomId: { totalWrongAttempts: 0, startTime: Date, playerNames: {} } }
+let gameSessions = {};
+
+// Score calculation constants
+const SCORE_TIME_MULTIPLIER = 10; // Points per second remaining
+const SCORE_WRONG_PENALTY = 5; // Points lost per wrong attempt
 
 // Morse code mapping
 const MORSE_CODE = {
@@ -401,9 +426,9 @@ io.on('connection', (socket) => {
         players: {},
         wireResults: [], // Store answered wires with results
         usedQuestionIds: [],
-        playerBConnections: [], // B's current connections
         timeRemaining: INITIAL_TIME,
         gameComplete: false,
+        gameOver: false, // Track if time ran out
         currentWire: null, // Wire being questioned
       };
     }
@@ -425,7 +450,7 @@ io.on('connection', (socket) => {
   // Player B selects a wire pair to ask about
   socket.on('select-wire', ({ roomId, from, to }) => {
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room || room.gameComplete || room.gameOver) return;
 
     // Check if this wire was already asked
     const alreadyAsked = room.wireResults.find(
@@ -538,7 +563,7 @@ io.on('connection', (socket) => {
   // Player B submits their connections
   socket.on('submit-connections', ({ roomId, connections }) => {
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room || room.gameComplete || room.gameOver) return;
 
     // Normalize connections for comparison
     const normalizeWire = (from, to) => {
@@ -569,6 +594,11 @@ io.on('connection', (socket) => {
       // Wrong submission - time penalty
       room.timeRemaining = Math.max(0, room.timeRemaining - TIME_PENALTY);
 
+      // Track wrong attempts
+      if (gameSessions[roomId]) {
+        gameSessions[roomId].totalWrongAttempts++;
+      }
+
       socket.emit('check-failed', {
         message: 'Chưa đúng! Kiểm tra lại các dây nối.',
         timePenalty: TIME_PENALTY,
@@ -583,9 +613,13 @@ io.on('connection', (socket) => {
 
       // Check if time ran out
       if (room.timeRemaining <= 0) {
+        room.gameOver = true;
         io.to(roomId).emit('game-over', {
-          message: 'Hết thời gian! Game Over.',
+          message: 'Hết thời gian! Quay lại Game 1...',
+          redirectToGame1: true,
         });
+        // Clean up session
+        delete gameSessions[roomId];
       }
     }
   });
@@ -593,12 +627,16 @@ io.on('connection', (socket) => {
   // Sync timer (called periodically by frontend)
   socket.on('sync-timer', ({ roomId, timeRemaining }) => {
     const room = rooms[roomId];
-    if (room && !room.gameComplete) {
+    if (room && !room.gameComplete && !room.gameOver) {
       room.timeRemaining = timeRemaining;
       if (timeRemaining <= 0) {
+        room.gameOver = true;
         io.to(roomId).emit('game-over', {
-          message: 'Hết thời gian! Game Over.',
+          message: 'Hết thời gian! Quay lại Game 1...',
+          redirectToGame1: true,
         });
+        // Clean up session
+        delete gameSessions[roomId];
       }
     }
   });
@@ -608,9 +646,9 @@ io.on('connection', (socket) => {
     if (rooms[roomId]) {
       rooms[roomId].wireResults = [];
       rooms[roomId].usedQuestionIds = [];
-      rooms[roomId].playerBConnections = [];
       rooms[roomId].timeRemaining = INITIAL_TIME;
       rooms[roomId].gameComplete = false;
+      rooms[roomId].gameOver = false;
       rooms[roomId].currentWire = null;
 
       io.to(roomId).emit('game-reset', {
@@ -630,42 +668,47 @@ io.on('connection', (socket) => {
   socket.on('join-game1', ({ roomId, role, playerName }) => {
     socket.join(`game1-${roomId}`);
 
-    // Nếu room chưa tồn tại
+    // Nếu room chưa tồn tại - tạo phrase ngay lập tức
     if (!game1Rooms[roomId]) {
+      const randomPhrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
       game1Rooms[roomId] = {
         players: {},
         playerNames: {},
-        phrase: '',
+        phrase: randomPhrase, // Phrase được tạo ngay khi room được khởi tạo
         attempts: 0,
         startTime: Date.now(),
         timeRemaining: INITIAL_TIME,
+        gameOver: false,
       };
+
+      // Initialize game session for tracking score across all games
+      gameSessions[roomId] = {
+        totalWrongAttempts: 0,
+        startTime: Date.now(),
+        playerNames: {},
+      };
+
+      console.log(
+        `[Game1] Room ${roomId} created with phrase: "${randomPhrase}"`
+      );
     }
 
     // Store player name
     game1Rooms[roomId].playerNames[role] =
       playerName || `Player ${role.toUpperCase()}`;
 
-    // Khi Player A join, luôn tạo phrase mới để mỗi game là unique
-    if (role === 'A') {
-      const randomPhrase =
-        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
-      game1Rooms[roomId].phrase = randomPhrase;
-      game1Rooms[roomId].attempts = 0;
-      game1Rooms[roomId].startTime = Date.now();
-      game1Rooms[roomId].timeRemaining = INITIAL_TIME;
-
-      console.log(
-        `[Game1] Room ${roomId} - Player A (${playerName}) joined, new phrase: "${randomPhrase}"`
-      );
-
-      // Gửi phrase cho Player A
-      socket.emit('game1-phrase', {
-        phrase: randomPhrase,
-      });
-    }
-
     game1Rooms[roomId].players[role] = socket.id;
+
+    // Gửi phrase cho Player A (dù join trước hay sau)
+    if (role === 'A') {
+      socket.emit('game1-phrase', {
+        phrase: game1Rooms[roomId].phrase,
+      });
+      console.log(
+        `[Game1] Room ${roomId} - Player A (${playerName}) joined, phrase: "${game1Rooms[roomId].phrase}"`
+      );
+    }
 
     // Emit player info and sync to all players in room
     io.to(`game1-${roomId}`).emit('game1-player-joined', {
@@ -693,16 +736,26 @@ io.on('connection', (socket) => {
   // Player B submits answer
   socket.on('submit-game1-answer', ({ roomId, answer }) => {
     const room = game1Rooms[roomId];
-    if (!room) return;
+    if (!room || room.gameOver) return;
 
     room.attempts++;
+
+    // Track in game session
+    if (gameSessions[roomId]) {
+      gameSessions[roomId].totalWrongAttempts++;
+    }
 
     // Normalize comparison (uppercase, trim)
     const normalizedAnswer = answer.toUpperCase().trim();
     const normalizedPhrase = room.phrase.toUpperCase().trim();
 
     if (normalizedAnswer === normalizedPhrase) {
-      // Correct! Notify both players to redirect to Game 2
+      // Correct! Decrement the wrong attempt we added above
+      if (gameSessions[roomId]) {
+        gameSessions[roomId].totalWrongAttempts--;
+      }
+
+      // Notify both players to redirect to Game 2
       io.to(`game1-${roomId}`).emit('game1-complete', {
         message: 'Chính xác! Chuyển sang Game 2...',
         answer: normalizedAnswer,
@@ -711,13 +764,34 @@ io.on('connection', (socket) => {
         `[Game1] Room ${roomId} completed! Answer: "${normalizedAnswer}"`
       );
     } else {
-      // Wrong answer
+      // Wrong answer - time penalty
+      room.timeRemaining = Math.max(0, room.timeRemaining - TIME_PENALTY);
+
       socket.emit('game1-wrong-answer', {
-        message: `Sai rồi! Thử lại. (Đã thử ${room.attempts} lần)`,
+        message: `Sai rồi! -${TIME_PENALTY}s (Đã thử ${room.attempts} lần)`,
         attempts: room.attempts,
+        timePenalty: TIME_PENALTY,
+        timeRemaining: room.timeRemaining,
       });
+
+      // Broadcast time update to all players
+      io.to(`game1-${roomId}`).emit('game1-timer-update', {
+        timeRemaining: room.timeRemaining,
+      });
+
+      // Check if time ran out
+      if (room.timeRemaining <= 0) {
+        room.gameOver = true;
+        io.to(`game1-${roomId}`).emit('game1-game-over', {
+          message: 'Hết thời gian! Quay lại Game 1...',
+          redirectToGame1: true,
+        });
+        // Clean up session on game over
+        delete gameSessions[roomId];
+      }
+
       console.log(
-        `[Game1] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}")`
+        `[Game1] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}") - Time: ${room.timeRemaining}s`
       );
     }
   });
@@ -749,12 +823,22 @@ io.on('connection', (socket) => {
         phrase: game3Phrase,
         morseSequence: textToMorse(game3Phrase),
         attempts: 0,
+        timeRemaining: INITIAL_TIME,
+        gameOver: false,
       };
     }
 
     game3Rooms[roomId].players[role] = socket.id;
 
-    // Send Morse sequence to Player B
+    // Send phrase to Player A (as text) - A will help B via voice
+    if (role === 'A') {
+      socket.emit('game3-phrase-for-a', {
+        phrase: game3Rooms[roomId].phrase,
+        message: 'Hướng dẫn Player B giải mã Morse code!',
+      });
+    }
+
+    // Send Morse sequence to Player B (Player B sees morse, not text)
     if (role === 'B') {
       socket.emit('game3-phrase', {
         morseSequence: game3Rooms[roomId].morseSequence,
@@ -771,29 +855,78 @@ io.on('connection', (socket) => {
   // Player B submits answer
   socket.on('submit-game3-answer', ({ roomId, answer }) => {
     const room = game3Rooms[roomId];
-    if (!room) return;
+    if (!room || room.gameOver) return;
 
     room.attempts++;
+
+    // Track in game session (will decrement if correct)
+    if (gameSessions[roomId]) {
+      gameSessions[roomId].totalWrongAttempts++;
+    }
 
     // Normalize: uppercase, trim, remove extra spaces
     const normalizedAnswer = answer.toUpperCase().trim().replace(/\s+/g, ' ');
     const normalizedPhrase = room.phrase.toUpperCase().trim();
 
     if (normalizedAnswer === normalizedPhrase) {
+      // Correct! Decrement wrong attempt we added above
+      if (gameSessions[roomId]) {
+        gameSessions[roomId].totalWrongAttempts--;
+      }
+
+      // Calculate final score
+      const session = gameSessions[roomId];
+      const finalScore = session
+        ? Math.max(
+            0,
+            room.timeRemaining * SCORE_TIME_MULTIPLIER -
+              session.totalWrongAttempts * SCORE_WRONG_PENALTY
+          )
+        : room.timeRemaining * SCORE_TIME_MULTIPLIER;
+
       io.to(`game3-${roomId}`).emit('game3-complete', {
-        message: 'Chính xác! Hoàn thành Game 3!',
+        message: 'Chính xác! Hoàn thành tất cả các game!',
         answer: normalizedAnswer,
+        score: finalScore,
+        timeRemaining: room.timeRemaining,
+        totalWrongAttempts: session?.totalWrongAttempts || 0,
       });
+
       console.log(
-        `[Game3] Room ${roomId} completed! Answer: "${normalizedAnswer}"`
+        `[Game3] Room ${roomId} completed! Answer: "${normalizedAnswer}" - Score: ${finalScore}`
       );
+
+      // Clean up session after successful completion
+      delete gameSessions[roomId];
     } else {
+      // Wrong answer - time penalty
+      room.timeRemaining = Math.max(0, room.timeRemaining - TIME_PENALTY);
+
       socket.emit('game3-wrong-answer', {
-        message: `Sai rồi! Thử lại. (Đã thử ${room.attempts} lần)`,
+        message: `Sai rồi! -${TIME_PENALTY}s (Đã thử ${room.attempts} lần)`,
         attempts: room.attempts,
+        timePenalty: TIME_PENALTY,
+        timeRemaining: room.timeRemaining,
       });
+
+      // Broadcast time update to all players
+      io.to(`game3-${roomId}`).emit('game3-timer-update', {
+        timeRemaining: room.timeRemaining,
+      });
+
+      // Check if time ran out
+      if (room.timeRemaining <= 0) {
+        room.gameOver = true;
+        io.to(`game3-${roomId}`).emit('game3-game-over', {
+          message: 'Hết thời gian! Quay lại Game 1...',
+          redirectToGame1: true,
+        });
+        // Clean up session
+        delete gameSessions[roomId];
+      }
+
       console.log(
-        `[Game3] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}")`
+        `[Game3] Wrong answer in room ${roomId}: "${normalizedAnswer}" (expected: "${normalizedPhrase}") - Time: ${room.timeRemaining}s`
       );
     }
   });
@@ -810,9 +943,68 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Disconnected:', socket.id);
+
+    // Cleanup Game 2 rooms
+    for (const roomId in rooms) {
+      const room = rooms[roomId];
+      for (const role in room.players) {
+        if (room.players[role] === socket.id) {
+          delete room.players[role];
+          // If no players left, delete the room
+          if (Object.keys(room.players).length === 0) {
+            delete rooms[roomId];
+            console.log(`[Game2] Room ${roomId} deleted - no players`);
+          } else {
+            // Notify remaining player
+            io.to(roomId).emit('player-disconnected', { role });
+          }
+          break;
+        }
+      }
+    }
+
+    // Cleanup Game 1 rooms
+    for (const roomId in game1Rooms) {
+      const room = game1Rooms[roomId];
+      for (const role in room.players) {
+        if (room.players[role] === socket.id) {
+          delete room.players[role];
+          if (Object.keys(room.players).length === 0) {
+            delete game1Rooms[roomId];
+            console.log(`[Game1] Room ${roomId} deleted - no players`);
+          } else {
+            io.to(`game1-${roomId}`).emit('game1-player-disconnected', {
+              role,
+            });
+          }
+          break;
+        }
+      }
+    }
+
+    // Cleanup Game 3 rooms
+    for (const roomId in game3Rooms) {
+      const room = game3Rooms[roomId];
+      for (const role in room.players) {
+        if (room.players[role] === socket.id) {
+          delete room.players[role];
+          if (Object.keys(room.players).length === 0) {
+            delete game3Rooms[roomId];
+            console.log(`[Game3] Room ${roomId} deleted - no players`);
+          } else {
+            io.to(`game3-${roomId}`).emit('game3-player-disconnected', {
+              role,
+            });
+          }
+          break;
+        }
+      }
+    }
   });
 });
 
-server.listen(3001, () =>
-  console.log('Socket server running on http://localhost:3001')
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, () =>
+  console.log(`Socket server running on http://localhost:${PORT}`)
 );
