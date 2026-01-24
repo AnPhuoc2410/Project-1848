@@ -78,13 +78,13 @@ body {
   }
 
   .special-font b {
-    font-family: var(--font-opsilon);
+    font-family: var(--font-crimson-pro);
     font-feature-settings: 'ss01' on;
   }
 
   .hero-heading {
     @apply font-black uppercase text-5xl sm:right-10 sm:text-7xl md:text-9xl lg:text-[9rem];
-    font-family: var(--font-opsilon);
+    font-family: var(--font-crimson-pro);
   }
 
   .about-subtext {
