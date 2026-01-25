@@ -430,9 +430,6 @@ export default function PlayerB() {
                 🎉 Hoàn thành!
               </h2>
               <p className="text-text/70 mb-4">{checkResult?.message}</p>
-              <button onClick={handleReset} className="btn-secondary">
-                Chơi lại
-              </button>
             </div>
           )}
         </div>

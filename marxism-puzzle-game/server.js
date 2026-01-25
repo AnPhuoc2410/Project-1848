@@ -587,7 +587,7 @@ io.on('connection', (socket) => {
     if (isCorrect) {
       room.gameComplete = true;
       io.to(roomId).emit('level-complete', {
-        message: 'Chúc mừng! Cả hai đã hoàn thành puzzle!',
+        message: 'Chúc mừng! Cả hai đã hoàn thành game 2!',
         nextLevel: 2,
       });
     } else {

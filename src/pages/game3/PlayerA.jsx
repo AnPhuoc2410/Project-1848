@@ -55,6 +55,7 @@ export default function PlayerA() {
       const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
       times.game3 = timeUsed;
+      times.isScoreSubmitter = false; // Player A không submit score - chỉ Player B submit
       sessionStorage.setItem('gameTimes', JSON.stringify(times));
 
       // Navigate to Leaderboard after delay

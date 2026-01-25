@@ -86,6 +86,7 @@ export default function PlayerB() {
       const timeUsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
       times.game3 = timeUsed;
+      times.isScoreSubmitter = true; // Player B là người submit score duy nhất
       sessionStorage.setItem('gameTimes', JSON.stringify(times));
 
       // Navigate to Leaderboard after delay

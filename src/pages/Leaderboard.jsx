@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Google Sheets Web App URL - User needs to replace this with their actual URL
 const SHEETS_API_URL = import.meta.env.VITE_SHEETS_URL;
 
 export default function Leaderboard() {
@@ -27,7 +26,18 @@ export default function Leaderboard() {
 
   // Submit score to Google Sheets
   const submitScore = async () => {
-    if (!hasCompletedAllGames || submitted) return;
+    // Only Player B submits score (isScoreSubmitter === true)
+    // Also prevent re-submit on page refresh
+    const alreadySubmitted =
+      sessionStorage.getItem('scoreSubmitted') === 'true';
+    if (
+      !hasCompletedAllGames ||
+      submitted ||
+      alreadySubmitted ||
+      times.isScoreSubmitter !== true
+    ) {
+      return;
+    }
 
     try {
       const payload = {
@@ -51,6 +61,7 @@ export default function Leaderboard() {
       }
 
       setSubmitted(true);
+      sessionStorage.setItem('scoreSubmitted', 'true'); // Mark as submitted to prevent duplicates
       sessionStorage.removeItem('gameTimes'); // Clear after submit
     } catch (err) {
       console.error('Error submitting score:', err);
@@ -86,8 +97,13 @@ export default function Leaderboard() {
   };
 
   useEffect(() => {
-    submitScore();
-    fetchLeaderboard();
+    const init = async () => {
+      await submitScore();
+      // Add delay to allow server to process before fetching
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await fetchLeaderboard();
+    };
+    init();
   }, []);
 
   return (
