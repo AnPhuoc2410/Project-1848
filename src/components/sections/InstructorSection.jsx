@@ -79,13 +79,15 @@ const InstructorSection = () => {
             <div className="flex flex-col items-center">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
                 <img
-                  src="https://via.placeholder.com/160"
+                  src="/img/anh_dai_dien.jpg"
                   alt="Thành viên 6"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h3 className="font-bold text-primary text-lg">Thành viên 6</h3>
-              <p className="text-gray-600 text-sm">MSSV: ...</p>
+              <h3 className="font-bold text-primary text-lg">
+                Hoàng Gia Phong
+              </h3>
+              <p className="text-gray-600 text-sm">MSSV: SE180543</p>
             </div>
           </div>
         </div>
