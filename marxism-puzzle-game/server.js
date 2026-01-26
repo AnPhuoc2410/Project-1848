@@ -171,6 +171,8 @@ const game1Phrases = [
 
 // 5. Game 3 Config
 const game3Phrase = 'DANG CONG SAN VIET NAM MUON NAM';
+const game3Words = ['DANG', 'CONG', 'SAN', 'VIET', 'NAM', 'MUON', 'NAM'];
+const game3Distractors = ['NHAN', 'TOC', 'CHU'];
 const MORSE_CODE = {
   A: '.-',
   B: '-...',
@@ -341,14 +343,12 @@ io.on('connection', (socket) => {
       isOwner: false,
       myRole: 'B',
     });
-    socket
-      .to(`lobby-${roomId}`)
-      .emit('lobby-update', {
-        roomId,
-        players: room.players,
-        isOwner: true,
-        myRole: 'A',
-      });
+    socket.to(`lobby-${roomId}`).emit('lobby-update', {
+      roomId,
+      players: room.players,
+      isOwner: true,
+      myRole: 'A',
+    });
   });
 
   socket.on('swap-roles', ({ roomId }) => {
@@ -374,14 +374,12 @@ io.on('connection', (socket) => {
       delete lobbyRooms[roomId];
     } else if (room.players.B?.id === socket.id) {
       room.players.B = null;
-      socket
-        .to(`lobby-${roomId}`)
-        .emit('lobby-update', {
-          roomId,
-          players: room.players,
-          isOwner: true,
-          myRole: 'A',
-        });
+      socket.to(`lobby-${roomId}`).emit('lobby-update', {
+        roomId,
+        players: room.players,
+        isOwner: true,
+        myRole: 'A',
+      });
     }
   });
 
@@ -724,13 +722,34 @@ io.on('connection', (socket) => {
   // ------------------------------------
   // GAME 3 EVENTS
   // ------------------------------------
+
+  // Helper: Generate word cards with morse codes
+  function generateWordCards() {
+    const correctCards = game3Words.map((word, index) => ({
+      id: `card-${index}`,
+      word: word,
+      morseSequence: textToMorse(word),
+      isDistractor: false,
+    }));
+
+    const distractorCards = game3Distractors.map((word, index) => ({
+      id: `distractor-${index}`,
+      word: word,
+      morseSequence: textToMorse(word),
+      isDistractor: true,
+    }));
+
+    return shuffleArray([...correctCards, ...distractorCards]);
+  }
+
   socket.on('join-game3', ({ roomId, role }) => {
     socket.join(`game3-${roomId}`);
     if (!game3Rooms[roomId]) {
       game3Rooms[roomId] = {
         players: {},
         phrase: game3Phrase,
-        morseSequence: textToMorse(game3Phrase),
+        correctWords: game3Words,
+        wordCards: generateWordCards(),
         attempts: 0,
         timeRemaining: INITIAL_TIME,
         gameOver: false,
@@ -741,29 +760,35 @@ io.on('connection', (socket) => {
     if (role === 'A') {
       socket.emit('game3-phrase-for-a', {
         phrase: game3Rooms[roomId].phrase,
-        message: 'Hướng dẫn Player B giải mã!',
+        correctWords: game3Rooms[roomId].correctWords,
+        message: 'Hướng dẫn Player B giải mã các thẻ từ!',
       });
     }
     if (role === 'B') {
-      socket.emit('game3-phrase', {
-        morseSequence: game3Rooms[roomId].morseSequence,
-        phraseLength: game3Rooms[roomId].phrase.replace(/\s/g, '').length,
+      socket.emit('game3-word-cards', {
+        wordCards: game3Rooms[roomId].wordCards,
+        totalSlots: game3Words.length,
       });
     }
     io.to(`game3-${roomId}`).emit('game3-player-joined', { role });
   });
 
-  socket.on('submit-game3-answer', ({ roomId, answer }) => {
+  socket.on('submit-game3-answer', ({ roomId, orderedWords }) => {
     const room = game3Rooms[roomId];
     if (!room || room.gameOver) return;
 
     room.attempts++;
     if (gameSessions[roomId]) gameSessions[roomId].totalWrongAttempts++;
 
-    const normalizedAnswer = answer.toUpperCase().trim().replace(/\s+/g, ' ');
-    const normalizedPhrase = room.phrase.toUpperCase().trim();
+    // Check if submitted words match the correct order
+    const isCorrect =
+      orderedWords.length === room.correctWords.length &&
+      orderedWords.every(
+        (word, index) =>
+          word.toUpperCase() === room.correctWords[index].toUpperCase()
+      );
 
-    if (normalizedAnswer === normalizedPhrase) {
+    if (isCorrect) {
       if (gameSessions[roomId]) gameSessions[roomId].totalWrongAttempts--;
       const session = gameSessions[roomId];
       const finalScore = session
@@ -776,7 +801,7 @@ io.on('connection', (socket) => {
 
       io.to(`game3-${roomId}`).emit('game3-complete', {
         message: 'HOÀN THÀNH TẤT CẢ!',
-        answer: normalizedAnswer,
+        answer: orderedWords.join(' '),
         score: finalScore,
         timeRemaining: room.timeRemaining,
         totalWrongAttempts: session?.totalWrongAttempts || 0,
@@ -785,7 +810,7 @@ io.on('connection', (socket) => {
     } else {
       room.timeRemaining = Math.max(0, room.timeRemaining - TIME_PENALTY);
       socket.emit('game3-wrong-answer', {
-        message: `Sai rồi! -${TIME_PENALTY}s`,
+        message: `Sai thứ tự! -${TIME_PENALTY}s`,
         attempts: room.attempts,
         timePenalty: TIME_PENALTY,
         timeRemaining: room.timeRemaining,
@@ -807,8 +832,9 @@ io.on('connection', (socket) => {
   socket.on('reset-game3', ({ roomId }) => {
     if (game3Rooms[roomId]) {
       game3Rooms[roomId].attempts = 0;
+      game3Rooms[roomId].wordCards = generateWordCards();
       io.to(`game3-${roomId}`).emit('game3-reset', {
-        morseSequence: game3Rooms[roomId].morseSequence,
+        wordCards: game3Rooms[roomId].wordCards,
       });
     }
   });

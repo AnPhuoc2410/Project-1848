@@ -13,6 +13,7 @@ export default function PlayerA() {
 
   const [playerBConnected, setPlayerBConnected] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const [correctWords, setCorrectWords] = useState([]);
 
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
@@ -43,6 +44,10 @@ export default function PlayerA() {
   useEffect(() => {
     socket.emit('join-game3', { roomId, role: 'A' });
 
+    socket.on('game3-phrase-for-a', ({ correctWords: words }) => {
+      setCorrectWords(words || []);
+    });
+
     socket.on('game3-player-joined', ({ role }) => {
       if (role === 'B') setPlayerBConnected(true);
     });
@@ -65,6 +70,7 @@ export default function PlayerA() {
     });
 
     return () => {
+      socket.off('game3-phrase-for-a');
       socket.off('game3-player-joined');
       socket.off('game3-complete');
     };
@@ -135,13 +141,23 @@ export default function PlayerA() {
           <h3 className="card-title">📋 Hướng dẫn</h3>
           <ol className="text-sm text-text/70 space-y-2">
             <li>
-              1. Lắng nghe Player B mô tả ánh sáng: <strong>NGẮN</strong> (chấm)
-              hoặc <strong>DÀI</strong> (gạch)
+              1. Player B sẽ nhấn vào từng <strong>thẻ từ</strong> để xem đèn
+              Morse chớp
             </li>
-            <li>2. Tra bảng mã Morse bên dưới để tìm chữ cái tương ứng</li>
-            <li>3. Đọc lại chữ cái cho Player B biết</li>
-            <li>4. Ghép đủ các chữ → Player B nhập đáp án</li>
+            <li>
+              2. Lắng nghe Player B mô tả: <strong>NGẮN</strong> (chấm) hoặc{' '}
+              <strong>DÀI</strong> (gạch)
+            </li>
+            <li>3. Tra bảng mã Morse bên dưới để tìm chữ cái tương ứng</li>
+            <li>4. Ghép các chữ cái thành từ và đọc lại cho Player B</li>
+            <li>5. Player B sẽ kéo thả các thẻ vào đúng thứ tự</li>
           </ol>
+          <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-amber-700 text-sm">
+              ⚠️ <strong>Lưu ý:</strong> Có {correctWords.length} từ cần giải mã
+              + 3 thẻ gây nhiễu
+            </p>
+          </div>
         </div>
 
         {/* Morse Code Reference */}
