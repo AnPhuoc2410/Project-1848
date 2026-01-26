@@ -12,6 +12,8 @@ const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
+  const shouldRenderMedia = true; // keep media visible
+  const autoRotateMedia = false;
 
   // Shared gradient text style for hero headings (yellow to red)
   const heroGradientText =
@@ -27,14 +29,14 @@ const HeroSection = () => {
   }, []);
 
   const mediaResources = [
-    { type: 'image', src: '/img/1.jpg' },
-    { type: 'image', src: '/img/2.jpg' },
-    { type: 'image', src: '/img/3.jpeg' },
+    // { type: 'image', src: '/img/1.jpg' },
+    // { type: 'image', src: '/img/2.jpg' },
+    // { type: 'image', src: '/img/3.jpeg' },
     { type: 'image', src: '/img/4.png' },
-    { type: 'image', src: '/img/6.webp' },
-    { type: 'image', src: '/img/7.jpeg' },
-    { type: 'image', src: '/img/8.jpg' },
-    { type: 'image', src: '/img/9.jpeg' },
+    // { type: 'image', src: '/img/6.webp' },
+    // { type: 'image', src: '/img/7.jpeg' },
+    // { type: 'image', src: '/img/8.jpg' },
+    // { type: 'image', src: '/img/9.jpeg' },
   ];
 
   const totalSlides = mediaResources.length;
@@ -52,24 +54,26 @@ const HeroSection = () => {
   // 0-based index helper for mediaResources
   const getMediaResource = (index) => mediaResources[(index - 1) % totalSlides];
 
-  const isLoading = loadedCount < totalSlides;
+  const isLoading = shouldRenderMedia ? loadedCount < totalSlides : false;
 
   const handleMiniVdClick = () => {
+    if (!shouldRenderMedia) return;
     setHasClicked(true);
     setCurrentIndex((prevIndex) => (prevIndex % totalSlides) + 1);
   };
 
   useEffect(() => {
+    if (!shouldRenderMedia || !autoRotateMedia) return undefined;
     const interval = setInterval(() => {
       handleMiniVdClick();
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [currentIndex, shouldRenderMedia]);
 
   useGSAP(
     () => {
-      if (hasClicked) {
+      if (shouldRenderMedia && hasClicked) {
         gsap.set('#next-media', { visibility: 'visible' });
         gsap.to('#next-media', {
           transformOrigin: 'center center',
@@ -93,7 +97,7 @@ const HeroSection = () => {
       }
     },
     {
-      dependencies: [currentIndex],
+      dependencies: [currentIndex, hasClicked, shouldRenderMedia],
       revertOnUpdate: true,
     }
   );
@@ -123,6 +127,7 @@ const HeroSection = () => {
     ref = null,
     isBackground = false
   ) => {
+    if (!shouldRenderMedia) return null;
     const resource = getMediaResource(index);
     if (!resource) return null;
 

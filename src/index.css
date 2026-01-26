@@ -85,6 +85,8 @@ body {
   .hero-heading {
     @apply font-black uppercase text-5xl sm:right-10 sm:text-7xl md:text-9xl lg:text-[9rem];
     font-family: var(--font-crimson-pro);
+    -webkit-text-stroke: 1.5px #0f172a;
+    paint-order: stroke fill;
   }
 
   .about-subtext {
