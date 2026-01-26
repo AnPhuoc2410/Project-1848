@@ -1,7 +1,6 @@
 import { socket } from '../../socket';
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import LightBoard from '../../components/LightBoard';
 
 export default function PlayerA() {
   const [params] = useSearchParams();
@@ -9,50 +8,59 @@ export default function PlayerA() {
   const roomId = params.get('room');
   const myName = params.get('myName') || 'Player A';
 
-  // Game state
-  const [lightNodes, setLightNodes] = useState([]);
-  const [wireResults, setWireResults] = useState([]);
+  // Game state - store all questions with wire info
+  const [allQuestions, setAllQuestions] = useState([]);
+  const [answeredQuestions, setAnsweredQuestions] = useState({}); // { wireIndex: 'YES' | 'NO' }
 
-  // Question modal state
-  const [showQuestion, setShowQuestion] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState('');
-  const [currentWire, setCurrentWire] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // Currently expanded question for answering
+  const [expandedIndex, setExpandedIndex] = useState(null);
 
-  // Editing existing answer
-  const [editingIndex, setEditingIndex] = useState(null);
+  // Timer state (synced from Player B via server)
+  const [timeRemaining, setTimeRemaining] = useState(300);
 
   // Game status
   const [levelComplete, setLevelComplete] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const startTimeRef = useRef(Date.now());
 
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   useEffect(() => {
     socket.emit('join-room', { roomId, role: 'A' });
 
     socket.on('game-init', (data) => {
-      setLightNodes(data.lightNodes);
-      setWireResults(data.wireResults || []);
+      // Store all questions for Player A
+      if (data.allQuestions) {
+        setAllQuestions(data.allQuestions);
+      }
+      // Restore answered questions from wireResults
+      if (data.wireResults) {
+        const answered = {};
+        data.wireResults.forEach((r) => {
+          answered[r.wireIndex] = r.shouldConnect ? 'YES' : 'NO';
+        });
+        setAnsweredQuestions(answered);
+      }
+      // Set initial time
+      if (data.timeRemaining) {
+        setTimeRemaining(data.timeRemaining);
+      }
     });
 
-    socket.on('wire-question', ({ wire, question, forPlayerA }) => {
-      if (!forPlayerA) return;
-      setCurrentWire(wire);
-      setCurrentQuestion(question);
-      setShowQuestion(true);
-      setLoading(false);
+    socket.on('answer-updated', ({ wireIndex, shouldConnect }) => {
+      setAnsweredQuestions((prev) => ({
+        ...prev,
+        [wireIndex]: shouldConnect ? 'YES' : 'NO',
+      }));
     });
 
-    socket.on('wire-result', ({ result, totalResults }) => {
-      setWireResults(totalResults);
-      setShowQuestion(false);
-      setCurrentWire(null);
-      setLoading(false);
-    });
-
-    socket.on('answer-updated', ({ totalResults }) => {
-      setWireResults(totalResults);
-      setEditingIndex(null);
+    // Listen for time updates from server (synced from Player B)
+    socket.on('time-update', ({ timeRemaining: newTime }) => {
+      setTimeRemaining(newTime);
     });
 
     socket.on('level-complete', () => {
@@ -74,51 +82,50 @@ export default function PlayerA() {
     socket.on('game-over', () => setGameOver(true));
 
     socket.on('game-reset', (data) => {
-      setLightNodes(data.lightNodes);
-      setWireResults([]);
-      setShowQuestion(false);
-      setCurrentWire(null);
-      setEditingIndex(null);
+      if (data.allQuestions) {
+        setAllQuestions(data.allQuestions);
+      }
+      setAnsweredQuestions({});
+      setExpandedIndex(null);
       setLevelComplete(false);
       setGameOver(false);
+      if (data.timeRemaining) {
+        setTimeRemaining(data.timeRemaining);
+      }
     });
 
     return () => {
       socket.off('game-init');
-      socket.off('wire-question');
-      socket.off('wire-result');
       socket.off('answer-updated');
+      socket.off('time-update');
       socket.off('level-complete');
       socket.off('game-over');
       socket.off('game-reset');
     };
-  }, [roomId]);
+  }, [roomId, navigate, myName]);
 
-  const handleAnswer = (answer) => {
-    setLoading(true);
-    socket.emit('answer-question', { roomId, answer });
+  const handleQuestionClick = (index) => {
+    // Toggle expand/collapse
+    setExpandedIndex(expandedIndex === index ? null : index);
   };
 
-  const handleEditClick = (index) => {
-    setEditingIndex(editingIndex === index ? null : index);
-  };
+  const handleAnswer = (wireIndex, answer) => {
+    // Update local state immediately
+    setAnsweredQuestions((prev) => ({
+      ...prev,
+      [wireIndex]: answer,
+    }));
 
-  const handleChangeAnswer = (index, newAnswer) => {
-    const result = wireResults[index];
-    if (result.shouldConnect === (newAnswer === 'YES')) {
-      setEditingIndex(null);
-      return;
-    }
-    socket.emit('update-answer', { roomId, wireIndex: index, newAnswer });
+    // Send to server
+    socket.emit('player-a-answer', { roomId, wireIndex, answer });
+
+    // Collapse the question
+    setExpandedIndex(null);
   };
 
   const handleReset = () => socket.emit('reset-game', { roomId });
 
-  const displayConnections = wireResults.map((r) => ({
-    from: r.from,
-    to: r.to,
-    color: r.shouldConnect ? '#16a34a' : '#dc2626',
-  }));
+  const answeredCount = Object.keys(answeredQuestions).length;
 
   return (
     <div className="game-page">
@@ -137,9 +144,16 @@ export default function PlayerA() {
             📖 Lý thuyết
           </span>
         </div>
-        <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
-          Room: {roomId}
-        </span>
+        <div className="flex items-center gap-4">
+          <div
+            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
+          >
+            ⏱️ {formatTime(timeRemaining)}
+          </div>
+          <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
+            Room: {roomId}
+          </span>
+        </div>
       </header>
 
       {/* Game Over Overlay */}
@@ -157,195 +171,148 @@ export default function PlayerA() {
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="relative z-10 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-        {/* Left - Board */}
-        <div className="game-card">
-          <h3 className="card-title">🔌 Bảng đèn</h3>
-          <p className="text-sm text-text/50 mb-4">
-            Hiển thị các cặp đèn đã được hỏi
-          </p>
-          <LightBoard
-            nodes={lightNodes}
-            connections={displayConnections}
-            interactive={false}
-            highlightWire={currentWire}
-          />
+      {/* Level Complete Overlay */}
+      {levelComplete && (
+        <div className="game-overlay">
+          <div className="overlay-card bg-green-50 border-green-200">
+            <h2 className="text-2xl font-bold text-green-600 mb-2">
+              🎉 Hoàn thành!
+            </h2>
+            <p className="text-text/70 mb-4">
+              Player B đã nối đúng tất cả dây!
+            </p>
+            <p className="text-sm text-text/50">Đang chuyển sang Game 3...</p>
+          </div>
         </div>
+      )}
 
-        {/* Right - Controls */}
-        <div className="space-y-6">
-          {/* Status Box */}
-          <div className="game-card">
-            <h3 className="card-title">📋 Trạng thái</h3>
+      {/* Main Content */}
+      <div className="relative z-10 p-6 max-w-4xl mx-auto">
+        {/* All Questions List */}
+        <div className="game-card">
+          <h3 className="card-title">📝 Danh sách câu hỏi</h3>
+          <p className="text-xs text-text/40 mb-4">
+            Click vào cặp dây để xem câu hỏi và trả lời
+          </p>
 
-            {!showQuestion && !levelComplete && (
+          <div className="space-y-3">
+            {allQuestions.map((q, index) => {
+              const answer = answeredQuestions[index];
+              const isExpanded = expandedIndex === index;
+
+              return (
+                <div
+                  key={index}
+                  className={`rounded-xl border transition-all cursor-pointer ${
+                    isExpanded
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary'
+                      : answer
+                        ? 'border-border bg-white hover:border-secondary'
+                        : 'border-dashed border-text/20 bg-gray-50 hover:border-secondary hover:bg-secondary/5'
+                  }`}
+                  onClick={() => handleQuestionClick(index)}
+                >
+                  {/* Header - Wire Pair */}
+                  <div className="p-4 flex items-center gap-3">
+                    {/* Wire Pair Label with Colors */}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="px-2 py-1 rounded-lg text-sm font-bold"
+                        style={{
+                          backgroundColor: q.fromColor + '30',
+                          color: q.fromColor,
+                          border: `2px solid ${q.fromColor}`,
+                        }}
+                      >
+                        {q.fromLabel}
+                      </span>
+                      <span className="text-text/40">—</span>
+                      <span
+                        className="px-2 py-1 rounded-lg text-sm font-bold"
+                        style={{
+                          backgroundColor: q.toColor + '30',
+                          color: q.toColor,
+                          border: `2px solid ${q.toColor}`,
+                        }}
+                      >
+                        {q.toLabel}
+                      </span>
+                    </div>
+
+                    {/* Answer Badge */}
+                    <div className="ml-auto flex items-center gap-2">
+                      {answer && (
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-bold ${
+                            answer === 'YES'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {answer === 'YES' ? '✓ NỐI' : '✗ KHÔNG NỐI'}
+                        </span>
+                      )}
+                      <span className="text-text/40">
+                        {isExpanded ? '▼' : '▶'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Expanded Content - Question and Answer buttons */}
+                  {isExpanded && (
+                    <div
+                      className="px-4 pb-4 border-t border-border/50 pt-4"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Question Text */}
+                      <div className="p-3 bg-secondary/10 rounded-lg mb-4">
+                        <p className="text-sm text-secondary font-medium mb-1">
+                          Câu hỏi:
+                        </p>
+                        <p className="text-text font-robert-regular">
+                          {q.question}
+                        </p>
+                      </div>
+
+                      {/* Answer Buttons */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => handleAnswer(index, 'YES')}
+                          className={`py-3 rounded-xl font-bold transition flex flex-col items-center gap-1 ${
+                            answer === 'YES'
+                              ? 'bg-green-600 text-white'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          <span>YES - NỐI</span>
+                        </button>
+                        <button
+                          onClick={() => handleAnswer(index, 'NO')}
+                          className={`py-3 rounded-xl font-bold transition flex flex-col items-center gap-1 ${
+                            answer === 'NO'
+                              ? 'bg-red-600 text-white'
+                              : 'bg-red-100 text-red-700 hover:bg-red-200'
+                          }`}
+                        >
+                          <span>NO - KHÔNG NỐI</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {allQuestions.length === 0 && (
               <div className="text-center py-8">
                 <div className="three-body mx-auto mb-4">
                   <div className="three-body__dot"></div>
                   <div className="three-body__dot"></div>
                   <div className="three-body__dot"></div>
                 </div>
-                <p className="text-text/70">
-                  Đang chờ Player B chọn cặp đèn...
-                </p>
-                <p className="text-sm text-text/40 mt-2">
-                  Player B sẽ đọc từ ảnh vật lý và chọn cặp đèn để hỏi bạn
-                </p>
+                <p className="text-text/50">Đang tải danh sách câu hỏi...</p>
               </div>
             )}
-
-            {showQuestion && currentWire && (
-              <div className="space-y-4">
-                {/* Wire Info */}
-                <div className="text-center p-4 bg-secondary/10 rounded-xl">
-                  <p className="text-sm text-text/60 mb-2">
-                    Player B hỏi về cặp:
-                  </p>
-                  <div className="flex items-center justify-center gap-3 text-xl font-bold">
-                    <span style={{ color: currentWire.fromColor }}>
-                      {currentWire.fromLabel}
-                    </span>
-                    <span className="text-text/30">→</span>
-                    <span style={{ color: currentWire.toColor }}>
-                      {currentWire.toLabel}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Question */}
-                <div className="p-4 bg-white rounded-xl border-l-4 border-secondary">
-                  <h4 className="text-sm font-medium text-secondary mb-2">
-                    ❓ Câu hỏi Triết học:
-                  </h4>
-                  <p className="text-text font-robert-regular">
-                    {currentQuestion}
-                  </p>
-                </div>
-
-                {/* Answer Buttons */}
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => handleAnswer('YES')}
-                    disabled={loading}
-                    className="answer-btn answer-yes"
-                  >
-                    <span className="text-2xl">✓</span>
-                    <span className="font-bold">YES</span>
-                    <span className="text-xs opacity-70">Dây cần nối</span>
-                  </button>
-                  <button
-                    onClick={() => handleAnswer('NO')}
-                    disabled={loading}
-                    className="answer-btn answer-no"
-                  >
-                    <span className="text-2xl">✗</span>
-                    <span className="font-bold">NO</span>
-                    <span className="text-xs opacity-70">Không cần nối</span>
-                  </button>
-                </div>
-                {loading && (
-                  <p className="text-center text-text/50">Đang gửi...</p>
-                )}
-              </div>
-            )}
-
-            {levelComplete && (
-              <div className="text-center py-8">
-                <h2 className="text-2xl font-bold text-green-600 mb-2">
-                  🎉 Hoàn thành!
-                </h2>
-                <p className="text-text/70 mb-4">
-                  Player B đã nối đúng tất cả dây!
-                </p>
-                <button onClick={handleReset} className="btn-secondary">
-                  Chơi lại
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Wire History */}
-          <div className="game-card">
-            <h3 className="card-title">
-              📝 Lịch sử câu hỏi ({wireResults.length})
-            </h3>
-            <p className="text-xs text-text/40 mb-3">
-              👆 Click vào để đổi đáp án
-            </p>
-
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {wireResults.map((result, i) => (
-                <div
-                  key={i}
-                  onClick={() => handleEditClick(i)}
-                  className={`history-item ${result.shouldConnect ? 'history-yes' : 'history-no'} 
-                             ${editingIndex === i ? 'ring-2 ring-primary' : ''}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span>{result.shouldConnect ? '✅' : '❌'}</span>
-                    <span className="flex-1">
-                      <span style={{ color: result.fromColor }}>
-                        {result.fromLabel}
-                      </span>
-                      <span className="text-text/30 mx-2">→</span>
-                      <span style={{ color: result.toColor }}>
-                        {result.toLabel}
-                      </span>
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        result.shouldConnect
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {result.shouldConnect ? 'NỐI' : 'KHÔNG NỐI'}
-                    </span>
-                    <span className="text-text/30">✏️</span>
-                  </div>
-
-                  {editingIndex === i && (
-                    <div
-                      className="mt-3 pt-3 border-t border-border"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <p className="text-sm text-text/60 mb-2">Đổi đáp án:</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => handleChangeAnswer(i, 'YES')}
-                          className={`py-2 rounded-lg text-sm font-medium transition
-                            ${
-                              result.shouldConnect
-                                ? 'bg-green-600 text-white'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                            }`}
-                        >
-                          ✓ YES - NỐI
-                        </button>
-                        <button
-                          onClick={() => handleChangeAnswer(i, 'NO')}
-                          className={`py-2 rounded-lg text-sm font-medium transition
-                            ${
-                              !result.shouldConnect
-                                ? 'bg-red-600 text-white'
-                                : 'bg-red-100 text-red-700 hover:bg-red-200'
-                            }`}
-                        >
-                          ✗ NO - KHÔNG NỐI
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {wireResults.length === 0 && (
-                <p className="text-center text-text/40 py-4">
-                  Chưa có câu hỏi nào
-                </p>
-              )}
-            </div>
           </div>
         </div>
       </div>

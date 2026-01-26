@@ -191,17 +191,6 @@ export default function PlayerB() {
 
         {/* Right - Answer Input */}
         <div className="space-y-6">
-          {/* Instructions */}
-          <div className="game-card">
-            <h3 className="card-title">📋 Hướng dẫn</h3>
-            <ol className="text-sm text-text/70 space-y-2">
-              <li>1. Lắng nghe {playerAName} mô tả ký hiệu qua lời nói</li>
-              <li>2. Tra bảng mã bên trái để tìm chữ cái tương ứng</li>
-              <li>3. Nói lại chữ cái cho {playerAName} biết</li>
-              <li>4. Ghép đủ các chữ → Nhập đáp án bên dưới</li>
-            </ol>
-          </div>
-
           {/* Answer Form */}
           <div className="game-card">
             <h3 className="card-title">✏️ Nhập đáp án</h3>

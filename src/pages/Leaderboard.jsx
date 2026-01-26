@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Google Sheets Web App URL - User needs to replace this with their actual URL
+// Đảm bảo file .env của bạn có biến VITE_SHEETS_URL
 const SHEETS_API_URL = import.meta.env.VITE_SHEETS_URL;
 
 export default function Leaderboard() {
@@ -11,12 +11,20 @@ export default function Leaderboard() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
+  // Dùng ref để tránh chạy useEffect 2 lần (React 18 Strict Mode)
+  const hasInitialized = useRef(false);
+
   // Get times from sessionStorage
   const times = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
-  const hasCompletedAllGames = times.game1 && times.game2 && times.game3;
+
+  // Kiểm tra xem đã hoàn thành đủ 3 game chưa
+  const hasCompletedAllGames =
+    times.game1 !== undefined &&
+    times.game2 !== undefined &&
+    times.game3 !== undefined;
 
   const formatTime = (seconds) => {
-    if (!seconds) return '--:--';
+    if (seconds === undefined || seconds === null) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -25,69 +33,135 @@ export default function Leaderboard() {
   const totalTime =
     (times.game1 || 0) + (times.game2 || 0) + (times.game3 || 0);
 
-  // Submit score to Google Sheets
+  // 1. Hàm Gửi điểm (POST)
   const submitScore = async () => {
-    if (!hasCompletedAllGames || submitted) return;
+    console.log('--- Bắt đầu quy trình Submit Score ---');
+
+    // Check các điều kiện chặn
+    const alreadySubmitted =
+      sessionStorage.getItem('scoreSubmitted') === 'true';
+
+    if (!hasCompletedAllGames) {
+      console.log('>> Chưa hoàn thành đủ game, bỏ qua submit.');
+      return;
+    }
+    if (alreadySubmitted) {
+      console.log('>> Đã submit trước đó (session flag), bỏ qua.');
+      setSubmitted(true); // Vẫn hiện thông báo đã lưu
+      return;
+    }
+    if (!times.isScoreSubmitter) {
+      console.log(
+        '>> User này không có quyền submit (là Player A hoặc truy cập trực tiếp).'
+      );
+      return;
+    }
+    if (!SHEETS_API_URL) {
+      console.error('>> LỖI: Không tìm thấy VITE_SHEETS_URL trong .env');
+      setError('Lỗi cấu hình: Thiếu API URL.');
+      return;
+    }
 
     try {
       const payload = {
-        playerA: times.playerA || 'Player A',
-        playerB: times.playerB || 'Player B',
+        playerA: times.playerA || 'Unknown A',
+        playerB: times.playerB || 'Unknown B',
         game1: times.game1,
         game2: times.game2,
         game3: times.game3,
         total: totalTime,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toLocaleString('sv-SE', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+        }),
       };
 
-      // POST to Google Sheets
-      if (SHEETS_API_URL !== 'YOUR_GOOGLE_SHEETS_WEB_APP_URL') {
-        await fetch(SHEETS_API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      }
+      console.log('>> Đang gửi payload:', payload);
+
+      // Gửi POST
+      await fetch(SHEETS_API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Quan trọng với Google Script
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('>> Submit thành công (no-cors mode)!');
 
       setSubmitted(true);
-      sessionStorage.removeItem('gameTimes'); // Clear after submit
+      sessionStorage.setItem('scoreSubmitted', 'true'); // Đánh dấu đã gửi
+      // KHÔNG xóa gameTimes ngay, để còn hiển thị kết quả ở UI "Kết quả của bạn"
     } catch (err) {
-      console.error('Error submitting score:', err);
+      console.error('>> Lỗi khi submit score:', err);
       setError('Không thể lưu kết quả. Vui lòng thử lại.');
     }
   };
 
-  // Fetch leaderboard from Google Sheets
+  // 2. Hàm Lấy bảng xếp hạng (GET)
   const fetchLeaderboard = async () => {
+    console.log('--- Bắt đầu Fetch Leaderboard ---');
+
+    if (!SHEETS_API_URL) {
+      // Fallback data nếu chưa cấu hình URL
+      console.log('>> Không có API URL, dùng Mock Data.');
+      setLeaderboard([
+        {
+          playerA: 'Demo A',
+          playerB: 'Demo B',
+          game1: 60,
+          game2: 120,
+          game3: 90,
+          total: 270,
+        },
+      ]);
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (SHEETS_API_URL !== 'YOUR_GOOGLE_SHEETS_WEB_APP_URL') {
-        const response = await fetch(`${SHEETS_API_URL}?action=get`);
-        const data = await response.json();
-        setLeaderboard(data.slice(0, 20)); // Top 20
-      } else {
-        // Demo data when no API URL is set
-        setLeaderboard([
-          {
-            playerA: 'Demo A',
-            playerB: 'Demo B',
-            game1: 60,
-            game2: 120,
-            game3: 90,
-            total: 270,
-          },
-        ]);
-      }
+      // Thêm tham số time để tránh cache
+      const response = await fetch(
+        `${SHEETS_API_URL}?action=get&t=${Date.now()}`
+      );
+      const data = await response.json();
+      console.log('>> Đã nhận data leaderboard:', data.length, 'records');
+
+      // Sắp xếp tăng dần theo total (thời gian ít nhất lên đầu)
+      const sortedData = data.sort((a, b) => a.total - b.total);
+
+      setLeaderboard(sortedData.slice(0, 20)); // Top 20
     } catch (err) {
-      console.error('Error fetching leaderboard:', err);
+      console.error('>> Lỗi fetching leaderboard:', err);
+      // Fallback nếu lỗi mạng
+      setLeaderboard([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // 3. UseEffect điều phối luồng chạy
   useEffect(() => {
-    submitScore();
-    fetchLeaderboard();
+    const initProcess = async () => {
+      // Ngăn chạy 2 lần trên dev
+      if (hasInitialized.current) return;
+      hasInitialized.current = true;
+
+      // Bước 1: Gửi điểm trước
+      await submitScore();
+
+      // Bước 2: Đợi một chút để Google Sheet kịp cập nhật (Google Script hơi chậm)
+      if (times.isScoreSubmitter && !sessionStorage.getItem('scoreSubmitted')) {
+        console.log('>> Đợi Server xử lý...');
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } else {
+        // Nếu chỉ vào xem hoặc đã submit rồi thì không cần đợi lâu
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Bước 3: Tải lại bảng xếp hạng mới nhất
+      await fetchLeaderboard();
+    };
+
+    initProcess();
   }, []);
 
   return (
@@ -105,7 +179,12 @@ export default function Leaderboard() {
           </h1>
         </div>
         <button
-          onClick={() => navigate('/lobby')}
+          onClick={() => {
+            // Xóa session khi bấm chơi lại
+            sessionStorage.removeItem('gameTimes');
+            sessionStorage.removeItem('scoreSubmitted');
+            navigate('/lobby');
+          }}
           className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary/80 transition"
         >
           Chơi lại
@@ -114,6 +193,13 @@ export default function Leaderboard() {
 
       {/* Main Content */}
       <div className="relative z-10 p-6 max-w-5xl mx-auto">
+        {/* Debug Info (Tạm thời để kiểm tra URL, xóa sau khi chạy ngon) */}
+        {!SHEETS_API_URL && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
+            ⚠️ Chưa cấu hình VITE_SHEETS_URL. Đang dùng dữ liệu giả lập.
+          </div>
+        )}
+
         {/* Your Score Card */}
         {hasCompletedAllGames && (
           <div className="game-card mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300">
@@ -159,8 +245,8 @@ export default function Leaderboard() {
               </div>
             </div>
             {submitted && (
-              <p className="text-center text-green-600 mt-4">
-                ✓ Đã lưu kết quả!
+              <p className="text-center text-green-600 mt-4 font-bold">
+                ✓ Đã lưu kết quả lên hệ thống!
               </p>
             )}
             {error && <p className="text-center text-red-600 mt-4">{error}</p>}
@@ -169,7 +255,7 @@ export default function Leaderboard() {
 
         {/* Leaderboard Table */}
         <div className="game-card">
-          <h3 className="card-title">🥇 Top 20 Cặp Đôi</h3>
+          <h3 className="card-title">🥇 Top 20 Cặp Đôi Xuất Sắc Nhất</h3>
 
           {loading ? (
             <div className="text-center py-8">
@@ -178,7 +264,9 @@ export default function Leaderboard() {
                 <div className="three-body__dot"></div>
                 <div className="three-body__dot"></div>
               </div>
-              <p className="mt-4 text-text/60">Đang tải bảng xếp hạng...</p>
+              <p className="mt-4 text-text/60">
+                Đang cập nhật bảng xếp hạng...
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -195,13 +283,13 @@ export default function Leaderboard() {
                       Player B
                     </th>
                     <th className="py-3 px-2 text-center text-sm font-medium text-text/60">
-                      Game 1
+                      G1
                     </th>
                     <th className="py-3 px-2 text-center text-sm font-medium text-text/60">
-                      Game 2
+                      G2
                     </th>
                     <th className="py-3 px-2 text-center text-sm font-medium text-text/60">
-                      Game 3
+                      G3
                     </th>
                     <th className="py-3 px-2 text-center text-sm font-medium text-yellow-600">
                       Tổng
@@ -249,24 +337,6 @@ export default function Leaderboard() {
               </table>
             </div>
           )}
-        </div>
-
-        {/* Instructions */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-          <h4 className="font-medium text-blue-700 mb-2">
-            📋 Hướng dẫn cài đặt Google Sheets
-          </h4>
-          <ol className="text-sm text-blue-600 space-y-1">
-            <li>
-              1. Tạo Google Sheet với các cột: PlayerA, PlayerB, Game1, Game2,
-              Game3, Total, Timestamp
-            </li>
-            <li>2. Vào Extensions → Apps Script</li>
-            <li>3. Tạo Web App với doPost và doGet functions</li>
-            <li>
-              4. Deploy và copy URL vào SHEETS_API_URL trong Leaderboard.jsx
-            </li>
-          </ol>
         </div>
       </div>
     </div>
