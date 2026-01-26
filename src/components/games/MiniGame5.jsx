@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 
-const STABLE_MIN = 40;
-const STABLE_MAX = 60;
+const STABLE_MIN = 45;
+const STABLE_MAX = 55;
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
 const displayValue = (v) => Math.round(v);
@@ -220,10 +220,7 @@ export default function MiniGame5({ onExit }) {
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-white/80">
-              ❓ Nhiệm vụ: Giữ 3 thanh trong vùng “ổn định”.{' '}
-              {autoStopped
-                ? 'Đã khóa tự động khi ổn định.'
-                : 'Các thanh đang tự dịch chuyển chậm.'}
+              Nhiệm vụ: Giữ 3 thanh trong vùng “ổn định”.
             </div>
             <div className="flex items-center gap-2">
               <button
