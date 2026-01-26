@@ -152,12 +152,6 @@ export default function PlayerA() {
             <li>4. Ghép các chữ cái thành từ và đọc lại cho Player B</li>
             <li>5. Player B sẽ kéo thả các thẻ vào đúng thứ tự</li>
           </ol>
-          <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <p className="text-amber-700 text-sm">
-              ⚠️ <strong>Lưu ý:</strong> Có {correctWords.length} từ cần giải mã
-              + 3 thẻ gây nhiễu
-            </p>
-          </div>
         </div>
 
         {/* Morse Code Reference */}

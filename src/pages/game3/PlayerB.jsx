@@ -153,7 +153,6 @@ export default function PlayerB() {
           const element = elements[j];
           const isDot = element === '.';
 
-          setCurrentElement(isDot ? '• NGẮN' : '— DÀI');
           setLightOn(true);
           await sleep(isDot ? DOT_DURATION : DASH_DURATION);
 
@@ -172,7 +171,6 @@ export default function PlayerB() {
       setIsPlaying(false);
       playingRef.current = false;
       setActiveCardId(null);
-      setCurrentElement('');
       setLightOn(false);
     },
     [isPlaying]
@@ -246,6 +244,13 @@ export default function PlayerB() {
   const availableCards = wordCards.filter(
     (card) => !answerSlots.some((slot) => slot?.id === card.id)
   );
+
+  // Get card label (A, B, C...) from card id - consistent mapping
+  const getCardLabel = (cardId) => {
+    const cardIndex = wordCards.findIndex((c) => c.id === cardId);
+    if (cardIndex === -1) return '?';
+    return String.fromCharCode(65 + cardIndex); // A, B, C, D...
+  };
 
   const handleSubmit = () => {
     // Check if all slots are filled
@@ -324,90 +329,122 @@ export default function PlayerB() {
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 p-6 max-w-6xl mx-auto space-y-6">
-        {/* Morse Light Display */}
-        <div className="game-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="card-title">💡 Đèn Morse</h3>
-            {isPlaying && (
-              <button
-                onClick={stopPlaying}
-                className="btn-primary px-4 py-2 text-sm"
-              >
-                ⏹️ Dừng
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center justify-center gap-8">
-            {/* Light Bulb */}
-            <div
-              className={`w-24 h-24 rounded-full transition-all duration-100 flex-shrink-0 ${
-                lightOn
-                  ? 'bg-yellow-400 shadow-[0_0_40px_20px_rgba(250,204,21,0.8)]'
-                  : 'bg-gray-300 shadow-inner'
-              }`}
-            />
-
-            {/* Current Element Display */}
-            <div className="text-center">
-              {currentElement ? (
-                <span
-                  className={`text-2xl font-bold ${
-                    lightOn ? 'text-yellow-600' : 'text-text/50'
-                  }`}
+      <div className="relative z-10 p-4 max-w-7xl mx-auto flex flex-col gap-4 h-[calc(100vh-80px)]">
+        {/* Top Row: Morse Light (left) + Word Cards (right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
+          {/* Left - Morse Light Display */}
+          <div className="game-card flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="card-title">💡 Đèn Morse</h3>
+              {isPlaying && (
+                <button
+                  onClick={stopPlaying}
+                  className="btn-primary px-3 py-1 text-sm"
                 >
-                  {currentElement}
-                </span>
-              ) : (
-                <span className="text-text/40">
-                  {isPlaying ? 'Đang phát...' : 'Nhấn vào thẻ để nghe mã Morse'}
-                </span>
+                  ⏹️ Dừng
+                </button>
               )}
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {/* Light Bulb */}
+              <div
+                className={`w-32 h-32 rounded-full transition-all duration-100 ${
+                  lightOn
+                    ? 'bg-yellow-400 shadow-[0_0_50px_25px_rgba(250,204,21,0.8)]'
+                    : 'bg-gray-300 shadow-inner'
+                }`}
+              />
+
+              {/* Current Element Display */}
+              <div className="mt-4 h-10 flex items-center justify-center">
+                {currentElement ? (
+                  <span
+                    className={`text-2xl font-bold ${
+                      lightOn ? 'text-yellow-600' : 'text-text/50'
+                    }`}
+                  >
+                    {currentElement}
+                  </span>
+                ) : (
+                  <span className="text-text/40 text-sm text-center">
+                    {isPlaying ? 'Đang phát...' : '👉 Chọn thẻ'}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Legend */}
-          <div className="mt-4 p-3 bg-yellow-50 rounded-xl border border-yellow-200 text-center">
-            <p className="text-yellow-700 text-sm">
-              <strong>Hướng dẫn:</strong> Đèn sáng NGẮN = Chấm (•) | Đèn sáng
-              DÀI = Gạch (—)
+          {/* Right - Word Cards */}
+          <div
+            className="game-card flex flex-col"
+            onDragOver={handleDragOver}
+            onDrop={handleDropOnPool}
+          >
+            <h3 className="card-title">🎴 Thẻ từ bí ẩn</h3>
+            <p className="text-xs text-text/50 mb-3">
+              Giải mã → Kéo vào ô bên dưới
             </p>
+
+            <div className="flex-1 flex flex-wrap gap-2 content-start justify-center overflow-auto">
+              {availableCards.map((card) => (
+                <div
+                  key={card.id}
+                  className={`relative px-4 py-3 rounded-xl border-2 cursor-pointer transition-all select-none ${
+                    activeCardId === card.id
+                      ? 'bg-yellow-100 border-yellow-400 shadow-lg scale-105'
+                      : 'bg-white border-gray-200 hover:border-primary hover:shadow-md'
+                  }`}
+                  draggable={!isPlaying}
+                  onDragStart={(e) => handleDragStart(e, card)}
+                  onClick={() => handleCardClick(card)}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🔊</span>
+                    <span className="font-bold text-text tracking-wide">
+                      Thẻ {getCardLabel(card.id)}
+                    </span>
+                  </div>
+                  {activeCardId === card.id && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {availableCards.length === 0 && (
+              <div className="text-center text-text/40 py-4 text-sm">
+                Tất cả thẻ đã được sử dụng
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="game-card bg-blue-50 border-blue-200">
-          <h3 className="card-title text-blue-700">📋 Cách chơi</h3>
-          <ol className="text-sm text-blue-600 space-y-1">
-            <li>
-              1. <strong>Nhấn vào thẻ</strong> để nghe mã Morse của từ đó
-            </li>
-            <li>
-              2. Mô tả cho Player A: &quot;NGẮN&quot; hoặc &quot;DÀI&quot; để
-              giải mã từng chữ cái
-            </li>
-            <li>
-              3. <strong>Kéo thả các thẻ</strong> vào 7 ô theo đúng thứ tự câu
-            </li>
-            <li>
-              4. <strong>⚠️ Lưu ý:</strong> Có 3 thẻ gây nhiễu, không thuộc câu
-              đáp án!
-            </li>
-          </ol>
-        </div>
-
-        {/* Answer Slots */}
+        {/* Bottom - Answer Slots */}
         <div className="game-card">
-          <h3 className="card-title">
-            📝 Sắp xếp câu trả lời ({answerSlots.filter((s) => s).length}/
-            {totalSlots})
-          </h3>
-          <div className="flex flex-wrap gap-3 justify-center mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="card-title">
+              📝 Sắp xếp câu trả lời ({answerSlots.filter((s) => s).length}/
+              {totalSlots})
+            </h3>
+            <button
+              onClick={handleSubmit}
+              disabled={
+                loading ||
+                gameComplete ||
+                answerSlots.filter((s) => s).length !== totalSlots
+              }
+              className="btn-check px-6 py-2"
+            >
+              {loading ? 'Đang kiểm tra...' : '✓ Kiểm tra'}
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-center">
             {answerSlots.map((slot, index) => (
               <div
                 key={index}
-                className={`relative w-28 h-16 rounded-xl border-2 border-dashed flex items-center justify-center transition-all ${
+                className={`relative w-24 h-14 rounded-xl border-2 border-dashed flex items-center justify-center transition-all ${
                   slot
                     ? 'bg-green-100 border-green-400'
                     : 'bg-gray-100 border-gray-300 hover:border-primary hover:bg-primary/5'
@@ -415,7 +452,7 @@ export default function PlayerB() {
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDropOnSlot(e, index)}
               >
-                <span className="absolute -top-2 -left-2 w-6 h-6 bg-primary text-white text-xs rounded-full flex items-center justify-center font-bold">
+                <span className="absolute -top-2 -left-2 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center font-bold">
                   {index + 1}
                 </span>
                 {slot ? (
@@ -424,99 +461,27 @@ export default function PlayerB() {
                     draggable
                     onDragStart={(e) => handleDragStart(e, slot, index)}
                   >
-                    <span className="font-bold text-green-700">
-                      {slot.word}
+                    <span className="font-bold text-green-700 text-sm">
+                      Thẻ {getCardLabel(slot.id)}
                     </span>
                     <button
                       onClick={() => removeFromSlot(index)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full hover:bg-red-600"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 flex items-center justify-center"
                     >
                       ×
                     </button>
                   </div>
                 ) : (
-                  <span className="text-gray-400 text-sm">Kéo thẻ vào</span>
+                  <span className="text-gray-400 text-xs">Kéo vào</span>
                 )}
               </div>
             ))}
-          </div>
-
-          {/* Submit Button */}
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={handleSubmit}
-              disabled={
-                loading ||
-                gameComplete ||
-                answerSlots.filter((s) => s).length !== totalSlots
-              }
-              className="btn-check px-8 py-3"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="three-body" style={{ '--uib-size': '20px' }}>
-                    <div className="three-body__dot"></div>
-                    <div className="three-body__dot"></div>
-                    <div className="three-body__dot"></div>
-                  </div>
-                  Đang kiểm tra...
-                </span>
-              ) : (
-                '✓ Kiểm tra đáp án'
-              )}
-            </button>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200 text-center">
-              <p className="text-primary font-medium">❌ {error}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Word Cards Pool */}
-        <div
-          className="game-card"
-          onDragOver={handleDragOver}
-          onDrop={handleDropOnPool}
-        >
-          <h3 className="card-title">🎴 Thẻ từ (Nhấn để nghe Morse)</h3>
-          <p className="text-sm text-text/50 mb-4">
-            Có {wordCards.length} thẻ, trong đó {totalSlots} thẻ là đáp án, còn
-            lại là thẻ gây nhiễu
-          </p>
-
-          <div className="flex flex-wrap gap-3 justify-center">
-            {availableCards.map((card) => (
-              <div
-                key={card.id}
-                className={`relative px-4 py-3 rounded-xl border-2 cursor-pointer transition-all select-none ${
-                  activeCardId === card.id
-                    ? 'bg-yellow-100 border-yellow-400 shadow-lg scale-105'
-                    : 'bg-white border-gray-200 hover:border-primary hover:shadow-md hover:scale-102'
-                }`}
-                draggable={!isPlaying}
-                onDragStart={(e) => handleDragStart(e, card)}
-                onClick={() => handleCardClick(card)}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🔊</span>
-                  <span className="font-bold text-text tracking-wide">
-                    Thẻ{' '}
-                    {card.id.replace('card-', '').replace('distractor-', 'X-')}
-                  </span>
-                </div>
-                {activeCardId === card.id && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-pulse" />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {availableCards.length === 0 && (
-            <div className="text-center text-text/40 py-4">
-              Tất cả thẻ đã được sử dụng
+            <div className="mt-3 p-2 bg-red-50 rounded-lg border border-red-200 text-center">
+              <p className="text-primary font-medium text-sm">❌ {error}</p>
             </div>
           )}
         </div>
