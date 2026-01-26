@@ -175,19 +175,6 @@ export default function PlayerA() {
 
       {/* Main Content */}
       <div className="relative z-10 p-6 max-w-10xl mx-auto">
-        {/* Instructions */}
-        <div className="game-card mb-6">
-          <h3 className="card-title">📋 Hướng dẫn</h3>
-          <ol className="text-sm text-text/70 space-y-2">
-            <li>1. Nhìn từng ký hiệu mật mã bên dưới</li>
-            <li>
-              2. Mô tả hình dạng ký hiệu cho {playerBName} thông qua giao tiếp
-            </li>
-            <li>3. {playerBName} sẽ giải mã và đọc lại chữ cái</li>
-            <li>4. Khi đủ chữ, {playerBName} nhập đáp án → Qua Game 2</li>
-          </ol>
-        </div>
-
         {/* Cipher Display */}
         <div className="game-card">
           <h3 className="card-title">🔐 Mật mã cần giải</h3>
@@ -205,13 +192,6 @@ export default function PlayerA() {
                 )}
               </div>
             ))}
-          </div>
-
-          <div className="mt-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-            <p className="text-yellow-700 text-sm text-center">
-              ⚠️ <strong>Chú ý:</strong> Mô tả hình dạng (góc, đường thẳng, có
-              chấm không...)
-            </p>
           </div>
         </div>
 
