@@ -26,67 +26,91 @@ const io = new Server(server, {
   pingTimeout: 60000,
 });
 
-// Philosophy questions database
+// Philosophy & Scientific Socialism questions database
 const questions = [
+  // --- NHÓM CÂU HỎI ĐÚNG (YES) - Dành cho dây nối đúng ---
   {
     id: 1,
-    question: 'Hiện tượng có phản ánh bản chất không?',
+    question:
+      'Giai cấp công nhân có sứ mệnh lịch sử xóa bỏ chủ nghĩa tư bản không?',
     correctAnswer: 'YES',
   },
   {
     id: 2,
-    question: 'Vật chất có quyết định ý thức không?',
+    question:
+      'Đảng Cộng sản có phải là đội tiên phong của giai cấp công nhân không?',
     correctAnswer: 'YES',
   },
   {
     id: 3,
-    question: 'Ý thức có thể tồn tại độc lập với vật chất không?',
-    correctAnswer: 'NO',
+    question: 'Thời kỳ quá độ lên chủ nghĩa xã hội có mang tính tất yếu không?',
+    correctAnswer: 'YES',
   },
   {
     id: 4,
-    question: 'Mâu thuẫn có phải động lực của sự phát triển không?',
+    question:
+      'Nền tảng của nhà nước XHCN là liên minh công - nông - trí thức đúng không?',
     correctAnswer: 'YES',
   },
   {
     id: 5,
-    question: 'Lượng đổi có dẫn đến chất đổi không?',
+    question:
+      'Trong chủ nghĩa xã hội, nguyên tắc phân phối theo lao động là chủ yếu đúng không?',
     correctAnswer: 'YES',
   },
   {
     id: 6,
-    question: 'Phủ định biện chứng có giữ lại yếu tố tích cực không?',
+    question:
+      'Dân chủ xã hội chủ nghĩa có phải là bản chất của chế độ ta không?',
     correctAnswer: 'YES',
   },
   {
     id: 7,
-    question: 'Thực tiễn có phải tiêu chuẩn của chân lý không?',
+    question: 'Gia đình có phải là tế bào của xã hội không?',
     correctAnswer: 'YES',
   },
   {
     id: 8,
-    question: 'Tồn tại xã hội có quyết định ý thức xã hội không?',
+    question:
+      'Cương lĩnh xây dựng đất nước có phải do Đảng Cộng sản đề ra không?',
     correctAnswer: 'YES',
   },
+  // --- NHÓM CÂU HỎI SAI (NO) - Dành cho dây nối sai ---
   {
     id: 9,
-    question: 'Quy luật tự nhiên có thể bị con người thay đổi không?',
-    correctAnswer: 'NO',
+    question:
+      'Nhà nước có tồn tại vĩnh viễn trong xã hội cộng sản chủ nghĩa không?',
+    correctAnswer: 'NO', // Nhà nước sẽ tự tiêu vong khi hết giai cấp
   },
   {
     id: 10,
-    question: 'Nhận thức cảm tính có phải giai đoạn đầu của nhận thức không?',
-    correctAnswer: 'YES',
+    question:
+      'Chủ nghĩa xã hội có duy trì chế độ tư hữu về tư liệu sản xuất chủ yếu không?',
+    correctAnswer: 'NO', // Phải là chế độ công hữu
   },
   {
     id: 11,
-    question: 'Biện chứng có phải là phương pháp tư duy khoa học không?',
-    correctAnswer: 'YES',
+    question:
+      'Giai cấp công nhân có thể tự giải phóng triệt để nếu thiếu Đảng lãnh đạo không?',
+    correctAnswer: 'NO', // Cần phải có Đảng Cộng sản
   },
   {
     id: 12,
-    question: 'Siêu hình học có thể giải thích được sự phát triển không?',
-    correctAnswer: 'NO',
+    question:
+      'Tôn giáo có bị cấm hoàn toàn trong thời kỳ quá độ lên chủ nghĩa xã hội không?',
+    correctAnswer: 'NO', // Tôn trọng tự do tín ngưỡng
+  },
+  {
+    id: 13,
+    question:
+      'Quá độ lên chủ nghĩa xã hội có thể bỏ qua việc phát triển lực lượng sản xuất không?',
+    correctAnswer: 'NO', // Phải phát triển mạnh mẽ LLSX
+  },
+  {
+    id: 14,
+    question:
+      'Nhà nước pháp quyền XHCN có phải chỉ bảo vệ quyền lợi của riêng giai cấp công nhân không?',
+    correctAnswer: 'NO', // Bảo vệ lợi ích của toàn thể nhân dân lao động
   },
 ];
 
@@ -111,20 +135,21 @@ const correctWires = [
   { from: 'green', to: 'yellow' }, // Xanh Lá - Vàng
 ];
 
-// All possible wire pairs for the physical board (includes fake ones)
+// All 10 wire pairs matching the circuit.png image
+// 8 wires around the circle + 2 diagonal wires
 const allWirePairs = [
-  { from: 'red', to: 'yellow' },
-  { from: 'yellow', to: 'green' },
-  { from: 'green', to: 'blue' },
-  { from: 'blue', to: 'purple' },
-  { from: 'purple', to: 'orange' },
-  { from: 'orange', to: 'cyan' },
-  { from: 'cyan', to: 'pink' },
-  { from: 'pink', to: 'red' },
-  { from: 'orange', to: 'pink' },
-  { from: 'pink', to: 'blue' },
-  { from: 'red', to: 'green' },
-  { from: 'yellow', to: 'purple' },
+  { from: 'red', to: 'yellow' }, // 1. Đỏ - Vàng
+  { from: 'yellow', to: 'green' }, // 2. Vàng - Xanh Lá
+  { from: 'green', to: 'blue' }, // 3. Xanh Lá - Xanh Dương
+  { from: 'blue', to: 'purple' }, // 4. Xanh Dương - Tím
+  { from: 'purple', to: 'orange' }, // 5. Tím - Cam
+  { from: 'orange', to: 'cyan' }, // 6. Cam - Lục Lam
+  { from: 'cyan', to: 'pink' }, // 7. Lục Lam - Hồng
+  { from: 'pink', to: 'red' }, // 8. Hồng - Đỏ
+  { from: 'red', to: 'green' }, // 9. Đỏ - Xanh Lá (chéo)
+  { from: 'blue', to: 'pink' }, // 10. Xanh Dương - Hồng (chéo)
+  { from: 'pink', to: 'orange' }, // 11. Hồng - Cam
+  { from: 'red', to: 'purple' }, // 12. Đỏ - Tím
 ];
 
 // Room state management
@@ -422,6 +447,46 @@ io.on('connection', (socket) => {
   socket.on('join-room', ({ roomId, role }) => {
     socket.join(roomId);
     if (!rooms[roomId]) {
+      // Separate questions by answer type
+      const yesQuestions = questions.filter((q) => q.correctAnswer === 'YES');
+      const noQuestions = questions.filter((q) => q.correctAnswer === 'NO');
+
+      // Helper to check if a wire is in correctWires
+      const isCorrectWire = (wire) =>
+        correctWires.some(
+          (cw) =>
+            (cw.from === wire.from && cw.to === wire.to) ||
+            (cw.from === wire.to && cw.to === wire.from)
+        );
+
+      // Assign questions to wire pairs - correctWires get YES questions, others get NO questions
+      let yesIndex = 0;
+      let noIndex = 0;
+      const questionAssignments = allWirePairs.map((wire, index) => {
+        const needsYes = isCorrectWire(wire);
+        let question;
+
+        if (needsYes) {
+          // This wire is in correctWires - assign a YES question
+          question = yesQuestions[yesIndex % yesQuestions.length];
+          yesIndex++;
+        } else {
+          // This wire is NOT in correctWires - assign a NO question
+          question = noQuestions[noIndex % noQuestions.length];
+          noIndex++;
+        }
+
+        return {
+          wireIndex: index,
+          from: wire.from,
+          to: wire.to,
+          question: question.question,
+          questionId: question.id,
+          correctAnswer: question.correctAnswer, // Store the correct answer
+          isCorrectWire: needsYes, // Mark if this wire should be connected
+        };
+      });
+
       rooms[roomId] = {
         players: {},
         wireResults: [], // Store answered wires with results
@@ -430,9 +495,26 @@ io.on('connection', (socket) => {
         gameComplete: false,
         gameOver: false, // Track if time ran out
         currentWire: null, // Wire being questioned
+        questionAssignments, // Fixed question for each wire pair
       };
     }
     rooms[roomId].players[role] = socket.id;
+
+    // Prepare allQuestions for Player A (with wire pair info)
+    const allQuestions = rooms[roomId].questionAssignments.map((qa) => {
+      const fromNode = lightNodes.find((n) => n.id === qa.from);
+      const toNode = lightNodes.find((n) => n.id === qa.to);
+      return {
+        question: qa.question,
+        questionId: qa.questionId,
+        from: qa.from,
+        to: qa.to,
+        fromLabel: fromNode?.label || qa.from,
+        toLabel: toNode?.label || qa.to,
+        fromColor: fromNode?.color,
+        toColor: toNode?.color,
+      };
+    });
 
     // Send initial game state
     socket.emit('game-init', {
@@ -442,6 +524,7 @@ io.on('connection', (socket) => {
       wireResults: rooms[roomId].wireResults,
       timeRemaining: rooms[roomId].timeRemaining,
       requiredWireCount: correctWires.length,
+      allQuestions: role === 'A' ? allQuestions : undefined, // Only send to Player A
     });
 
     console.log(`${role} joined room ${roomId}`);
@@ -451,6 +534,12 @@ io.on('connection', (socket) => {
   socket.on('select-wire', ({ roomId, from, to }) => {
     const room = rooms[roomId];
     if (!room || room.gameComplete || room.gameOver) return;
+
+    // Find the wire index in the question assignments
+    const wireIndex = room.questionAssignments.findIndex(
+      (qa) =>
+        (qa.from === from && qa.to === to) || (qa.from === to && qa.to === from)
+    );
 
     // Check if this wire was already asked
     const alreadyAsked = room.wireResults.find(
@@ -467,8 +556,15 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Get question for Player A
-    const question = getRandomQuestion(room.usedQuestionIds);
+    // Get the pre-assigned question for this wire
+    const questionAssignment = room.questionAssignments[wireIndex];
+    const question = questionAssignment
+      ? {
+          id: questionAssignment.questionId,
+          question: questionAssignment.question,
+        }
+      : getRandomQuestion(room.usedQuestionIds);
+
     room.usedQuestionIds.push(question.id);
 
     const fromNode = lightNodes.find((n) => n.id === from);
@@ -482,6 +578,7 @@ io.on('connection', (socket) => {
       fromColor: fromNode?.color,
       toColor: toNode?.color,
       questionId: question.id,
+      wireIndex: wireIndex >= 0 ? wireIndex : room.wireResults.length,
     };
 
     // Notify Player B that wire is being processed
@@ -490,17 +587,20 @@ io.on('connection', (socket) => {
       message: 'Đang chờ Player A trả lời...',
     });
 
-    // Send question to Player A
+    // Send question to Player A with wireIndex
     io.to(roomId).emit('wire-question', {
       wire: room.currentWire,
       question: question.question,
       forPlayerA: true,
+      wireIndex: room.currentWire.wireIndex,
     });
 
-    console.log(`Wire selected: ${fromNode?.label} → ${toNode?.label}`);
+    console.log(
+      `Wire selected: ${fromNode?.label} → ${toNode?.label} (index: ${wireIndex})`
+    );
   });
 
-  // Player A answers the question
+  // Player A answers the question (old flow - when B asks)
   socket.on('answer-question', ({ roomId, answer }) => {
     const room = rooms[roomId];
     if (!room || !room.currentWire) return;
@@ -521,6 +621,7 @@ io.on('connection', (socket) => {
       toColor: wire.toColor,
       playerAAnswer: answer,
       shouldConnect: shouldConnect, // What A told B to do
+      wireIndex: wire.wireIndex, // Include wireIndex for Player A to track
     };
 
     room.wireResults.push(result);
@@ -537,14 +638,71 @@ io.on('connection', (socket) => {
     );
   });
 
+  // Player A independently answers a question (new flow - A is proactive)
+  socket.on('player-a-answer', ({ roomId, wireIndex, answer }) => {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    const shouldConnect = answer === 'YES';
+
+    // Check if this question was already answered
+    const existingIndex = room.wireResults.findIndex(
+      (r) => r.wireIndex === wireIndex
+    );
+
+    if (existingIndex >= 0) {
+      // Update existing answer
+      room.wireResults[existingIndex].playerAAnswer = answer;
+      room.wireResults[existingIndex].shouldConnect = shouldConnect;
+    } else {
+      // Add new answer
+      const qa = room.questionAssignments[wireIndex];
+      if (!qa) return;
+
+      const fromNode = lightNodes.find((n) => n.id === qa.from);
+      const toNode = lightNodes.find((n) => n.id === qa.to);
+
+      const result = {
+        from: qa.from,
+        to: qa.to,
+        fromLabel: fromNode?.label || qa.from,
+        toLabel: toNode?.label || qa.to,
+        fromColor: fromNode?.color,
+        toColor: toNode?.color,
+        playerAAnswer: answer,
+        shouldConnect: shouldConnect,
+        wireIndex: wireIndex,
+      };
+
+      room.wireResults.push(result);
+    }
+
+    // Notify Player A of the update (Player B doesn't see this)
+    io.to(roomId).emit('answer-updated', {
+      wireIndex,
+      shouldConnect,
+      totalResults: room.wireResults,
+    });
+
+    console.log(
+      `Player A answered wire ${wireIndex}: ${answer} (${shouldConnect ? 'NỐI' : 'KHÔNG NỐI'})`
+    );
+  });
+
   // Player A updates an existing answer
   socket.on('update-answer', ({ roomId, wireIndex, newAnswer }) => {
     const room = rooms[roomId];
-    if (!room || wireIndex < 0 || wireIndex >= room.wireResults.length) return;
+    if (!room) return;
+
+    // Find the wire result by wireIndex (not array index)
+    const resultIndex = room.wireResults.findIndex(
+      (r) => r.wireIndex === wireIndex
+    );
+    if (resultIndex < 0) return;
 
     const shouldConnect = newAnswer === 'YES';
-    room.wireResults[wireIndex].playerAAnswer = newAnswer;
-    room.wireResults[wireIndex].shouldConnect = shouldConnect;
+    room.wireResults[resultIndex].playerAAnswer = newAnswer;
+    room.wireResults[resultIndex].shouldConnect = shouldConnect;
 
     // Notify both players of the update
     io.to(roomId).emit('answer-updated', {
@@ -554,7 +712,7 @@ io.on('connection', (socket) => {
       totalResults: room.wireResults,
     });
 
-    const wire = room.wireResults[wireIndex];
+    const wire = room.wireResults[resultIndex];
     console.log(
       `Answer UPDATED: ${wire.fromLabel} → ${wire.toLabel} = ${newAnswer} (${shouldConnect ? 'NỐI' : 'KHÔNG NỐI'})`
     );
@@ -624,11 +782,15 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Sync timer (called periodically by frontend)
+  // Sync timer (called periodically by frontend - broadcast to all players)
   socket.on('sync-timer', ({ roomId, timeRemaining }) => {
     const room = rooms[roomId];
     if (room && !room.gameComplete && !room.gameOver) {
       room.timeRemaining = timeRemaining;
+
+      // Broadcast time update to all players in the room (including Player A)
+      io.to(roomId).emit('time-update', { timeRemaining });
+
       if (timeRemaining <= 0) {
         room.gameOver = true;
         io.to(roomId).emit('game-over', {
@@ -644,18 +806,74 @@ io.on('connection', (socket) => {
   // Reset game
   socket.on('reset-game', ({ roomId }) => {
     if (rooms[roomId]) {
+      // Separate questions by answer type
+      const yesQuestions = questions.filter((q) => q.correctAnswer === 'YES');
+      const noQuestions = questions.filter((q) => q.correctAnswer === 'NO');
+
+      // Helper to check if a wire is in correctWires
+      const isCorrectWire = (wire) =>
+        correctWires.some(
+          (cw) =>
+            (cw.from === wire.from && cw.to === wire.to) ||
+            (cw.from === wire.to && cw.to === wire.from)
+        );
+
+      // Assign questions to wire pairs - correctWires get YES questions, others get NO questions
+      let yesIndex = 0;
+      let noIndex = 0;
+      const questionAssignments = allWirePairs.map((wire, index) => {
+        const needsYes = isCorrectWire(wire);
+        let question;
+
+        if (needsYes) {
+          question = yesQuestions[yesIndex % yesQuestions.length];
+          yesIndex++;
+        } else {
+          question = noQuestions[noIndex % noQuestions.length];
+          noIndex++;
+        }
+
+        return {
+          wireIndex: index,
+          from: wire.from,
+          to: wire.to,
+          question: question.question,
+          questionId: question.id,
+          correctAnswer: question.correctAnswer,
+          isCorrectWire: needsYes,
+        };
+      });
+
       rooms[roomId].wireResults = [];
       rooms[roomId].usedQuestionIds = [];
       rooms[roomId].timeRemaining = INITIAL_TIME;
       rooms[roomId].gameComplete = false;
       rooms[roomId].gameOver = false;
       rooms[roomId].currentWire = null;
+      rooms[roomId].questionAssignments = questionAssignments;
+
+      // Prepare allQuestions for Player A (with wire pair info)
+      const allQuestions = questionAssignments.map((qa) => {
+        const fromNode = lightNodes.find((n) => n.id === qa.from);
+        const toNode = lightNodes.find((n) => n.id === qa.to);
+        return {
+          question: qa.question,
+          questionId: qa.questionId,
+          from: qa.from,
+          to: qa.to,
+          fromLabel: fromNode?.label || qa.from,
+          toLabel: toNode?.label || qa.to,
+          fromColor: fromNode?.color,
+          toColor: toNode?.color,
+        };
+      });
 
       io.to(roomId).emit('game-reset', {
         lightNodes,
         allWirePairs,
         timeRemaining: INITIAL_TIME,
         requiredWireCount: correctWires.length,
+        allQuestions, // Send updated questions to Player A
       });
     }
   });
