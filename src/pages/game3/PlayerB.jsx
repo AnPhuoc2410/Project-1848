@@ -138,7 +138,7 @@ export default function PlayerB() {
   };
 
   useEffect(() => {
-    socket.emit('join-game3', { roomId, role: 'B' });
+    socket.emit('join-game3', { roomId, role: 'B', playerName: myName });
 
     socket.on('game3-word-cards', ({ wordCards: cards, totalSlots: slots }) => {
       setWordCards(cards);

@@ -774,11 +774,12 @@ io.on('connection', (socket) => {
     return shuffleArray([...correctCards, ...distractorCards]);
   }
 
-  socket.on('join-game3', ({ roomId, role }) => {
+  socket.on('join-game3', ({ roomId, role, playerName }) => {
     socket.join(`game3-${roomId}`);
     if (!game3Rooms[roomId]) {
       game3Rooms[roomId] = {
         players: {},
+        playerNames: {},
         phrase: game3Phrase,
         correctWords: game3Words,
         wordCards: generateWordCards(),
@@ -788,6 +789,7 @@ io.on('connection', (socket) => {
       };
     }
     game3Rooms[roomId].players[role] = socket.id;
+    game3Rooms[roomId].playerNames[role] = playerName || `Player ${role}`;
 
     if (role === 'A') {
       socket.emit('game3-phrase-for-a', {
@@ -802,7 +804,10 @@ io.on('connection', (socket) => {
         totalSlots: game3Words.length,
       });
     }
-    io.to(`game3-${roomId}`).emit('game3-player-joined', { role });
+    io.to(`game3-${roomId}`).emit('game3-player-joined', {
+      role,
+      playerName: game3Rooms[roomId].playerNames[role],
+    });
   });
 
   socket.on('submit-game3-answer', ({ roomId, orderedWords }) => {
