@@ -16,6 +16,7 @@ export default function PlayerA() {
   const [playerBConnected, setPlayerBConnected] = useState(false);
   const [playerBName, setPlayerBName] = useState('Player B');
   const [gameComplete, setGameComplete] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Timer state
@@ -31,6 +32,7 @@ export default function PlayerA() {
         const newTime = prev - 1;
         if (newTime <= 0) {
           setTimerActive(false);
+          setGameOver(true);
           return 0;
         }
         // Sync timer to server every 5 seconds
@@ -58,14 +60,21 @@ export default function PlayerA() {
       startTimeRef.current = Date.now();
     });
 
-    socket.on('game1-player-joined', ({ role, playerName, playerNames }) => {
-      if (role === 'B') {
-        setPlayerBConnected(true);
-        setPlayerBName(playerName);
+    socket.on(
+      'game1-player-joined',
+      ({ role, playerName, playerNames, timeRemaining: serverTime }) => {
+        if (role === 'B') {
+          setPlayerBConnected(true);
+          setPlayerBName(playerName);
+        }
+        // Sync player names
+        if (playerNames?.B) setPlayerBName(playerNames.B);
+        // Sync timer from server
+        if (serverTime !== undefined) {
+          setTimeRemaining(serverTime);
+        }
       }
-      // Sync player names
-      if (playerNames?.B) setPlayerBName(playerNames.B);
-    });
+    );
 
     socket.on('game1-complete', () => {
       setGameComplete(true);
@@ -87,10 +96,24 @@ export default function PlayerA() {
       }, 2000);
     });
 
+    socket.on('global-restart', () => {
+      // Reset states before navigating
+      setTimeRemaining(INITIAL_TIME);
+      setTimerActive(true);
+      setGameComplete(false);
+      setGameOver(false);
+      setLoading(true);
+      // Navigate to game1 with timestamp to force re-join
+      navigate(
+        `/game1/a?room=${roomId}&myName=${encodeURIComponent(myName)}&t=${Date.now()}`
+      );
+    });
+
     return () => {
       socket.off('game1-phrase');
       socket.off('game1-player-joined');
       socket.off('game1-complete');
+      socket.off('global-restart');
     };
   }, [roomId, navigate, myName, playerBName]);
 
@@ -136,6 +159,34 @@ export default function PlayerA() {
           </span>
         </div>
       </header>
+
+      {/* Game Over Overlay */}
+      {gameOver && (
+        <div className="game-overlay">
+          <div className="overlay-card bg-red-50 border-red-200">
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              ⏰ Hết thời gian!
+            </h2>
+            <p className="text-text/70 mb-4">Game kết thúc</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  socket.emit('restart-all-games', { roomId });
+                }}
+                className="btn-primary px-6 py-2"
+              >
+                🔄 Chơi lại
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="btn-secondary px-6 py-2"
+              >
+                🏠 Trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Game Complete Overlay */}
       {gameComplete && (

@@ -5,6 +5,7 @@ import TimelineSection from '../components/sections/TimelineSection';
 import InstructorSection from '../components/sections/InstructorSection';
 import FooterSection from '../components/sections/FooterSection';
 import About from '../components/About';
+import TeamSection from '../components/sections/TeamSection';
 
 const ScientificSocialism = () => {
   const courseModules = [
@@ -133,6 +134,7 @@ const ScientificSocialism = () => {
       <CourseContentSection modules={courseModules} />
       <TimelineSection events={timelineEvents} />
       <InstructorSection />
+      <TeamSection />
       <FooterSection />
     </div>
   );

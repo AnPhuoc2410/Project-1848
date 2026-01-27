@@ -213,7 +213,7 @@ const MORSE_CODE = {
 };
 
 // 6. Global Settings
-const INITIAL_TIME = 300;
+const INITIAL_TIME = 20;
 const TIME_PENALTY = 30;
 const SCORE_TIME_MULTIPLIER = 10;
 const SCORE_WRONG_PENALTY = 5;
@@ -307,6 +307,38 @@ function textToMorse(text) {
 
 io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
+
+  // ------------------------------------
+  // GLOBAL RESTART EVENT
+  // ------------------------------------
+  socket.on('restart-all-games', ({ roomId }) => {
+    console.log(`[Restart] Room ${roomId} - Restarting all games`);
+
+    // Clear all game rooms for this roomId
+    if (game1Rooms[roomId]) {
+      const randomPhrase =
+        game1Phrases[Math.floor(Math.random() * game1Phrases.length)];
+      game1Rooms[roomId] = {
+        players: game1Rooms[roomId].players,
+        playerNames: game1Rooms[roomId].playerNames,
+        phrase: randomPhrase,
+        attempts: 0,
+        startTime: Date.now(),
+        timeRemaining: INITIAL_TIME,
+        gameOver: false,
+      };
+    }
+    if (rooms[roomId]) delete rooms[roomId];
+    if (game3Rooms[roomId]) delete game3Rooms[roomId];
+    if (gameSessions[roomId]) delete gameSessions[roomId];
+
+    // Notify all players in all game rooms to restart
+    io.to(`game1-${roomId}`).emit('global-restart', { roomId });
+    io.to(roomId).emit('global-restart', { roomId }); // game2 uses roomId directly
+    io.to(`game3-${roomId}`).emit('global-restart', { roomId });
+
+    console.log(`[Restart] Room ${roomId} - All games reset, players notified`);
+  });
 
   // ------------------------------------
   // LOBBY EVENTS
