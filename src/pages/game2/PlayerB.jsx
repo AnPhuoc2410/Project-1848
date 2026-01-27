@@ -10,6 +10,10 @@ export default function PlayerB() {
   const roomId = params.get('room');
   const myName = params.get('myName') || 'Player B';
 
+  // Get player A name from sessionStorage (saved in game1)
+  const savedTimes = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+  const [playerAName] = useState(savedTimes.playerA || 'Player A');
+
   // Game state
   const [lightNodes, setLightNodes] = useState([]);
   const [myConnections, setMyConnections] = useState([]);
@@ -148,54 +152,146 @@ export default function PlayerB() {
   const handleReset = () => socket.emit('reset-game', { roomId });
 
   return (
-    <div className="game-page">
-      {/* Background */}
-      <div className="absolute inset-0 z-0 bg-background">
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-      </div>
-
-      {/* Header */}
-      <header className="game-header">
-        <div className="flex items-center gap-4">
-          <h1 className="special-font text-2xl font-black text-primary">
-            PL<b>A</b>YER B
-          </h1>
-          <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
-            🔧 Thực hành
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div
-            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
-          >
-            ⏱️ {formatTime(timeRemaining)}
+    <div className="h-screen w-screen bg-slate-100 flex flex-col overflow-hidden">
+      {/* ===== HEADER BAR 1: Dark top bar ===== */}
+      <header className="flex-shrink-0 bg-slate-800 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left: Player Title */}
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-black text-white tracking-wide">
+              PLAYER <span className="text-emerald-400">B</span>
+            </h1>
+            <span className="px-3 py-1 text-sm font-semibold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">
+              🔧 Thực hành
+            </span>
           </div>
-          <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
-            Room: {roomId}
-          </span>
+
+          {/* Right: Timer */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-400">
+              Room:{' '}
+              <span className="font-semibold text-slate-200">{roomId}</span>
+            </span>
+            <span className="px-3 py-1 text-sm bg-slate-700 text-slate-300 rounded-lg">
+              Dây đã nối: {myConnections.length}
+            </span>
+            <div
+              className={`px-5 py-2 rounded-xl font-mono text-2xl font-black tracking-wider ${
+                timeRemaining < 60
+                  ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50 animate-pulse'
+                  : 'bg-slate-700 text-white border-2 border-slate-600'
+              }`}
+            >
+              ⏱️ {formatTime(timeRemaining)}
+            </div>
+          </div>
         </div>
       </header>
 
+      {/* ===== HEADER BAR 2: Instruction sub-header ===== */}
+      <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left: Instruction Text */}
+          <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-200">
+            <span className="text-2xl">📋</span>
+            <p className="text-base text-emerald-800">
+              <span className="font-semibold">Nhiệm vụ:</span> Click 2 đèn để
+              nối/gỡ dây. Hãy hỏi{' '}
+              <span className="font-black text-emerald-900 underline decoration-2">
+                {playerAName}
+              </span>{' '}
+              xem nên nối cặp dây nào.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="flex-1 overflow-auto p-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left - Reference Image */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">
+              📷 Ảnh bảng đèn vật lý
+            </h3>
+            <div className="rounded-xl overflow-hidden bg-slate-50">
+              <img
+                src="/img_game/circuit.png"
+                alt="Bảng đèn vật lý"
+                className="w-full h-auto"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Right - Connection Board */}
+          <div className="space-y-6">
+            {/* Connection Board */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+              <h3 className="text-lg font-bold text-slate-800 mb-2">
+                🔌 Bảng nối dây của bạn
+              </h3>
+              <p className="text-sm text-slate-500 mb-4">
+                Click 2 đèn để nối/gỡ dây.
+              </p>
+
+              <LightBoard
+                nodes={lightNodes}
+                connections={myConnections}
+                onWireComplete={handleToggleConnection}
+                interactive={!levelComplete && !gameOver}
+              />
+            </div>
+
+            {/* Submit Button */}
+            {!levelComplete && !gameOver && (
+              <button
+                onClick={handleCheck}
+                disabled={myConnections.length === 0}
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 
+                           text-white rounded-xl font-bold text-lg transition"
+              >
+                ✓ Kiểm tra kết quả
+              </button>
+            )}
+
+            {/* Check Result */}
+            {checkResult?.type === 'error' && (
+              <div className="p-4 bg-red-50 rounded-xl border border-red-200 text-center">
+                <p className="text-red-600 font-medium">
+                  ❌ {checkResult.message}
+                </p>
+                <p className="text-xl font-bold text-red-600 mt-2">
+                  -{checkResult.timePenalty} giây!
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* ===== OVERLAYS ===== */}
       {/* Game Over Overlay */}
       {gameOver && (
-        <div className="game-overlay">
-          <div className="overlay-card bg-red-50 border-red-200">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-red-200">
+            <div className="text-6xl mb-4">⏰</div>
             <h2 className="text-2xl font-bold text-red-600 mb-2">
-              ⏰ Hết thời gian!
+              Hết thời gian!
             </h2>
-            <p className="text-text/70 mb-4">Game kết thúc</p>
+            <p className="text-slate-600 mb-6">Game kết thúc</p>
             <div className="flex gap-3 justify-center">
               <button
-                onClick={() => {
-                  socket.emit('restart-all-games', { roomId });
-                }}
-                className="btn-primary px-6 py-2"
+                onClick={() => socket.emit('restart-all-games', { roomId })}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition"
               >
                 🔄 Chơi lại
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="btn-secondary px-6 py-2"
+                className="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold transition"
               >
                 🏠 Trang chủ
               </button>
@@ -206,75 +302,17 @@ export default function PlayerB() {
 
       {/* Level Complete Overlay */}
       {levelComplete && (
-        <div className="game-overlay">
-          <div className="overlay-card bg-green-50 border-green-200">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-green-200">
+            <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-2xl font-bold text-green-600 mb-2">
-              🎉 Hoàn thành!
+              Hoàn thành!
             </h2>
-            <p className="text-text/70 mb-4">{checkResult?.message}</p>
-            <p className="text-sm text-text/50">Đang chuyển sang Game 3...</p>
+            <p className="text-slate-600 mb-4">{checkResult?.message}</p>
+            <p className="text-sm text-slate-400">Đang chuyển sang Game 3...</p>
           </div>
         </div>
       )}
-
-      {/* Main Content */}
-      <div className="relative z-10 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-        {/* Left - Reference Image */}
-        <div className="game-card">
-          <h3 className="card-title">Ảnh bảng đèn vật lý</h3>
-          <div className="rounded-lg overflow-hidden bg-gray-100">
-            <img
-              src="/img_game/circuit.png"
-              alt="Bảng đèn vật lý"
-              className="w-full h-auto"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Right - Connection Board */}
-        <div className="space-y-6">
-          {/* Connection Board */}
-          <div className="game-card">
-            <h3 className="card-title">Bảng nối dây của bạn</h3>
-            <p className="text-sm text-text/50 mb-4">
-              Click 2 đèn để nối/gỡ dây.
-            </p>
-
-            <LightBoard
-              nodes={lightNodes}
-              connections={myConnections}
-              onWireComplete={handleToggleConnection}
-              interactive={!levelComplete && !gameOver}
-            />
-          </div>
-
-          {/* Submit Button */}
-          {!levelComplete && !gameOver && (
-            <button
-              onClick={handleCheck}
-              disabled={myConnections.length === 0}
-              className="btn-check w-full"
-            >
-              ✓ Kiểm tra kết quả
-            </button>
-          )}
-
-          {/* Check Result */}
-          {checkResult?.type === 'error' && (
-            <div className="p-4 bg-red-50 rounded-xl border border-red-200 text-center">
-              <p className="text-primary font-medium">
-                ❌ {checkResult.message}
-              </p>
-              <p className="text-xl font-bold text-primary mt-2">
-                -{checkResult.timePenalty} giây!
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

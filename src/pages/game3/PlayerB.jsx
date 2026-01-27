@@ -18,6 +18,10 @@ export default function PlayerB() {
   const roomId = params.get('room') || 'mln131';
   const myName = params.get('myName') || 'Player B';
 
+  // Get player A name from sessionStorage (saved in game1)
+  const savedTimes = JSON.parse(sessionStorage.getItem('gameTimes') || '{}');
+  const [playerAName] = useState(savedTimes.playerA || 'Player A');
+
   const [playerAConnected, setPlayerAConnected] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
   const [gameOver, setGameOver] = useState(false);
@@ -504,29 +508,18 @@ export default function PlayerB() {
           BAR 2 - INSTRUCTION SUB-HEADER (Light Background)
       ═══════════════════════════════════════════════════════════════════ */}
       <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center justify-between">
-          {/* Left: Hint Text (Larger & More Prominent) */}
-          <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
-            <span className="text-2xl">💡</span>
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-bold text-amber-900">Gợi ý:</p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-amber-800">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-amber-600 rounded-full"></span>
-                  Mỗi thẻ = <strong className="text-amber-900">1 từ</strong>{' '}
-                  (không phải chữ cái)
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                  Có <strong className="text-red-600">3 thẻ giả</strong> trong
-                  danh sách
-                </span>
-              </div>
-            </div>
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Nhiệm vụ */}
+          <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-200">
+            <span className="text-2xl">📋</span>
+            <p className="text-base text-emerald-800">
+              <span className="font-semibold">Nhiệm vụ:</span> Giải mã tín hiệu
+              Morse và sắp xếp các thẻ thành câu hoàn chỉnh.
+            </p>
           </div>
 
           {/* Right: Signal Legend */}
-          <div className="hidden md:flex items-center gap-2 bg-slate-50 rounded-xl px-4 py-2 border border-slate-200">
+          <div className="hidden lg:flex items-center gap-2 bg-slate-50 rounded-xl px-4 py-2 border border-slate-200">
             <span className="text-xs font-semibold text-slate-500 mr-2">
               Bấm để nghe:
             </span>
@@ -626,6 +619,16 @@ export default function PlayerB() {
           onDragOver={handleDragOver}
           onDrop={handleDropOnPool}
         >
+          {/* Gợi ý - Hint box above cards */}
+          <div className="mb-3 flex items-center justify-center gap-4 text-sm">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-full border border-amber-200 text-amber-800">
+              💡 Mỗi thẻ = <strong className="text-amber-900">1 từ</strong>
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-full border border-red-200 text-red-700">
+              ⚠️ Có <strong>3 thẻ giả</strong>
+            </span>
+          </div>
+
           <div className="grid grid-cols-5 gap-2 md:gap-3">
             {wordCards.map((card) => {
               const isInSlot = answerSlots.some((slot) => slot?.id === card.id);
