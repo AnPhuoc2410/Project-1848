@@ -1,15 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import { GAME_TIMES } from '../../config/gameConfig';
 
-// Initial time for Game 1 (5 minutes)
-const INITIAL_TIME = 300;
+// Initial time for Game 1
+const INITIAL_TIME = GAME_TIMES.GAME1;
 
 export default function PlayerB() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roomId = params.get('room') || 'mln131';
   const myName = params.get('myName') || 'Player B';
+  const restartKey = params.get('t') || ''; // Force re-run on restart
 
   const [answer, setAnswer] = useState('');
   const [playerAConnected, setPlayerAConnected] = useState(false);
@@ -47,8 +49,7 @@ export default function PlayerB() {
   };
 
   useEffect(() => {
-    socket.emit('join-game1', { roomId, role: 'B', playerName: myName });
-
+    // Setup listeners FIRST, then emit
     socket.on(
       'game1-player-joined',
       ({ role, playerName, playerNames, timeRemaining: serverTime }) => {
@@ -112,6 +113,9 @@ export default function PlayerB() {
       );
     });
 
+    // Emit AFTER listeners are setup
+    socket.emit('join-game1', { roomId, role: 'B', playerName: myName });
+
     return () => {
       socket.off('game1-player-joined');
       socket.off('game1-timer-update');
@@ -119,7 +123,7 @@ export default function PlayerB() {
       socket.off('game1-complete');
       socket.off('global-restart');
     };
-  }, [roomId, navigate, myName, playerAName]);
+  }, [roomId, navigate, myName, playerAName, restartKey]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

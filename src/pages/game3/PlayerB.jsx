@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import { GAME_TIMES } from '../../config/gameConfig';
 
 // Timing constants (in milliseconds)
 const DOT_DURATION = 400;
@@ -8,8 +9,8 @@ const DASH_DURATION = 1200;
 const ELEMENT_GAP = 400;
 const LETTER_GAP = 1200;
 
-// Initial time for Game 3 (5 minutes)
-const INITIAL_TIME = 300;
+// Initial time for Game 3
+const INITIAL_TIME = GAME_TIMES.GAME3;
 
 export default function PlayerB() {
   const [params] = useSearchParams();
@@ -40,6 +41,11 @@ export default function PlayerB() {
   const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
   const [timerActive, setTimerActive] = useState(true);
   const startTimeRef = useRef(Date.now());
+
+  // Demo light state
+  const [demoLightOn, setDemoLightOn] = useState(false);
+  const [isPlayingDemo, setIsPlayingDemo] = useState(false);
+  const demoTimeoutRef = useRef(null);
 
   // Initialize empty answer slots
   useEffect(() => {
@@ -279,6 +285,49 @@ export default function PlayerB() {
     });
   };
 
+  // Demo functions
+  const playDemo = (type) => {
+    if (isPlayingDemo) return;
+    setIsPlayingDemo(true);
+
+    const clearAllTimeouts = () => {
+      if (demoTimeoutRef.current) {
+        clearTimeout(demoTimeoutRef.current);
+      }
+    };
+
+    clearAllTimeouts();
+
+    if (type === 'dot') {
+      // Chấm: 0.4s sáng
+      setDemoLightOn(true);
+      demoTimeoutRef.current = setTimeout(() => {
+        setDemoLightOn(false);
+        setIsPlayingDemo(false);
+      }, DOT_DURATION);
+    } else if (type === 'dash') {
+      // Gạch: 1.2s sáng
+      setDemoLightOn(true);
+      demoTimeoutRef.current = setTimeout(() => {
+        setDemoLightOn(false);
+        setIsPlayingDemo(false);
+      }, DASH_DURATION);
+    } else if (type === 'letter-gap') {
+      // Khoảng lặng giữa chữ: chấm -> gap 1.2s -> chấm
+      setDemoLightOn(true);
+      demoTimeoutRef.current = setTimeout(() => {
+        setDemoLightOn(false);
+        setTimeout(() => {
+          setDemoLightOn(true);
+          setTimeout(() => {
+            setDemoLightOn(false);
+            setIsPlayingDemo(false);
+          }, DOT_DURATION);
+        }, LETTER_GAP);
+      }, DOT_DURATION);
+    }
+  };
+
   return (
     <div className="game-page">
       {/* Background */}
@@ -305,15 +354,6 @@ export default function PlayerB() {
           >
             ⏱️ {formatTime(timeRemaining)}
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              playerAConnected
-                ? 'bg-green-100 text-green-600'
-                : 'bg-gray-100 text-gray-500'
-            }`}
-          >
-            {playerAConnected ? '🟢 Player A online' : '⏳ Chờ Player A...'}
-          </span>
           <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
             Room: {roomId}
           </span>
@@ -366,48 +406,112 @@ export default function PlayerB() {
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 p-4 max-w-7xl mx-auto flex flex-col gap-4 h-[calc(100vh-80px)]">
-        {/* Top Row: Morse Light (left) + Word Cards (right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
-          {/* Left - Morse Light Display */}
-          <div className="game-card flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="card-title">💡 Đèn Morse</h3>
-              {isPlaying && (
+      <div className="relative z-10 p-4 max-w-7xl mx-auto flex flex-col gap-4 overflow-auto">
+        {/* Top Row: Left (Demo + Morse Light) + Right (Word Cards) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[500px]">
+          {/* Left Column - Demo & Morse Light */}
+          <div className="flex flex-col gap-3">
+            {/* Demo Timing Section */}
+            <div className="game-card">
+              <h3 className="card-title mb-2 text-sm">⏱️ Demo tín hiệu</h3>
+
+              {/* Demo Light */}
+              <div className="flex justify-center mb-2">
+                <div
+                  className={`w-16 h-16 rounded-full border-2 transition-all duration-100 ${
+                    demoLightOn
+                      ? 'bg-yellow-400 border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.8)]'
+                      : 'bg-gray-300 border-gray-400'
+                  }`}
+                />
+              </div>
+
+              {/* Demo Controls */}
+              <div className="grid grid-cols-3 gap-1.5">
                 <button
-                  onClick={stopPlaying}
-                  className="btn-primary px-3 py-1 text-sm"
+                  onClick={() => playDemo('dot')}
+                  disabled={isPlayingDemo}
+                  className={`px-2 py-1.5 rounded-lg font-medium transition-all text-xs ${
+                    isPlayingDemo
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
+                  }`}
                 >
-                  ⏹️ Dừng
+                  <div className="font-bold text-base">•</div>
+                  <div className="text-xs">Chấm</div>
+                  <div className="text-[10px] opacity-80">0.4s</div>
                 </button>
-              )}
+
+                <button
+                  onClick={() => playDemo('dash')}
+                  disabled={isPlayingDemo}
+                  className={`px-2 py-1.5 rounded-lg font-medium transition-all text-xs ${
+                    isPlayingDemo
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-purple-500 text-white hover:bg-purple-600 active:scale-95'
+                  }`}
+                >
+                  <div className="font-bold text-base">—</div>
+                  <div className="text-xs">Gạch</div>
+                  <div className="text-[10px] opacity-80">1.2s</div>
+                </button>
+
+                <button
+                  onClick={() => playDemo('letter-gap')}
+                  disabled={isPlayingDemo}
+                  className={`px-2 py-1.5 rounded-lg font-medium transition-all text-xs ${
+                    isPlayingDemo
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-orange-500 text-white hover:bg-orange-600 active:scale-95'
+                  }`}
+                >
+                  <div className="font-bold text-base">_</div>
+                  <div className="text-xs">Lặng</div>
+                  <div className="text-[10px] opacity-80">1.2s</div>
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center">
-              {/* Light Bulb */}
-              <div
-                className={`w-32 h-32 rounded-full transition-all duration-100 ${
-                  lightOn
-                    ? 'bg-yellow-400 shadow-[0_0_50px_25px_rgba(250,204,21,0.8)]'
-                    : 'bg-gray-300 shadow-inner'
-                }`}
-              />
-
-              {/* Current Element Display */}
-              <div className="mt-4 h-10 flex items-center justify-center">
-                {currentElement ? (
-                  <span
-                    className={`text-2xl font-bold ${
-                      lightOn ? 'text-yellow-600' : 'text-text/50'
-                    }`}
+            {/* Morse Light Display */}
+            <div className="game-card flex flex-col flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="card-title text-sm">💡 Đèn Morse</h3>
+                {isPlaying && (
+                  <button
+                    onClick={stopPlaying}
+                    className="btn-primary px-2 py-1 text-xs"
                   >
-                    {currentElement}
-                  </span>
-                ) : (
-                  <span className="text-text/40 text-sm text-center">
-                    {isPlaying ? 'Đang phát...' : '👉 Chọn thẻ'}
-                  </span>
+                    ⏹️ Dừng
+                  </button>
                 )}
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center">
+                {/* Light Bulb */}
+                <div
+                  className={`w-28 h-28 rounded-full transition-all duration-100 ${
+                    lightOn
+                      ? 'bg-yellow-400 shadow-[0_0_40px_20px_rgba(250,204,21,0.8)]'
+                      : 'bg-gray-300 shadow-inner'
+                  }`}
+                />
+
+                {/* Current Element Display */}
+                <div className="mt-3 h-8 flex items-center justify-center">
+                  {currentElement ? (
+                    <span
+                      className={`text-xl font-bold ${
+                        lightOn ? 'text-yellow-600' : 'text-text/50'
+                      }`}
+                    >
+                      {currentElement}
+                    </span>
+                  ) : (
+                    <span className="text-text/40 text-xs text-center">
+                      {isPlaying ? 'Đang phát...' : '👉 Chọn thẻ'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

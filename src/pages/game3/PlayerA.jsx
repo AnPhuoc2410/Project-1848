@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import { GAME_TIMES } from '../../config/gameConfig';
 
-// Initial time for Game 3 (5 minutes)
-const INITIAL_TIME = 300;
+// Initial time for Game 3
+const INITIAL_TIME = GAME_TIMES.GAME3;
 
 export default function PlayerA() {
   const [params] = useSearchParams();
@@ -111,15 +112,6 @@ export default function PlayerA() {
           >
             ⏱️ {formatTime(timeRemaining)}
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              playerBConnected
-                ? 'bg-green-100 text-green-600'
-                : 'bg-gray-100 text-gray-500'
-            }`}
-          >
-            {playerBConnected ? '🟢 Player B online' : '⏳ Chờ Player B...'}
-          </span>
           <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
             Room: {roomId}
           </span>
@@ -173,30 +165,9 @@ export default function PlayerA() {
 
       {/* Main Content */}
       <div className="relative z-10 p-6 max-w-5xl mx-auto">
-        {/* Instructions */}
-        <div className="game-card mb-6">
-          <h3 className="card-title">📋 Hướng dẫn</h3>
-          <ol className="text-sm text-text/70 space-y-2">
-            <li>
-              1. Player B sẽ nhấn vào từng <strong>thẻ từ</strong> để xem đèn
-              Morse chớp
-            </li>
-            <li>
-              2. Lắng nghe Player B mô tả: <strong>NGẮN</strong> (chấm) hoặc{' '}
-              <strong>DÀI</strong> (gạch)
-            </li>
-            <li>3. Tra bảng mã Morse bên dưới để tìm chữ cái tương ứng</li>
-            <li>4. Ghép các chữ cái thành từ và đọc lại cho Player B</li>
-            <li>5. Player B sẽ kéo thả các thẻ vào đúng thứ tự</li>
-          </ol>
-        </div>
-
         {/* Morse Code Reference */}
         <div className="game-card">
           <h3 className="card-title">🔤 Bảng mã Morse</h3>
-          <p className="text-sm text-text/50 mb-4">
-            Chấm (•) = NGẮN | Gạch (—) = DÀI
-          </p>
           <div className="rounded-xl overflow-hidden bg-white p-4 border border-border">
             <img
               src="/img_game/mmorse.jpg"

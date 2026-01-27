@@ -2,6 +2,7 @@ import { socket } from '../../socket';
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import LightBoard from '../../components/LightBoard';
+import { GAME_TIMES } from '../../config/gameConfig';
 
 export default function PlayerB() {
   const [params] = useSearchParams();
@@ -14,7 +15,7 @@ export default function PlayerB() {
   const [myConnections, setMyConnections] = useState([]);
 
   // Timer state
-  const [timeRemaining, setTimeRemaining] = useState(300);
+  const [timeRemaining, setTimeRemaining] = useState(GAME_TIMES.GAME2);
   const [timerActive, setTimerActive] = useState(true);
 
   // UI state
