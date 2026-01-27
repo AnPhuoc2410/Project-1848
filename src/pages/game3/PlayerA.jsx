@@ -13,6 +13,8 @@ export default function PlayerA() {
 
   const [playerBConnected, setPlayerBConnected] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [correctWords, setCorrectWords] = useState([]);
 
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
@@ -26,6 +28,7 @@ export default function PlayerA() {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           setTimerActive(false);
+          setGameOver(true);
           return 0;
         }
         return prev - 1;
@@ -42,6 +45,10 @@ export default function PlayerA() {
 
   useEffect(() => {
     socket.emit('join-game3', { roomId, role: 'A' });
+
+    socket.on('game3-phrase-for-a', ({ correctWords: words }) => {
+      setCorrectWords(words || []);
+    });
 
     socket.on('game3-player-joined', ({ role }) => {
       if (role === 'B') setPlayerBConnected(true);
@@ -64,9 +71,17 @@ export default function PlayerA() {
       }, 2000);
     });
 
+    socket.on('global-restart', () => {
+      navigate(
+        `/game1/a?room=${roomId}&myName=${encodeURIComponent(myName)}&t=${Date.now()}`
+      );
+    });
+
     return () => {
+      socket.off('game3-phrase-for-a');
       socket.off('game3-player-joined');
       socket.off('game3-complete');
+      socket.off('global-restart');
     };
   }, [roomId, navigate]);
 
@@ -111,6 +126,34 @@ export default function PlayerA() {
         </div>
       </header>
 
+      {/* Game Over Overlay */}
+      {gameOver && (
+        <div className="game-overlay">
+          <div className="overlay-card bg-red-50 border-red-200">
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              ⏰ Hết thời gian!
+            </h2>
+            <p className="text-text/70 mb-4">Game kết thúc</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  socket.emit('restart-all-games', { roomId });
+                }}
+                className="btn-primary px-6 py-2"
+              >
+                🔄 Chơi lại
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="btn-secondary px-6 py-2"
+              >
+                🏠 Trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Game Complete Overlay */}
       {gameComplete && (
         <div className="game-overlay">
@@ -135,12 +178,16 @@ export default function PlayerA() {
           <h3 className="card-title">📋 Hướng dẫn</h3>
           <ol className="text-sm text-text/70 space-y-2">
             <li>
-              1. Lắng nghe Player B mô tả ánh sáng: <strong>NGẮN</strong> (chấm)
-              hoặc <strong>DÀI</strong> (gạch)
+              1. Player B sẽ nhấn vào từng <strong>thẻ từ</strong> để xem đèn
+              Morse chớp
             </li>
-            <li>2. Tra bảng mã Morse bên dưới để tìm chữ cái tương ứng</li>
-            <li>3. Đọc lại chữ cái cho Player B biết</li>
-            <li>4. Ghép đủ các chữ → Player B nhập đáp án</li>
+            <li>
+              2. Lắng nghe Player B mô tả: <strong>NGẮN</strong> (chấm) hoặc{' '}
+              <strong>DÀI</strong> (gạch)
+            </li>
+            <li>3. Tra bảng mã Morse bên dưới để tìm chữ cái tương ứng</li>
+            <li>4. Ghép các chữ cái thành từ và đọc lại cho Player B</li>
+            <li>5. Player B sẽ kéo thả các thẻ vào đúng thứ tự</li>
           </ol>
         </div>
 

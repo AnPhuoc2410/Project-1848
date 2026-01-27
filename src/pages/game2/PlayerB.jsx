@@ -99,6 +99,12 @@ export default function PlayerB() {
       setTimerActive(true);
     });
 
+    socket.on('global-restart', () => {
+      navigate(
+        `/game1/b?room=${roomId}&myName=${encodeURIComponent(myName)}&t=${Date.now()}`
+      );
+    });
+
     return () => {
       socket.off('game-init');
       socket.off('check-failed');
@@ -106,6 +112,7 @@ export default function PlayerB() {
       socket.off('level-complete');
       socket.off('game-over');
       socket.off('game-reset');
+      socket.off('global-restart');
     };
   }, [roomId, navigate, myName]);
 
@@ -172,13 +179,26 @@ export default function PlayerB() {
       {gameOver && (
         <div className="game-overlay">
           <div className="overlay-card bg-red-50 border-red-200">
-            <h2 className="text-2xl font-bold text-primary mb-2">
-              ⏰ Hết Thời Gian!
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              ⏰ Hết thời gian!
             </h2>
-            <p className="text-text/70 mb-4">Game Over</p>
-            <button onClick={handleReset} className="btn-primary">
-              Chơi lại
-            </button>
+            <p className="text-text/70 mb-4">Game kết thúc</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  socket.emit('restart-all-games', { roomId });
+                }}
+                className="btn-primary px-6 py-2"
+              >
+                🔄 Chơi lại
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="btn-secondary px-6 py-2"
+              >
+                🏠 Trang chủ
+              </button>
+            </div>
           </div>
         </div>
       )}

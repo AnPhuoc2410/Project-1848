@@ -85,23 +85,31 @@ const TimelineSection = ({ events }) => {
             các cột mốc quan trọng.
           </p>
         </div>
-        <div className="relative wrap overflow-hidden p-10 h-full">
+
+        {/* Thêm class timeline-container để làm trigger cho đường kẻ */}
+        <div className="timeline-container relative wrap p-10 h-full">
+          {/* Đường kẻ dọc: Thêm class timeline-line */}
           <div
-            className="border-2-2 absolute border-opacity-20 border-gray-700 h-full border"
+            className="timeline-line border-2-2 absolute border-opacity-20 border-gray-700 h-full border"
             style={{ left: '50%' }}
           ></div>
+
           {events.map((event, index) => (
             <div
               key={event.id}
               className={`timeline-card mb-8 flex justify-between items-center w-full ${index % 2 === 0 ? 'flex-row-reverse left-timeline' : 'right-timeline'}`}
             >
               <div className="order-1 w-5/12"></div>
-              <div className="z-20 flex items-center order-1 bg-primary shadow-xl w-8 h-8 rounded-full">
+
+              {/* Vòng tròn trung tâm */}
+              <div className="z-20 flex items-center order-1 bg-primary shadow-xl w-8 h-8 rounded-full ring-4 ring-white">
                 <h1 className="mx-auto font-semibold text-sm text-white">
                   {event.id}
                 </h1>
               </div>
-              <div className="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4">
+
+              {/* Card nội dung */}
+              <div className="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 transition-transform hover:scale-[1.02]">
                 <p className="text-sm font-medium text-primary">{event.date}</p>
                 <h3 className="font-bold text-gray-800 text-lg">
                   {event.title}

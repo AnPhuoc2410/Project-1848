@@ -15,6 +15,7 @@ export default function PlayerB() {
   const [playerAConnected, setPlayerAConnected] = useState(false);
   const [playerAName, setPlayerAName] = useState('Player A');
   const [gameComplete, setGameComplete] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +31,7 @@ export default function PlayerB() {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           setTimerActive(false);
+          setGameOver(true);
           return 0;
         }
         return prev - 1;
@@ -96,11 +98,26 @@ export default function PlayerB() {
       }, 2000);
     });
 
+    socket.on('global-restart', () => {
+      // Reset states before navigating
+      setTimeRemaining(INITIAL_TIME);
+      setTimerActive(true);
+      setGameComplete(false);
+      setGameOver(false);
+      setError('');
+      setAnswer('');
+      // Navigate to game1 with timestamp to force re-join
+      navigate(
+        `/game1/b?room=${roomId}&myName=${encodeURIComponent(myName)}&t=${Date.now()}`
+      );
+    });
+
     return () => {
       socket.off('game1-player-joined');
       socket.off('game1-timer-update');
       socket.off('game1-wrong-answer');
       socket.off('game1-complete');
+      socket.off('global-restart');
     };
   }, [roomId, navigate, myName, playerAName]);
 
@@ -156,6 +173,34 @@ export default function PlayerB() {
           </span>
         </div>
       </header>
+
+      {/* Game Over Overlay */}
+      {gameOver && (
+        <div className="game-overlay">
+          <div className="overlay-card bg-red-50 border-red-200">
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              ⏰ Hết thời gian!
+            </h2>
+            <p className="text-text/70 mb-4">Game kết thúc</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  socket.emit('restart-all-games', { roomId });
+                }}
+                className="btn-primary px-6 py-2"
+              >
+                🔄 Chơi lại
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="btn-secondary px-6 py-2"
+              >
+                🏠 Trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Game Complete Overlay */}
       {gameComplete && (
