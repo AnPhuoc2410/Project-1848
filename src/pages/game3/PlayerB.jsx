@@ -508,13 +508,21 @@ export default function PlayerB() {
           {/* Left: Hint Text (Larger & More Prominent) */}
           <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
             <span className="text-2xl">💡</span>
-            <p className="text-base text-amber-800">
-              <span className="font-semibold">Gợi ý:</span> Mỗi thẻ ẩn chứa{' '}
-              <span className="font-black text-amber-900 underline decoration-2">
-                1 từ vựng
-              </span>{' '}
-              (word), không phải chữ cái.
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-bold text-amber-900">Gợi ý:</p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-amber-800">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-amber-600 rounded-full"></span>
+                  Mỗi thẻ = <strong className="text-amber-900">1 từ</strong>{' '}
+                  (không phải chữ cái)
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  Có <strong className="text-red-600">3 thẻ giả</strong> trong
+                  danh sách
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Right: Signal Legend */}
