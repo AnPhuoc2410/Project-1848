@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import { GAME_TIMES } from '../../config/gameConfig';
 
-// Initial time for Game 3 (5 minutes)
-const INITIAL_TIME = 300;
+// Initial time for Game 3
+const INITIAL_TIME = GAME_TIMES.GAME3;
 
 export default function PlayerA() {
   const [params] = useSearchParams();
@@ -188,6 +189,15 @@ export default function PlayerA() {
             <li>3. Tra bảng mã Morse bên dưới để tìm chữ cái tương ứng</li>
             <li>4. Ghép các chữ cái thành từ và đọc lại cho Player B</li>
             <li>5. Player B sẽ kéo thả các thẻ vào đúng thứ tự</li>
+            <li className="mt-3 pt-3 border-t border-border/50">
+              <strong>⏱️ Độ dài tín hiệu:</strong>
+              <ul className="ml-4 mt-1 space-y-1">
+                <li>• Chấm (•) = 0.4 giây</li>
+                <li>• Gạch (—) = 1.2 giây (dài gấp 3 lần chấm)</li>
+                <li>• Khoảng lặng giữa các chấm/gạch = 0.4 giây</li>
+                <li>• Khoảng lặng giữa các chữ cái = 1.2 giây</li>
+              </ul>
+            </li>
           </ol>
         </div>
 

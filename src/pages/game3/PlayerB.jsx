@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import { GAME_TIMES } from '../../config/gameConfig';
 
 // Timing constants (in milliseconds)
 const DOT_DURATION = 400;
@@ -8,8 +9,8 @@ const DASH_DURATION = 1200;
 const ELEMENT_GAP = 400;
 const LETTER_GAP = 1200;
 
-// Initial time for Game 3 (5 minutes)
-const INITIAL_TIME = 300;
+// Initial time for Game 3
+const INITIAL_TIME = GAME_TIMES.GAME3;
 
 export default function PlayerB() {
   const [params] = useSearchParams();

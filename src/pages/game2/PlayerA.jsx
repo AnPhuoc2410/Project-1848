@@ -1,6 +1,7 @@
 import { socket } from '../../socket';
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { GAME_TIMES } from '../../config/gameConfig';
 
 export default function PlayerA() {
   const [params] = useSearchParams();
@@ -16,7 +17,7 @@ export default function PlayerA() {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
   // Timer state (synced from Player B via server)
-  const [timeRemaining, setTimeRemaining] = useState(300);
+  const [timeRemaining, setTimeRemaining] = useState(GAME_TIMES.GAME2);
 
   // Game status
   const [levelComplete, setLevelComplete] = useState(false);

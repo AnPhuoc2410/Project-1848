@@ -213,7 +213,7 @@ const MORSE_CODE = {
 };
 
 // 6. Global Settings
-const INITIAL_TIME = 20;
+const INITIAL_TIME = 300;
 const TIME_PENALTY = 30;
 const SCORE_TIME_MULTIPLIER = 10;
 const SCORE_WRONG_PENALTY = 5;
