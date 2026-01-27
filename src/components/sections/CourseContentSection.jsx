@@ -1,6 +1,20 @@
+import { useState } from 'react';
 import AnimatedTitle from '../AnimatedTitle';
+import CourseModal from '../CourseModal';
 
 const CourseContentSection = ({ modules }) => {
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModuleClick = (module) => {
+    setSelectedModule(module);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedModule(null), 300); // Wait for transition
+  };
   return (
     <section
       id="content"
@@ -25,7 +39,8 @@ const CourseContentSection = ({ modules }) => {
           {modules.map((module) => (
             <div
               key={module.id}
-              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-white p-6 transition-all duration-500 ease-out hover:-translate-y-3 hover:scale-[1.01] hover:border-primary/80 hover:shadow-[0_24px_60px_-32px_rgba(0,0,0,0.55)]"
+              onClick={() => handleModuleClick(module)}
+              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-white p-6 transition-all duration-500 ease-out hover:-translate-y-3 hover:scale-[1.01] hover:border-primary/80 hover:shadow-[0_24px_60px_-32px_rgba(0,0,0,0.55)] cursor-pointer"
             >
               <div
                 className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 blur-3xl"
@@ -56,6 +71,11 @@ const CourseContentSection = ({ modules }) => {
           ))}
         </div>
       </div>
+      <CourseModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        module={selectedModule}
+      />
     </section>
   );
 };
