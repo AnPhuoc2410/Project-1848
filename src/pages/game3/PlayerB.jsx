@@ -3,11 +3,11 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import { GAME_TIMES } from '../../config/gameConfig';
 
-// Timing constants (in milliseconds)
-const DOT_DURATION = 400;
-const DASH_DURATION = 1200;
-const ELEMENT_GAP = 400;
-const LETTER_GAP = 1200;
+// Timing constants (in milliseconds) - Chuẩn Morse tỉ lệ 1:3
+const DOT_DURATION = 300; // Chấm: ngắn
+const DASH_DURATION = 900; // Gạch: dài gấp 3 lần chấm
+const ELEMENT_GAP = 300; // Khoảng cách giữa các tín hiệu trong 1 chữ
+const LETTER_GAP = 900; // Khoảng cách giữa các chữ (= 3 đơn vị)
 
 // Initial time for Game 3
 const INITIAL_TIME = GAME_TIMES.GAME3;
@@ -35,7 +35,9 @@ export default function PlayerB() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [lightOn, setLightOn] = useState(false);
   const [currentElement, setCurrentElement] = useState('');
+  const [currentMorseDisplay, setCurrentMorseDisplay] = useState(''); // Hiển thị morse đang phát
   const playingRef = useRef(false);
+  const audioContextRef = useRef(null);
 
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState(INITIAL_TIME);
@@ -46,6 +48,37 @@ export default function PlayerB() {
   const [demoLightOn, setDemoLightOn] = useState(false);
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const demoTimeoutRef = useRef(null);
+
+  // Initialize audio context for beep sounds
+  const playBeep = useCallback((duration) => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+      }
+      const ctx = audioContextRef.current;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.frequency.value = 600; // Tần số beep
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        ctx.currentTime + duration / 1000
+      );
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + duration / 1000);
+    } catch (e) {
+      // Ignore audio errors
+    }
+  }, []);
 
   // Initialize empty answer slots
   useEffect(() => {
@@ -151,8 +184,10 @@ export default function PlayerB() {
       setActiveCardId(card.id);
       setIsPlaying(true);
       playingRef.current = true;
+      setCurrentMorseDisplay('');
 
       const morseSequence = card.morseSequence;
+      let fullMorseDisplay = '';
 
       for (let i = 0; i < morseSequence.length; i++) {
         if (!playingRef.current) break;
@@ -167,15 +202,28 @@ export default function PlayerB() {
 
           const element = elements[j];
           const isDot = element === '.';
+          const duration = isDot ? DOT_DURATION : DASH_DURATION;
+
+          // Update morse display - hiển thị từng tín hiệu
+          setCurrentElement(isDot ? '•' : '—');
+          fullMorseDisplay += isDot ? '•' : '—';
+          setCurrentMorseDisplay(fullMorseDisplay);
 
           setLightOn(true);
-          await sleep(isDot ? DOT_DURATION : DASH_DURATION);
+          playBeep(duration);
+          await sleep(duration);
 
           setLightOn(false);
+          setCurrentElement('');
+
           if (j < elements.length - 1) {
             await sleep(ELEMENT_GAP);
           }
         }
+
+        // Thêm dấu cách để phân biệt chữ
+        fullMorseDisplay += ' ';
+        setCurrentMorseDisplay(fullMorseDisplay);
 
         // Letter gap after each letter
         if (i < morseSequence.length - 1) {
@@ -183,12 +231,17 @@ export default function PlayerB() {
         }
       }
 
+      // Giữ hiển thị morse 1 giây trước khi xóa
+      await sleep(1000);
+
       setIsPlaying(false);
       playingRef.current = false;
       setActiveCardId(null);
       setLightOn(false);
+      setCurrentMorseDisplay('');
+      setCurrentElement('');
     },
-    [isPlaying]
+    [isPlaying, playBeep]
   );
 
   const stopPlaying = () => {
@@ -197,6 +250,7 @@ export default function PlayerB() {
     setLightOn(false);
     setActiveCardId(null);
     setCurrentElement('');
+    setCurrentMorseDisplay('');
   };
 
   // Drag and Drop handlers
@@ -299,26 +353,30 @@ export default function PlayerB() {
     clearAllTimeouts();
 
     if (type === 'dot') {
-      // Chấm: 0.4s sáng
+      // Chấm: 0.3s sáng
       setDemoLightOn(true);
+      playBeep(DOT_DURATION);
       demoTimeoutRef.current = setTimeout(() => {
         setDemoLightOn(false);
         setIsPlayingDemo(false);
       }, DOT_DURATION);
     } else if (type === 'dash') {
-      // Gạch: 1.2s sáng
+      // Gạch: 0.9s sáng
       setDemoLightOn(true);
+      playBeep(DASH_DURATION);
       demoTimeoutRef.current = setTimeout(() => {
         setDemoLightOn(false);
         setIsPlayingDemo(false);
       }, DASH_DURATION);
     } else if (type === 'letter-gap') {
-      // Khoảng lặng giữa chữ: chấm -> gap 1.2s -> chấm
+      // Khoảng lặng giữa chữ: chấm -> gap 0.9s -> chấm
       setDemoLightOn(true);
+      playBeep(DOT_DURATION);
       demoTimeoutRef.current = setTimeout(() => {
         setDemoLightOn(false);
         setTimeout(() => {
           setDemoLightOn(true);
+          playBeep(DOT_DURATION);
           setTimeout(() => {
             setDemoLightOn(false);
             setIsPlayingDemo(false);
@@ -436,7 +494,9 @@ export default function PlayerB() {
                 >
                   <div className="font-bold text-base">•</div>
                   <div className="text-xs">Chấm</div>
-                  <div className="text-[10px] opacity-80">0.4s</div>
+                  <div className="text-[10px] opacity-80">
+                    {DOT_DURATION / 1000}s
+                  </div>
                 </button>
 
                 <button
@@ -450,7 +510,9 @@ export default function PlayerB() {
                 >
                   <div className="font-bold text-base">—</div>
                   <div className="text-xs">Gạch</div>
-                  <div className="text-[10px] opacity-80">1.2s</div>
+                  <div className="text-[10px] opacity-80">
+                    {DASH_DURATION / 1000}s
+                  </div>
                 </button>
 
                 <button
@@ -464,7 +526,9 @@ export default function PlayerB() {
                 >
                   <div className="font-bold text-base">_</div>
                   <div className="text-xs">Lặng</div>
-                  <div className="text-[10px] opacity-80">1.2s</div>
+                  <div className="text-[10px] opacity-80">
+                    {LETTER_GAP / 1000}s
+                  </div>
                 </button>
               </div>
             </div>
@@ -520,9 +584,18 @@ export default function PlayerB() {
             onDrop={handleDropOnPool}
           >
             <h3 className="card-title">🎴 Thẻ từ bí ẩn</h3>
-            <p className="text-xs text-text/50 mb-3">
-              Giải mã → Kéo vào ô bên dưới
-            </p>
+
+            {/* Hint Box */}
+            <div className="mb-3 p-2.5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200/50">
+              <div className="flex items-start gap-2">
+                <div className="text-xs text-amber-800/80 leading-relaxed">
+                  <span className="font-semibold">Gợi ý:</span> Tín hiệu trong
+                  mỗi thẻ đại diện cho{' '}
+                  <span className="font-bold text-amber-700">1 từ</span>, không
+                  phải một chữ cái.
+                </div>
+              </div>
+            </div>
 
             <div className="flex-1 flex flex-wrap gap-2 content-start justify-center overflow-auto">
               {availableCards.map((card) => (
