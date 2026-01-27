@@ -1,71 +1,80 @@
-import { useRef, useLayoutEffect } from 'react'; // Thêm hooks
-import gsap from 'gsap'; // Import GSAP
-import { ScrollTrigger } from 'gsap/ScrollTrigger'; // Import ScrollTrigger
+import { useEffect } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/all';
+
 import AnimatedTitle from '../AnimatedTitle';
 
-// Đăng ký plugin ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
 const TimelineSection = ({ events }) => {
-  const containerRef = useRef(null); // Ref bao bọc toàn bộ section để scoped selector
+  useEffect(() => {
+    const cards = gsap.utils.toArray('.timeline-card');
 
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      // 1. Animation cho đường kẻ dọc (Vẽ từ trên xuống dưới theo scroll)
-      gsap.fromTo(
-        '.timeline-line',
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          transformOrigin: 'top center', // Bắt đầu vẽ từ trên
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.timeline-container', // Trigger dựa trên wrapper của timeline
-            start: 'top 70%',
-            end: 'bottom 90%',
-            scrub: 1, // Mượt mà theo tốc độ cuộn chuột
-          },
-        }
-      );
+    cards.forEach((card, index) => {
+      const fromX = index % 2 === 0 ? 160 : -160;
 
-      // 2. Animation cho từng sự kiện (Trượt vào từ 2 bên)
-      const items = gsap.utils.toArray('.timeline-item');
+      gsap.set(card, { opacity: 0, x: fromX, y: 60, rotate: fromX / 15 });
 
-      items.forEach((item, index) => {
-        // Kiểm tra xem item đang nằm bên trái hay phải dựa vào index
-        // Logic cũ: index chẵn (0, 2...) có class 'flex-row-reverse' => Card nằm bên TRÁI
-        // index lẻ (1, 3...) => Card nằm bên PHẢI
-        const isEven = index % 2 === 0;
-        const xValue = isEven ? -100 : 100; // Trái trượt từ -100px, Phải trượt từ 100px
-
-        gsap.fromTo(
-          item,
-          { opacity: 0, x: xValue },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: item,
-              start: 'top 85%', // Bắt đầu chạy khi phần tử vào 85% viewport
-              toggleActions: 'play none none reverse', // Cuộn xuống thì chạy, cuộn lên thì đảo ngược
+      const enter = () => {
+        gsap.to(card, {
+          keyframes: [
+            {
+              x: fromX * 0.8,
+              y: -24,
+              rotate: fromX / -25,
+              opacity: 0.6,
+              duration: 0.25,
+              ease: 'power1.out',
             },
-          }
-        );
-      });
-    }, containerRef); // Scope animations vào containerRef
+            {
+              x: 0,
+              y: 0,
+              rotate: 0,
+              opacity: 1,
+              duration: 0.5,
+              ease: 'power2.out',
+            },
+          ],
+        });
+      };
 
-    return () => ctx.revert(); // Cleanup khi unmount
+      const leave = () => {
+        gsap.to(card, {
+          x: fromX,
+          y: 140,
+          rotate: fromX / 10,
+          opacity: 0,
+          duration: 0.4,
+          ease: 'power1.in',
+        });
+      };
+
+      ScrollTrigger.create({
+        trigger: card,
+        start: 'top 85%',
+        end: 'bottom 60%',
+        onEnter: enter,
+        onEnterBack: enter,
+        onLeave: leave,
+        onLeaveBack: leave,
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
   }, [events]);
 
   return (
     <section
-      ref={containerRef}
       id="timeline"
-      className="py-16 md:py-24 scroll-mt-16 overflow-hidden"
+      className="relative py-16 md:py-24 scroll-mt-16 overflow-hidden"
     >
-      <div className="container mx-auto px-4">
+      <div className="absolute inset-0 z-0 bg-background">
+        <div className="absolute inset-0 bg-grid-pattern" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4">
         <div className="text-center mb-12">
           <AnimatedTitle
             title="DÒNG TH<b>Ờ</b>I GIAN <br /> NHỮNG CỘT M<b>Ố</b>C CHÍNH"
@@ -88,12 +97,7 @@ const TimelineSection = ({ events }) => {
           {events.map((event, index) => (
             <div
               key={event.id}
-              // Thêm class timeline-item để target animation
-              className={`timeline-item mb-8 flex justify-between items-center w-full ${
-                index % 2 === 0
-                  ? 'flex-row-reverse left-timeline'
-                  : 'right-timeline'
-              }`}
+              className={`timeline-card mb-8 flex justify-between items-center w-full ${index % 2 === 0 ? 'flex-row-reverse left-timeline' : 'right-timeline'}`}
             >
               <div className="order-1 w-5/12"></div>
 

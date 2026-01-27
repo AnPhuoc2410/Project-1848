@@ -5,48 +5,10 @@ import TimelineSection from '../components/sections/TimelineSection';
 import InstructorSection from '../components/sections/InstructorSection';
 import FooterSection from '../components/sections/FooterSection';
 import About from '../components/About';
+import courseModules from '../data/courseModules';
 import TeamSection from '../components/sections/TeamSection';
 
 const ScientificSocialism = () => {
-  const courseModules = [
-    {
-      id: 1,
-      title: 'Nhập môn Chủ nghĩa xã hội khoa học',
-      description:
-        'Đối tượng, phương pháp và ý nghĩa của việc học tập, nghiên cứu chủ nghĩa xã hội khoa học.',
-    },
-    {
-      id: 2,
-      title: 'Sứ mệnh lịch sử của giai cấp công nhân',
-      description:
-        'Nội dung và những điều kiện khách quan quy định sứ mệnh lịch sử của giai cấp công nhân.',
-    },
-    {
-      id: 3,
-      title: 'Chủ nghĩa xã hội và thời kỳ quá độ',
-      description:
-        'Những đặc trưng cơ bản của chủ nghĩa xã hội và con đường đi lên chủ nghĩa xã hội.',
-    },
-    {
-      id: 4,
-      title: 'Vấn đề dân tộc và tôn giáo',
-      description:
-        'Chủ nghĩa Mác - Lênin về vấn đề dân tộc và tôn giáo trong thời kỳ quá độ lên chủ nghĩa xã hội.',
-    },
-    {
-      id: 5,
-      title: 'Vấn đề gia đình',
-      description:
-        'Xây dựng gia đình kiểu mới xã hội chủ nghĩa và các giá trị gia đình trong xã hội hiện đại.',
-    },
-    {
-      id: 6,
-      title: 'Con đường đi lên CNXH ở Việt Nam',
-      description:
-        'Đặc điểm của thời kỳ quá độ lên chủ nghĩa xã hội ở Việt Nam và những phương hướng cơ bản.',
-    },
-  ];
-
   const timelineEvents = [
     {
       id: 1,

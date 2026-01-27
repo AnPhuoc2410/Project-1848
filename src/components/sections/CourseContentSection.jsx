@@ -1,9 +1,30 @@
+import { useState } from 'react';
 import AnimatedTitle from '../AnimatedTitle';
+import CourseModal from '../CourseModal';
 
 const CourseContentSection = ({ modules }) => {
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModuleClick = (module) => {
+    setSelectedModule(module);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedModule(null), 300); // Wait for transition
+  };
   return (
-    <section id="content" className="py-16 md:py-24 bg-gray-50 scroll-mt-16">
-      <div className="container mx-auto px-4">
+    <section
+      id="content"
+      className="relative py-16 md:py-24 scroll-mt-16 overflow-hidden"
+    >
+      <div className="absolute inset-0 z-0 bg-background">
+        <div className="absolute inset-0 bg-grid-pattern" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4">
         <div className="text-center mb-12">
           <AnimatedTitle
             title="NỘI DUNG <b>KHÓA</b> HỌC <br /> KẾT CẤU <b>CHUYÊN</b> ĐỀ"
@@ -18,7 +39,8 @@ const CourseContentSection = ({ modules }) => {
           {modules.map((module) => (
             <div
               key={module.id}
-              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-white p-6 transition-all duration-500 ease-out hover:-translate-y-3 hover:scale-[1.01] hover:border-primary/80 hover:shadow-[0_24px_60px_-32px_rgba(0,0,0,0.55)]"
+              onClick={() => handleModuleClick(module)}
+              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-white p-6 transition-all duration-500 ease-out hover:-translate-y-3 hover:scale-[1.01] hover:border-primary/80 hover:shadow-[0_24px_60px_-32px_rgba(0,0,0,0.55)] cursor-pointer"
             >
               <div
                 className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 blur-3xl"
@@ -49,6 +71,11 @@ const CourseContentSection = ({ modules }) => {
           ))}
         </div>
       </div>
+      <CourseModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        module={selectedModule}
+      />
     </section>
   );
 };
