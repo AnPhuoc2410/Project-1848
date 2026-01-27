@@ -139,25 +139,13 @@ export default function PlayerA() {
           <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm font-medium">
             🔐 Mã hóa
           </span>
-          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
-            {myName}
-          </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div
             className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
           >
             ⏱️ {formatTime(timeRemaining)}
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              playerBConnected
-                ? 'bg-green-100 text-green-600'
-                : 'bg-gray-100 text-gray-500'
-            }`}
-          >
-            {playerBConnected ? `🟢 ${playerBName}` : '⏳ Chờ Player B...'}
-          </span>
           <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
             Room: {roomId}
           </span>

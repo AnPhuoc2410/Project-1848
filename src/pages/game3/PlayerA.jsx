@@ -102,11 +102,8 @@ export default function PlayerA() {
           <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm font-medium">
             📖 Bảng mã Morse
           </span>
-          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
-            {myName}
-          </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div
             className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
           >
