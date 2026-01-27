@@ -5,7 +5,7 @@ const navLinks = [
   { href: '/#introduction', label: 'Giới thiệu', type: 'home-hash' },
   { href: '/#content', label: 'Nội dung', type: 'home-hash' },
   { href: '/#timeline', label: 'Dòng thời gian', type: 'home-hash' },
-  { href: '/#instructor', label: 'Giảng viên', type: 'home-hash' },
+  { href: '/#instructor', label: 'Thành viên', type: 'home-hash' },
   { href: '/mirror-hall', label: 'Đại sảnh gương 3D', type: 'route' },
   { href: '/mini-game', label: 'Mini-game', type: 'route' },
 ];
@@ -25,9 +25,9 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
 
-  const containerClass = `fixed inset-x-0 top-0 z-50 transition-colors duration-300 border border-blue-300/40 bg-blue-75/90 backdrop-blur-md shadow-lg`;
+  const containerClass = `fixed inset-x-0 top-0 z-50 duration-300 border border-blue-300/40 bg-white shadow-lg`;
 
-  const linkColor = scrolled ? 'text-black' : 'text-black';
+  const linkColor = scrolled ? 'text-red-700' : 'text-red-700';
 
   return (
     <nav className={containerClass}>
@@ -47,8 +47,8 @@ const Navbar = () => {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="text-sm font-medium nav-hover-btn text-black"
-                    style={{ fontFamily: 'var(--font-atkinson)' }}
+                    className="text-medium font-medium nav-hover-btn text-black"
+                    style={{ fontFamily: 'var(--font-crimson-pro)' }}
                   >
                     {link.label}
                   </a>
@@ -67,7 +67,7 @@ const Navbar = () => {
             })}
             <Link
               to="/lobby"
-              className="text-sm font-semibold rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 hover:text-white transition-colors"
+              className="text-sm font-semibold rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700 hover:text-white transition-colors"
               style={{ fontFamily: 'var(--font-atkinson)' }}
             >
               Tới trò chơi

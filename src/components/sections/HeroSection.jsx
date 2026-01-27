@@ -12,6 +12,12 @@ const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
+  const shouldRenderMedia = true; // keep media visible
+  const autoRotateMedia = false;
+
+  // Shared gradient text style for hero headings (yellow to red)
+  const heroGradientText =
+    'bg-gradient-to-r from-yellow-200 via-yellow-300 to-red-700 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(255,255,255,0.35)]';
 
   // Fallback to ensure loading screen doesn't get stuck
   useEffect(() => {
@@ -23,14 +29,14 @@ const HeroSection = () => {
   }, []);
 
   const mediaResources = [
-    { type: 'image', src: '/img/1.jpg' },
-    { type: 'image', src: '/img/2.jpg' },
-    { type: 'image', src: '/img/3.jpeg' },
+    // { type: 'image', src: '/img/1.jpg' },
+    // { type: 'image', src: '/img/2.jpg' },
+    // { type: 'image', src: '/img/3.jpeg' },
     { type: 'image', src: '/img/4.png' },
-    { type: 'image', src: '/img/6.webp' },
-    { type: 'image', src: '/img/7.jpeg' },
-    { type: 'image', src: '/img/8.jpg' },
-    { type: 'image', src: '/img/9.jpeg' },
+    // { type: 'image', src: '/img/6.webp' },
+    // { type: 'image', src: '/img/7.jpeg' },
+    // { type: 'image', src: '/img/8.jpg' },
+    // { type: 'image', src: '/img/9.jpeg' },
   ];
 
   const totalSlides = mediaResources.length;
@@ -48,24 +54,26 @@ const HeroSection = () => {
   // 0-based index helper for mediaResources
   const getMediaResource = (index) => mediaResources[(index - 1) % totalSlides];
 
-  const isLoading = loadedCount < totalSlides;
+  const isLoading = shouldRenderMedia ? loadedCount < totalSlides : false;
 
   const handleMiniVdClick = () => {
+    if (!shouldRenderMedia) return;
     setHasClicked(true);
     setCurrentIndex((prevIndex) => (prevIndex % totalSlides) + 1);
   };
 
   useEffect(() => {
+    if (!shouldRenderMedia || !autoRotateMedia) return undefined;
     const interval = setInterval(() => {
       handleMiniVdClick();
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [currentIndex, shouldRenderMedia]);
 
   useGSAP(
     () => {
-      if (hasClicked) {
+      if (shouldRenderMedia && hasClicked) {
         gsap.set('#next-media', { visibility: 'visible' });
         gsap.to('#next-media', {
           transformOrigin: 'center center',
@@ -89,7 +97,7 @@ const HeroSection = () => {
       }
     },
     {
-      dependencies: [currentIndex],
+      dependencies: [currentIndex, hasClicked, shouldRenderMedia],
       revertOnUpdate: true,
     }
   );
@@ -119,15 +127,22 @@ const HeroSection = () => {
     ref = null,
     isBackground = false
   ) => {
+    if (!shouldRenderMedia) return null;
     const resource = getMediaResource(index);
     if (!resource) return null;
+
+    // Dim background for readability and dim any video to 80% visibility
+    const opacityClasses = [];
+    if (isBackground) opacityClasses.push('opacity-80');
+    if (resource.type === 'video') opacityClasses.push('opacity-80');
+    const mediaClassName = `${className} ${opacityClasses.join(' ')}`.trim();
 
     if (resource.type === 'video') {
       return (
         <video
           ref={ref}
           src={resource.src}
-          className={className}
+          className={mediaClassName}
           id={id}
           loop
           muted
@@ -142,7 +157,7 @@ const HeroSection = () => {
       <img
         ref={ref}
         src={resource.src}
-        className={className}
+        className={mediaClassName}
         id={id}
         onLoad={handleMediaLoad}
         onError={handleMediaError}
@@ -197,7 +212,7 @@ const HeroSection = () => {
 
             {/* Background Media: current index */}
             {renderMedia(
-              currentIndex,
+              1,
               'absolute left-0 top-0 size-full object-cover object-center',
               'bg-media',
               null,
@@ -208,17 +223,19 @@ const HeroSection = () => {
             <div className="absolute left-0 top-0 size-full bg-black/40 z-10 pointer-events-none" />
           </div>
 
-          <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-primary">
-            K<b>H</b>OA<b>H</b>ỌC
+          <h1
+            className={`special-font hero-heading absolute bottom-5 right-5 z-40 ${heroGradientText}`}
+          >
+            K<b>H</b>OA<b> H</b>ỌC
           </h1>
 
           <div className="absolute left-0 top-0 z-40 size-full">
             <div className="mt-24 px-5 sm:px-10">
-              <h1 className="special-font hero-heading text-primary">
+              <h1 className={`special-font hero-heading ${heroGradientText}`}>
                 CH<b>Ủ</b> NGH<b>Ĩ</b>A <br /> X<b>Ã</b> HỘ<b>I</b>
               </h1>
 
-              <p className="mb-5 max-w-72 font-robert-regular text-white">
+              <p className="mb-5 max-w-100 font-robert-regular text-white text-lg">
                 Khóa học nền tảng về tư tưởng và lý luận <br />
                 Củng cố kiến thức, mở rộng tầm nhìn.
               </p>
@@ -234,8 +251,8 @@ const HeroSection = () => {
           </div>
         </div>
 
-        <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
-          K<b>H</b>OA<b>H</b>ỌC
+        <h1 className={`special-font hero-heading absolute bottom-5 right-5 `}>
+          K<b>H</b>OA<b> H</b>ỌC
         </h1>
       </div>
     </header>

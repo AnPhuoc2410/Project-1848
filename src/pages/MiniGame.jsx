@@ -4,10 +4,14 @@ import { FaLock } from 'react-icons/fa';
 import MiniGame1 from '../components/games/MiniGame1';
 import MiniGame2 from '../components/games/MiniGame2';
 import MiniGame3 from '../components/games/MiniGame3';
+import MiniGame4 from '../components/games/MiniGame4';
+import MiniGame5 from '../components/games/MiniGame5';
+import MiniGame6 from '../components/games/MiniGame6';
+import MiniGame7 from '../components/games/MiniGame7';
 
 const MiniGame = () => {
   const [activeGameId, setActiveGameId] = useState(null);
-  const [unlockedLevel, setUnlockedLevel] = useState(1);
+  const [unlockedLevel, setUnlockedLevel] = useState(7);
 
   const handleLevelComplete = (id) => {
     if (id >= unlockedLevel) {
@@ -62,12 +66,64 @@ const MiniGame = () => {
       image: '/img/game3.jpg',
       isPlaceholder: false,
     },
-    ...Array.from({ length: 4 }).map((_, i) => ({
-      id: i + 4,
-      title: `Mini Game ${i + 4}`,
-      isPlaceholder: true,
-    })),
+    {
+      id: 4,
+      title: 'CHƯƠNG 4: XÂY DỰNG NHÀ NƯỚC PHÁP QUYỀN XHCN',
+      objectives: ['Hiểu dân chủ XHCN & nhà nước pháp quyền'],
+      gameplay: 'Ghép đúng 3 nhánh quyền lực · Xử lý tình huống tham nhũng',
+      knowledge: [
+        'Lập pháp – Hành pháp – Tư pháp',
+        'Quyền làm chủ của nhân dân',
+      ],
+      mission: 'Tình huống: Phát hiện tham nhũng → công dân làm gì?',
+      image: '/img/game4.jpg',
+      isPlaceholder: false,
+    },
+    {
+      id: 5,
+      title: 'CHƯƠNG 5: GIỮ CÂN BẰNG LIÊN MINH GIAI CẤP',
+      objectives: ['Hiểu vai trò liên minh công – nông – trí thức'],
+      gameplay: 'Điều chỉnh 3 thanh cân bằng; lệch → xã hội mất ổn định',
+      knowledge: [
+        'Liên minh là nền tảng xã hội',
+        'Thiếu 1 giai cấp → mất cân bằng',
+      ],
+      mission: 'Giữ 3 thanh trong vùng “ổn định”.',
+      image: '/img/game5.jpeg',
+      isPlaceholder: false,
+    },
+    {
+      id: 6,
+      title: 'CHƯƠNG 6: Ô CHỮ THỜI KỲ',
+      objectives: ['Hiểu thời kỳ quá độ và chế độ công hữu'],
+      gameplay: 'Giải 4 ô chữ',
+      knowledge: [
+        'Thời kỳ quá độ chính trị',
+        'Chế độ công hữu trong CNXH',
+        'Hình thái gia đình trong lịch sử xã hội',
+      ],
+      mission: 'Điền đúng 4 đáp án để mở ô chữ bí mật.',
+      image: '/img/game6.png',
+      isPlaceholder: false,
+    },
+    {
+      id: 7,
+      title: 'CHƯƠNG 7: GIA ĐÌNH BÌNH ĐẲNG',
+      objectives: ['Hiểu gia đình là tế bào xã hội'],
+      gameplay: 'Chọn hành vi đúng; điểm hạnh phúc tăng/giảm',
+      knowledge: ['Bình đẳng giới', 'Giáo dục gia đình'],
+      mission:
+        'Tình huống: Việc nhà → ai làm? Chọn hành vi đúng để giữ hạnh phúc.',
+      image: '/img/game7.webp',
+      isPlaceholder: false,
+    },
   ];
+
+  const handlePlay = (game) => {
+    if (game.id > unlockedLevel) return;
+    if (game.isPlaceholder) return;
+    setActiveGameId(game.id);
+  };
 
   return (
     <div className="relative min-h-screen bg-background text-text">
@@ -81,13 +137,6 @@ const MiniGame = () => {
             >
               Mini-game
             </h1>
-            <p
-              className="text-lg text-text mb-12"
-              style={{ fontFamily: 'var(--font-atkinson)' }}
-            >
-              Nội dung Mini-game đang được chuẩn bị. Bạn có thể chọn Game hoặc
-              quay lại Đại sảnh gương.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -110,12 +159,19 @@ const MiniGame = () => {
                   )}
                 </div>
 
-                <h3
-                  className="text-xl font-bold text-primary mb-3"
-                  style={{ fontFamily: 'var(--font-crimson-pro)' }}
-                >
-                  {game.title}
-                </h3>
+                <div className="flex items-start justify-between gap-2">
+                  <h3
+                    className="text-xl font-bold text-primary mb-3"
+                    style={{ fontFamily: 'var(--font-crimson-pro)' }}
+                  >
+                    {game.title}
+                  </h3>
+                  {game.isNew && (
+                    <span className="mt-1 rounded-full bg-secondary/15 px-3 py-1 text-xs font-semibold text-secondary">
+                      NEW
+                    </span>
+                  )}
+                </div>
 
                 {!game.isPlaceholder ? (
                   <div className="text-sm text-text/80 mb-4 space-y-2 flex-grow">
@@ -162,11 +218,7 @@ const MiniGame = () => {
                     )}
                   </span>
                   <button
-                    onClick={() => {
-                      if (game.id <= unlockedLevel && !game.isPlaceholder) {
-                        setActiveGameId(game.id);
-                      }
-                    }}
+                    onClick={() => handlePlay(game)}
                     disabled={game.id > unlockedLevel}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       game.id > unlockedLevel
@@ -201,6 +253,61 @@ const MiniGame = () => {
           onClose={() => setActiveGameId(null)}
           onComplete={() => handleLevelComplete(3)}
         />
+      )}
+      {activeGameId === 4 && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative min-h-screen">
+            <button
+              onClick={() => setActiveGameId(null)}
+              className="fixed top-4 right-4 z-50 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 border border-white/20"
+            >
+              Đóng
+            </button>
+            <MiniGame4 onExit={() => setActiveGameId(null)} />
+          </div>
+        </div>
+      )}
+      {activeGameId === 5 && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative min-h-screen">
+            <button
+              onClick={() => setActiveGameId(null)}
+              className="fixed top-4 right-4 z-50 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 border border-white/20"
+            >
+              Đóng
+            </button>
+            <MiniGame5 onExit={() => setActiveGameId(null)} />
+          </div>
+        </div>
+      )}
+      {activeGameId === 6 && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative min-h-screen">
+            <button
+              onClick={() => setActiveGameId(null)}
+              className="fixed top-4 right-4 z-50 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 border border-white/20"
+            >
+              Đóng
+            </button>
+            <MiniGame6 onExit={() => setActiveGameId(null)} />
+          </div>
+        </div>
+      )}
+      {activeGameId === 7 && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative min-h-screen">
+            <button
+              onClick={() => setActiveGameId(null)}
+              className="fixed top-4 right-4 z-50 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 border border-white/20"
+            >
+              Đóng
+            </button>
+            <MiniGame7
+              onExit={() => setActiveGameId(null)}
+              onComplete={() => handleLevelComplete(7)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
