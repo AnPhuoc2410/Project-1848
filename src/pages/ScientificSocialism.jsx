@@ -6,7 +6,6 @@ import InstructorSection from '../components/sections/InstructorSection';
 import FooterSection from '../components/sections/FooterSection';
 import About from '../components/About';
 import courseModules from '../data/courseModules';
-import TeamSection from '../components/sections/TeamSection';
 
 const ScientificSocialism = () => {
   const timelineEvents = [
@@ -96,7 +95,6 @@ const ScientificSocialism = () => {
       <CourseContentSection modules={courseModules} />
       <TimelineSection events={timelineEvents} />
       <InstructorSection />
-      <TeamSection />
       <FooterSection />
     </div>
   );
