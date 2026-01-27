@@ -130,7 +130,7 @@ const InstructorSection = () => {
     {
       name: 'Vũ Hoàng Hiếu Ngân',
       mssv: 'SE183096',
-      img: 'https://avatars.githubusercontent.com/u/153256952?v=4',
+      img: 'https://avatars.githubusercontent.com/u/139431216?v=4',
     },
     {
       name: 'Trần Đình Thịnh',
