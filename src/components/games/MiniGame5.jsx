@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 const STABLE_MIN = 45;
 const STABLE_MAX = 55;
@@ -6,6 +6,63 @@ const STABLE_MAX = 55;
 const clamp = (v) => Math.min(100, Math.max(0, v));
 const displayValue = (v) => Math.round(v);
 const withinRange = (v) => v >= STABLE_MIN && v <= STABLE_MAX;
+
+const DraggableSlider = ({ value, stable = false, onChange }) => {
+  const trackRef = useRef(null);
+  const isDragging = useRef(false);
+
+  const valueFromPointer = (clientX) => {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect) return value;
+    const percent = ((clientX - rect.left) / rect.width) * 100;
+    return clamp(percent);
+  };
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      if (!isDragging.current) return;
+      onChange(valueFromPointer(e.clientX));
+    };
+
+    const stopDrag = () => {
+      isDragging.current = false;
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', stopDrag);
+    window.addEventListener('pointercancel', stopDrag);
+
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', stopDrag);
+      window.removeEventListener('pointercancel', stopDrag);
+    };
+  }, [onChange]);
+
+  const handlePointerDown = (e) => {
+    isDragging.current = true;
+    onChange(valueFromPointer(e.clientX));
+  };
+
+  return (
+    <div className="relative mb-3 select-none" ref={trackRef}>
+      <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+        <div
+          className={`h-full bg-gradient-to-r ${stable ? 'from-emerald-400 to-emerald-500' : 'from-red-500 to-red-600'}`}
+          style={{ width: `${clamp(value)}%` }}
+          aria-hidden
+        />
+      </div>
+      <button
+        type="button"
+        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 border border-orange-300 shadow-md shadow-orange-500/40 cursor-grab active:cursor-grabbing focus:outline-none"
+        style={{ left: `${clamp(value)}%` }}
+        onPointerDown={handlePointerDown}
+        aria-label="Kéo để điều chỉnh giá trị"
+      />
+    </div>
+  );
+};
 
 export default function MiniGame5({ onExit }) {
   const randStart = () => {
@@ -61,8 +118,8 @@ export default function MiniGame5({ onExit }) {
     [workers, peasants, intellectuals]
   );
 
-  const handleSliderChange = (key, value) => {
-    const val = Number(value);
+  const handleSliderChange = useCallback((key, value) => {
+    const val = Math.round(Number(value));
 
     if (key === 'workers') {
       setWorkers(val);
@@ -81,7 +138,7 @@ export default function MiniGame5({ onExit }) {
     setChecked(false);
     setIsStable(false);
     setAutoStopped(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (autoStable) {
@@ -162,22 +219,10 @@ export default function MiniGame5({ onExit }) {
                   {displayValue(item.value)}
                 </span>
               </div>
-              <div className="relative h-2 rounded-full bg-white/10 mb-3 overflow-hidden">
-                <div
-                  className="absolute inset-y-0 rounded-full bg-gradient-to-r"
-                  style={{
-                    width: `${item.value}%`,
-                    backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`,
-                  }}
-                />
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
+              <DraggableSlider
                 value={item.value}
-                onChange={(e) => handleSliderChange(item.key, e.target.value)}
-                className="w-full accent-primary"
+                stable={withinRange(item.value)}
+                onChange={(val) => handleSliderChange(item.key, val)}
               />
               <div className="mt-2 text-xs text-white/70 flex items-center justify-between">
                 <span>0</span>
