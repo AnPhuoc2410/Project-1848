@@ -13,6 +13,7 @@ export default function PlayerA() {
   const myName = params.get('myName') || 'Player A';
 
   const [playerBConnected, setPlayerBConnected] = useState(false);
+  const [playerBName, setPlayerBName] = useState('Player B');
   const [gameComplete, setGameComplete] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [correctWords, setCorrectWords] = useState([]);
@@ -45,14 +46,17 @@ export default function PlayerA() {
   };
 
   useEffect(() => {
-    socket.emit('join-game3', { roomId, role: 'A' });
+    socket.emit('join-game3', { roomId, role: 'A', playerName: myName });
 
     socket.on('game3-phrase-for-a', ({ correctWords: words }) => {
       setCorrectWords(words || []);
     });
 
-    socket.on('game3-player-joined', ({ role }) => {
-      if (role === 'B') setPlayerBConnected(true);
+    socket.on('game3-player-joined', ({ role, playerName }) => {
+      if (role === 'B') {
+        setPlayerBConnected(true);
+        if (playerName) setPlayerBName(playerName);
+      }
     });
 
     socket.on('game3-complete', () => {
@@ -87,57 +91,125 @@ export default function PlayerA() {
   }, [roomId, navigate]);
 
   return (
-    <div className="game-page">
-      {/* Background */}
-      <div className="absolute inset-0 z-0 bg-background">
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-      </div>
-
-      {/* Header */}
-      <header className="game-header">
-        <div className="flex items-center gap-4">
-          <h1 className="special-font text-2xl font-black text-secondary">
-            PL<b>A</b>YER A
-          </h1>
-          <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-sm font-medium">
-            📖 Bảng mã Morse
-          </span>
-          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
-            {myName}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div
-            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
-          >
-            ⏱️ {formatTime(timeRemaining)}
+    <div className="h-screen w-screen bg-slate-100 flex flex-col overflow-hidden">
+      {/* ═══════════════════════════════════════════════════════════════════
+          BAR 1 - TOP STATUS BAR (Dark Brand Color)
+      ═══════════════════════════════════════════════════════════════════ */}
+      <header className="flex-shrink-0 bg-slate-800 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left: Player Title */}
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-black text-white tracking-wide">
+              PLAYER <span className="text-blue-400">A</span>
+            </h1>
+            <span className="px-3 py-1 text-sm font-semibold bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">
+              📖 Bảng mã Morse
+            </span>
           </div>
-          <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
-            Room: {roomId}
-          </span>
+
+          {/* Right: Timer (Large Digital Clock Style) */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-400">
+              Room:{' '}
+              <span className="font-semibold text-slate-200">{roomId}</span>
+            </span>
+            <div
+              className={`px-5 py-2 rounded-xl font-mono text-2xl font-black tracking-wider ${
+                timeRemaining < 60
+                  ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50 animate-pulse'
+                  : 'bg-slate-700 text-white border-2 border-slate-600'
+              }`}
+            >
+              ⏱️ {formatTime(timeRemaining)}
+            </div>
+          </div>
         </div>
       </header>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          BAR 2 - INSTRUCTION SUB-HEADER (Light Background)
+      ═══════════════════════════════════════════════════════════════════ */}
+      <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left: Instruction Text */}
+          <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+            <span className="text-2xl">📋</span>
+            <p className="text-base text-blue-800">
+              <span className="font-semibold">Nhiệm vụ:</span> Sử dụng bảng mã
+              Morse bên dưới để{' '}
+              <span className="font-black text-blue-900 underline decoration-2">
+                hỗ trợ {playerBName}
+              </span>{' '}
+              giải mã các từ vựng.
+            </p>
+          </div>
+
+          {/* Right: Status */}
+          {!gameComplete && (
+            <div className="hidden md:flex items-center gap-2 bg-slate-50 rounded-xl px-4 py-2 border border-slate-200">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span
+                  className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"
+                  style={{ animationDelay: '150ms' }}
+                ></span>
+                <span
+                  className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"
+                  style={{ animationDelay: '300ms' }}
+                ></span>
+              </div>
+              <span className="text-sm text-slate-600 ml-2">
+                Đang chờ {playerBName}...
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          MIDDLE WORKSPACE - Main Content (Flex Grow)
+      ═══════════════════════════════════════════════════════════════════ */}
+      <main className="flex-1 flex flex-col items-center justify-center p-4 min-h-0 overflow-auto">
+        {/* Morse Code Reference */}
+        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+          <div className="bg-slate-50 px-6 py-3 border-b border-slate-200">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              🔤 Bảng mã Morse quốc tế
+            </h3>
+          </div>
+          <div className="p-4">
+            <img
+              src="/img_game/mmorse.jpg"
+              alt="Bảng mã Morse"
+              className="w-full h-auto rounded-lg"
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          OVERLAYS
+      ═══════════════════════════════════════════════════════════════════ */}
+
       {/* Game Over Overlay */}
       {gameOver && (
-        <div className="game-overlay">
-          <div className="overlay-card bg-red-50 border-red-200">
-            <h2 className="text-2xl font-bold text-red-600 mb-2">
-              ⏰ Hết thời gian!
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div className="text-5xl mb-3">⏰</div>
+            <h2 className="text-xl font-bold text-red-600 mb-2">
+              Hết thời gian!
             </h2>
-            <p className="text-text/70 mb-4">Game kết thúc</p>
-            <div className="flex gap-3 justify-center">
+            <p className="text-slate-500 text-sm mb-4">Game kết thúc</p>
+            <div className="flex gap-2 justify-center">
               <button
-                onClick={() => {
-                  socket.emit('restart-all-games', { roomId });
-                }}
-                className="btn-primary px-6 py-2"
+                onClick={() => socket.emit('restart-all-games', { roomId })}
+                className="px-4 py-2 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition-colors cursor-pointer"
               >
                 🔄 Chơi lại
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="btn-secondary px-6 py-2"
+                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 transition-colors cursor-pointer"
               >
                 🏠 Trang chủ
               </button>
@@ -148,51 +220,34 @@ export default function PlayerA() {
 
       {/* Game Complete Overlay */}
       {gameComplete && (
-        <div className="game-overlay">
-          <div className="overlay-card bg-green-50 border-green-200">
-            <h2 className="text-2xl font-bold text-green-600 mb-2">
-              🎉 Hoàn thành Game 3!
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div className="text-5xl mb-3">🎉</div>
+            <h2 className="text-xl font-bold text-emerald-600 mb-2">
+              Hoàn thành Game 3!
             </h2>
-            <p className="text-text/70 mb-4">Đang chuyển đến Leaderboard...</p>
-            <div className="three-body mx-auto">
-              <div className="three-body__dot"></div>
-              <div className="three-body__dot"></div>
-              <div className="three-body__dot"></div>
+            <p className="text-slate-500 text-sm mb-4">
+              Đang chuyển đến Leaderboard...
+            </p>
+            <div className="flex justify-center">
+              <div className="flex gap-1">
+                <span
+                  className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                ></span>
+                <span
+                  className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                ></span>
+                <span
+                  className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                ></span>
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Main Content */}
-      <div className="relative z-10 p-6 max-w-5xl mx-auto">
-        {/* Morse Code Reference */}
-        <div className="game-card">
-          <h3 className="card-title">🔤 Bảng mã Morse</h3>
-          <div className="rounded-xl overflow-hidden bg-white p-4 border border-border">
-            <img
-              src="/img_game/mmorse.jpg"
-              alt="Bảng mã Morse"
-              className="w-full h-auto"
-            />
-          </div>
-        </div>
-
-        {/* Listening Status */}
-        {!gameComplete && (
-          <div className="mt-6 text-center">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white rounded-xl shadow-sm border border-border">
-              <div className="three-body" style={{ '--uib-size': '25px' }}>
-                <div className="three-body__dot"></div>
-                <div className="three-body__dot"></div>
-                <div className="three-body__dot"></div>
-              </div>
-              <span className="text-text/70">
-                Lắng nghe Player B mô tả mã Morse...
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

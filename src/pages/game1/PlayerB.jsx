@@ -138,127 +138,95 @@ export default function PlayerB() {
   };
 
   return (
-    <div className="game-page">
-      {/* Background */}
-      <div className="absolute inset-0 z-0 bg-background">
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-      </div>
-
-      {/* Header */}
-      <header className="game-header">
-        <div className="flex items-center gap-4">
-          <h1 className="special-font text-2xl font-black text-primary">
-            PL<b>A</b>YER B
-          </h1>
-          <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
-            🔓 Giải mã
-          </span>
-          <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-sm">
-            {myName}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div
-            className={`timer-display ${timeRemaining < 60 ? 'timer-warning' : ''}`}
-          >
-            ⏱️ {formatTime(timeRemaining)}
+    <div className="h-screen w-screen bg-slate-100 flex flex-col overflow-hidden">
+      {/* ===== HEADER BAR 1: Dark top bar ===== */}
+      <header className="flex-shrink-0 bg-slate-800 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left: Player Title */}
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-black text-white tracking-wide">
+              PLAYER <span className="text-emerald-400">B</span>
+            </h1>
+            <span className="px-3 py-1 text-sm font-semibold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">
+              🔓 Giải mã
+            </span>
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              playerAConnected
-                ? 'bg-green-100 text-green-600'
-                : 'bg-gray-100 text-gray-500'
-            }`}
-          >
-            {playerAConnected ? `🟢 ${playerAName}` : '⏳ Chờ Player A...'}
-          </span>
-          <span className="px-3 py-1 rounded-lg bg-white/80 text-text/60 text-sm">
-            Room: {roomId}
-          </span>
+
+          {/* Right: Timer */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-400">
+              Room:{' '}
+              <span className="font-semibold text-slate-200">{roomId}</span>
+            </span>
+            <div
+              className={`px-5 py-2 rounded-xl font-mono text-2xl font-black tracking-wider ${
+                timeRemaining < 60
+                  ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50 animate-pulse'
+                  : 'bg-slate-700 text-white border-2 border-slate-600'
+              }`}
+            >
+              ⏱️ {formatTime(timeRemaining)}
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Game Over Overlay */}
-      {gameOver && (
-        <div className="game-overlay">
-          <div className="overlay-card bg-red-50 border-red-200">
-            <h2 className="text-2xl font-bold text-red-600 mb-2">
-              ⏰ Hết thời gian!
-            </h2>
-            <p className="text-text/70 mb-4">Game kết thúc</p>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => {
-                  socket.emit('restart-all-games', { roomId });
-                }}
-                className="btn-primary px-6 py-2"
-              >
-                🔄 Chơi lại
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="btn-secondary px-6 py-2"
-              >
-                🏠 Trang chủ
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Game Complete Overlay */}
-      {gameComplete && (
-        <div className="game-overlay">
-          <div className="overlay-card bg-green-50 border-green-200">
-            <h2 className="text-2xl font-bold text-green-600 mb-2">
-              🎉 Chính xác!
-            </h2>
-            <p className="text-text/70 mb-4">
-              Đang chuyển sang Game 2: Nối dây...
+      {/* ===== HEADER BAR 2: Instruction sub-header ===== */}
+      <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left: Instruction Text */}
+          <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-200">
+            <span className="text-2xl">📋</span>
+            <p className="text-base text-emerald-800">
+              <span className="font-semibold">Nhiệm vụ:</span> Nghe mô tả từ{' '}
+              <span className="font-black text-emerald-900 underline decoration-2">
+                {playerAName}
+              </span>{' '}
+              và tra bảng mã để nhập từ khóa đúng.
             </p>
-            <div className="three-body mx-auto">
-              <div className="three-body__dot"></div>
-              <div className="three-body__dot"></div>
-              <div className="three-body__dot"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left - Cipher Key */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">
+              📋 Bảng mã Freemason
+            </h3>
+            <div className="rounded-xl overflow-hidden bg-slate-50 p-4 border border-slate-200">
+              <img
+                src="/img_game/FreemasonV2.png"
+                alt="Bảng mã Freemason"
+                className="w-full h-auto"
+              />
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Main Content */}
-      <div className="relative z-10 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-        {/* Left - Cipher Key */}
-        <div className="game-card">
-          <div className="rounded-xl overflow-hidden bg-white p-4 border border-border">
-            <img
-              src="/img_game/FreemasonV2.png"
-              alt="Bảng mã Freemason"
-              className="w-full h-auto"
-            />
-          </div>
-        </div>
-
-        {/* Right - Answer Input */}
-        <div className="space-y-6">
-          {/* Answer Form */}
-          <div className="game-card">
-            <h3 className="card-title">✏️ Nhập đáp án</h3>
+          {/* Right - Answer Input */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">
+              ✏️ Nhập đáp án
+            </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Nhập từ đã giải mã..."
-                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-white text-text 
-                           focus:border-primary focus:outline-none transition-colors
-                           font-atkinson text-lg uppercase tracking-widest"
+                className="w-full px-4 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-800 
+                           focus:border-emerald-500 focus:outline-none transition-colors
+                           text-lg uppercase tracking-widest font-mono"
                 disabled={gameComplete}
               />
 
               <button
                 type="submit"
                 disabled={!answer.trim() || loading || gameComplete}
-                className="btn-check w-full"
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 
+                           text-white rounded-xl font-bold text-lg transition"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -281,12 +249,60 @@ export default function PlayerB() {
             {/* Error Message */}
             {error && (
               <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200 text-center">
-                <p className="text-primary font-medium">❌ {error}</p>
+                <p className="text-red-600 font-medium">❌ {error}</p>
               </div>
             )}
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* ===== OVERLAYS ===== */}
+      {/* Game Over Overlay */}
+      {gameOver && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-red-200">
+            <div className="text-6xl mb-4">⏰</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              Hết thời gian!
+            </h2>
+            <p className="text-slate-600 mb-6">Game kết thúc</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => socket.emit('restart-all-games', { roomId })}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition"
+              >
+                🔄 Chơi lại
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold transition"
+              >
+                🏠 Trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game Complete Overlay */}
+      {gameComplete && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-green-200">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold text-green-600 mb-2">
+              Chính xác!
+            </h2>
+            <p className="text-slate-600 mb-4">
+              Đang chuyển sang Game 2: Nối dây...
+            </p>
+            <div className="three-body mx-auto">
+              <div className="three-body__dot"></div>
+              <div className="three-body__dot"></div>
+              <div className="three-body__dot"></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

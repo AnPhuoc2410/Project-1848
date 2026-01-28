@@ -1,8 +1,50 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 // Đảm bảo file .env của bạn có biến VITE_SHEETS_URL
 const SHEETS_API_URL = import.meta.env.VITE_SHEETS_URL;
+
+// Header component for Leaderboard
+const LeaderboardHeader = ({ onPlayAgain }) => {
+  const navLinks = [
+    { href: '/', label: 'Trang chủ' },
+    { href: '/mirror-hall', label: 'Đại sảnh gương 3D' },
+  ];
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center py-3">
+          <Link
+            to="/"
+            className="text-lg font-bold text-slate-800"
+            style={{ fontFamily: 'var(--font-crimson-pro)' }}
+          >
+            Chủ nghĩa xã hội khoa học
+          </Link>
+          <div className="flex items-center space-x-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
+                style={{ fontFamily: 'var(--font-atkinson)' }}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <button
+              onClick={onPlayAgain}
+              className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition"
+            >
+              Chơi lại
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
 export default function Leaderboard() {
   const navigate = useNavigate();
@@ -159,106 +201,152 @@ export default function Leaderboard() {
 
       // Bước 3: Tải lại bảng xếp hạng mới nhất
       await fetchLeaderboard();
+
+      // Bước 4: Nếu đã hoàn thành tất cả game, hiển thị thông báo đã lưu cho cả 2 player
+      if (hasCompletedAllGames) {
+        setSubmitted(true);
+      }
     };
 
     initProcess();
   }, []);
 
+  const handlePlayAgain = () => {
+    sessionStorage.removeItem('gameTimes');
+    sessionStorage.removeItem('scoreSubmitted');
+    navigate('/lobby');
+  };
+
   return (
-    <div className="game-page min-h-screen">
+    <div className="game-page min-h-screen pb-8">
+      {/* Header */}
+      <LeaderboardHeader onPlayAgain={handlePlayAgain} />
+
       {/* Background */}
       <div className="absolute inset-0 z-0 bg-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-50" />
       </div>
 
-      {/* Header */}
-      <header className="game-header">
-        <div className="flex items-center gap-4">
-          <h1 className="special-font text-2xl font-black text-primary">
+      {/* Main Content */}
+      <div className="relative z-10 p-6 pt-20 max-w-4xl mx-auto">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <h1 className="special-font text-3xl font-black text-slate-800">
             🏆 LE<b>A</b>DERBOARD
           </h1>
+          <p className="text-slate-500 text-sm mt-2">
+            Bảng xếp hạng các đội hoàn thành nhanh nhất
+          </p>
         </div>
-        <button
-          onClick={() => {
-            // Xóa session khi bấm chơi lại
-            sessionStorage.removeItem('gameTimes');
-            sessionStorage.removeItem('scoreSubmitted');
-            navigate('/lobby');
-          }}
-          className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary/80 transition"
-        >
-          Chơi lại
-        </button>
-      </header>
-
-      {/* Main Content */}
-      <div className="relative z-10 p-6 max-w-5xl mx-auto">
-        {/* Debug Info (Tạm thời để kiểm tra URL, xóa sau khi chạy ngon) */}
+        {/* Debug Info */}
         {!SHEETS_API_URL && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
             ⚠️ Chưa cấu hình VITE_SHEETS_URL. Đang dùng dữ liệu giả lập.
           </div>
         )}
 
-        {/* Your Score Card */}
+        {/* ========== HERO CARD: Team Result ========== */}
         {hasCompletedAllGames && (
-          <div className="game-card mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300">
-            <h3 className="card-title text-yellow-700">🎉 Kết quả của bạn</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-sm text-text/60">Player A</p>
-                <p className="font-bold text-lg">
-                  {times.playerA || 'Player A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-text/60">Player B</p>
-                <p className="font-bold text-lg">
-                  {times.playerB || 'Player B'}
-                </p>
-              </div>
+          <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-200 shadow-lg">
+            {/* Card Header */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <span className="text-2xl">🎉</span>
+              <h3 className="text-xl font-bold text-amber-700">
+                Kết quả của nhóm bạn
+              </h3>
+              <span className="text-2xl">🎉</span>
             </div>
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div className="p-3 bg-white rounded-lg">
-                <p className="text-xs text-text/50">Game 1</p>
-                <p className="font-bold text-secondary">
-                  {formatTime(times.game1)}
-                </p>
+
+            {/* Main Content: 3 Columns */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              {/* LEFT: The Team */}
+              <div className="flex items-center gap-3 bg-white/70 px-5 py-4 rounded-xl border border-amber-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                    A
+                  </div>
+                  <span className="font-semibold text-gray-800">
+                    {times.playerA || 'Player A'}
+                  </span>
+                </div>
+                <span className="text-amber-400 font-bold text-xl">&</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">
+                    B
+                  </div>
+                  <span className="font-semibold text-gray-800">
+                    {times.playerB || 'Player B'}
+                  </span>
+                </div>
               </div>
-              <div className="p-3 bg-white rounded-lg">
-                <p className="text-xs text-text/50">Game 2</p>
-                <p className="font-bold text-secondary">
-                  {formatTime(times.game2)}
-                </p>
+
+              {/* MIDDLE: Game Breakdown */}
+              <div className="flex items-center gap-4">
+                <div className="text-center px-4 py-2 bg-white/50 rounded-lg">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    G1
+                  </p>
+                  <p className="font-mono font-semibold text-gray-700">
+                    {formatTime(times.game1)}
+                  </p>
+                </div>
+                <span className="text-gray-300">+</span>
+                <div className="text-center px-4 py-2 bg-white/50 rounded-lg">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    G2
+                  </p>
+                  <p className="font-mono font-semibold text-gray-700">
+                    {formatTime(times.game2)}
+                  </p>
+                </div>
+                <span className="text-gray-300">+</span>
+                <div className="text-center px-4 py-2 bg-white/50 rounded-lg">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    G3
+                  </p>
+                  <p className="font-mono font-semibold text-gray-700">
+                    {formatTime(times.game3)}
+                  </p>
+                </div>
               </div>
-              <div className="p-3 bg-white rounded-lg">
-                <p className="text-xs text-text/50">Game 3</p>
-                <p className="font-bold text-secondary">
-                  {formatTime(times.game3)}
+
+              {/* RIGHT: Hero Metric - Total Time */}
+              <div className="text-center px-6 py-4 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl shadow-md">
+                <p className="text-xs text-amber-900 uppercase tracking-wider font-medium">
+                  Tổng thời gian
                 </p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-lg border-2 border-yellow-400">
-                <p className="text-xs text-yellow-600">Tổng</p>
-                <p className="font-bold text-xl text-yellow-700">
+                <p className="font-mono font-black text-4xl text-white drop-shadow">
                   {formatTime(totalTime)}
                 </p>
               </div>
             </div>
+
+            {/* Status Messages */}
             {submitted && (
-              <p className="text-center text-green-600 mt-4 font-bold">
-                ✓ Đã lưu kết quả lên hệ thống!
+              <p className="text-center text-green-600 mt-5 font-semibold flex items-center justify-center gap-2">
+                <span className="inline-block w-5 h-5 bg-green-500 rounded-full text-white text-xs flex items-center justify-center">
+                  ✓
+                </span>
+                Đã lưu kết quả lên hệ thống!
               </p>
             )}
-            {error && <p className="text-center text-red-600 mt-4">{error}</p>}
+            {error && (
+              <p className="text-center text-red-600 mt-5 font-medium">
+                {error}
+              </p>
+            )}
           </div>
         )}
 
-        {/* Leaderboard Table */}
+        {/* ========== LEADERBOARD TABLE ========== */}
         <div className="game-card">
-          <h3 className="card-title">🥇 Top 20 Cặp Đôi Xuất Sắc Nhất</h3>
+          <h3 className="card-title flex items-center gap-2">
+            <span>🥇</span>
+            <span>Top 20 Cặp Đôi Xuất Sắc Nhất</span>
+          </h3>
 
           {loading ? (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <div className="three-body mx-auto">
                 <div className="three-body__dot"></div>
                 <div className="three-body__dot"></div>
@@ -272,63 +360,109 @@ export default function Leaderboard() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-border">
-                    <th className="py-3 px-2 text-left text-sm font-medium text-text/60">
+                  <tr className="border-b-2 border-gray-200 bg-gray-50">
+                    <th className="py-3 px-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">
                       #
                     </th>
-                    <th className="py-3 px-2 text-left text-sm font-medium text-text/60">
-                      Player A
+                    <th className="py-3 px-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Đội
                     </th>
-                    <th className="py-3 px-2 text-left text-sm font-medium text-text/60">
-                      Player B
-                    </th>
-                    <th className="py-3 px-2 text-center text-sm font-medium text-text/60">
+                    <th className="py-3 px-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
                       G1
                     </th>
-                    <th className="py-3 px-2 text-center text-sm font-medium text-text/60">
+                    <th className="py-3 px-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
                       G2
                     </th>
-                    <th className="py-3 px-2 text-center text-sm font-medium text-text/60">
+                    <th className="py-3 px-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
                       G3
                     </th>
-                    <th className="py-3 px-2 text-center text-sm font-medium text-yellow-600">
+                    <th className="py-3 px-3 text-right text-xs font-semibold text-amber-600 uppercase tracking-wider w-24">
                       Tổng
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {leaderboard.map((entry, index) => (
-                    <tr
-                      key={index}
-                      className={`border-b border-border/50 ${index < 3 ? 'bg-yellow-50' : ''}`}
-                    >
-                      <td className="py-3 px-2">
-                        {index === 0 && '🥇'}
-                        {index === 1 && '🥈'}
-                        {index === 2 && '🥉'}
-                        {index > 2 && (
-                          <span className="text-text/50">{index + 1}</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-2 font-medium">{entry.playerA}</td>
-                      <td className="py-3 px-2 font-medium">{entry.playerB}</td>
-                      <td className="py-3 px-2 text-center text-sm">
-                        {formatTime(entry.game1)}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm">
-                        {formatTime(entry.game2)}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm">
-                        {formatTime(entry.game3)}
-                      </td>
-                      <td className="py-3 px-2 text-center font-bold text-yellow-600">
-                        {formatTime(entry.total)}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-gray-100">
+                  {leaderboard.map((entry, index) => {
+                    const isMyTeam =
+                      hasCompletedAllGames &&
+                      entry.playerA === (times.playerA || 'Unknown A') &&
+                      entry.playerB === (times.playerB || 'Unknown B') &&
+                      entry.total === totalTime;
+
+                    // Rank styling
+                    const rankStyles = {
+                      0: 'bg-gradient-to-r from-yellow-100 to-amber-50 border-l-4 border-l-yellow-400',
+                      1: 'bg-gradient-to-r from-gray-100 to-slate-50 border-l-4 border-l-gray-400',
+                      2: 'bg-gradient-to-r from-orange-100 to-amber-50 border-l-4 border-l-orange-400',
+                    };
+
+                    const myTeamStyle =
+                      'bg-green-100 border-l-4 border-l-green-500 ring-2 ring-green-300 ring-inset';
+
+                    return (
+                      <tr
+                        key={index}
+                        className={`transition-all hover:bg-gray-50 ${
+                          isMyTeam ? myTeamStyle : rankStyles[index] || ''
+                        }`}
+                      >
+                        {/* Rank */}
+                        <td className="py-4 px-3 text-center">
+                          {index === 0 && <span className="text-2xl">🥇</span>}
+                          {index === 1 && <span className="text-2xl">🥈</span>}
+                          {index === 2 && <span className="text-2xl">🥉</span>}
+                          {index > 2 && (
+                            <span className="text-gray-400 font-medium">
+                              {index + 1}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Team Names */}
+                        <td className="py-4 px-3">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-800">
+                              {entry.playerA}
+                            </span>
+                            <span className="text-gray-300">&</span>
+                            <span className="font-medium text-gray-800">
+                              {entry.playerB}
+                            </span>
+                            {isMyTeam && (
+                              <span className="ml-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full font-semibold">
+                                Bạn
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Game Times - Right Aligned */}
+                        <td className="py-4 px-3 text-right font-mono text-sm text-gray-600">
+                          {formatTime(entry.game1)}
+                        </td>
+                        <td className="py-4 px-3 text-right font-mono text-sm text-gray-600">
+                          {formatTime(entry.game2)}
+                        </td>
+                        <td className="py-4 px-3 text-right font-mono text-sm text-gray-600">
+                          {formatTime(entry.game3)}
+                        </td>
+
+                        {/* Total - Highlighted */}
+                        <td className="py-4 px-3 text-right">
+                          <span className="font-mono font-bold text-amber-600 text-lg">
+                            {formatTime(entry.total)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {leaderboard.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-text/50">
+                      <td
+                        colSpan={6}
+                        className="py-12 text-center text-gray-400"
+                      >
+                        <div className="text-4xl mb-2">🏆</div>
                         Chưa có dữ liệu. Hãy là người đầu tiên!
                       </td>
                     </tr>
@@ -337,6 +471,30 @@ export default function Leaderboard() {
               </table>
             </div>
           )}
+        </div>
+
+        {/* ========== BOTTOM CTA BUTTON ========== */}
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={handlePlayAgain}
+            className="group px-8 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3"
+          >
+            <span>🎮</span>
+            <span>Chơi ván mới</span>
+            <svg
+              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
