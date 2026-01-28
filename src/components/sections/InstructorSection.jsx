@@ -113,14 +113,14 @@ const InstructorSection = () => {
 
   const members = [
     {
-      name: 'Lê Trung Anh Khôi',
-      mssv: 'SE180591',
-      img: '/img/khoi.JPG',
-    },
-    {
       name: 'Hoàng Quốc An',
       mssv: 'SE181520',
       img: 'https://avatars.githubusercontent.com/u/165766167?v=4',
+    },
+    {
+      name: 'Lê Trung Anh Khôi',
+      mssv: 'SE180591',
+      img: '/img/khoi.JPG',
     },
     {
       name: 'Đào Công An Phước',
