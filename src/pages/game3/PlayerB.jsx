@@ -4,10 +4,10 @@ import { socket } from '../../socket';
 import { GAME_TIMES } from '../../config/gameConfig';
 
 // Timing constants (in milliseconds) - Chuẩn Morse tỉ lệ 1:3
-const DOT_DURATION = 300; // Chấm: ngắn
-const DASH_DURATION = 900; // Gạch: dài gấp 3 lần chấm
-const ELEMENT_GAP = 300; // Khoảng cách giữa các tín hiệu trong 1 chữ
-const LETTER_GAP = 900; // Khoảng cách giữa các chữ (= 3 đơn vị)
+const DOT_DURATION = 500; // Chấm: ngắn
+const DASH_DURATION = 1500; // Gạch: dài gấp 3 lần chấm
+const ELEMENT_GAP = 500; // Khoảng cách giữa các tín hiệu trong 1 chữ
+const LETTER_GAP = 1500; // Khoảng cách giữa các chữ (= 3 đơn vị)
 
 // Initial time for Game 3
 const INITIAL_TIME = GAME_TIMES.GAME3;
