@@ -159,6 +159,11 @@ export default function Leaderboard() {
 
       // Bước 3: Tải lại bảng xếp hạng mới nhất
       await fetchLeaderboard();
+
+      // Bước 4: Nếu đã hoàn thành tất cả game, hiển thị thông báo đã lưu cho cả 2 player
+      if (hasCompletedAllGames) {
+        setSubmitted(true);
+      }
     };
 
     initProcess();
@@ -297,35 +302,60 @@ export default function Leaderboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {leaderboard.map((entry, index) => (
-                    <tr
-                      key={index}
-                      className={`border-b border-border/50 ${index < 3 ? 'bg-yellow-50' : ''}`}
-                    >
-                      <td className="py-3 px-2">
-                        {index === 0 && '🥇'}
-                        {index === 1 && '🥈'}
-                        {index === 2 && '🥉'}
-                        {index > 2 && (
-                          <span className="text-text/50">{index + 1}</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-2 font-medium">{entry.playerA}</td>
-                      <td className="py-3 px-2 font-medium">{entry.playerB}</td>
-                      <td className="py-3 px-2 text-center text-sm">
-                        {formatTime(entry.game1)}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm">
-                        {formatTime(entry.game2)}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm">
-                        {formatTime(entry.game3)}
-                      </td>
-                      <td className="py-3 px-2 text-center font-bold text-yellow-600">
-                        {formatTime(entry.total)}
-                      </td>
-                    </tr>
-                  ))}
+                  {leaderboard.map((entry, index) => {
+                    // Kiểm tra xem dòng này có phải nhóm mình không
+                    const isMyTeam =
+                      hasCompletedAllGames &&
+                      entry.playerA === (times.playerA || 'Unknown A') &&
+                      entry.playerB === (times.playerB || 'Unknown B') &&
+                      entry.total === totalTime;
+
+                    return (
+                      <tr
+                        key={index}
+                        className={`border-b border-border/50 transition-all ${
+                          isMyTeam
+                            ? 'bg-green-100 border-l-4 border-l-green-500 animate-pulse'
+                            : index < 3
+                              ? 'bg-yellow-50'
+                              : ''
+                        }`}
+                      >
+                        <td className="py-3 px-2">
+                          {index === 0 && '🥇'}
+                          {index === 1 && '🥈'}
+                          {index === 2 && '🥉'}
+                          {index > 2 && (
+                            <span className="text-text/50">{index + 1}</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-2 font-medium">
+                          {entry.playerA}
+                          {isMyTeam && (
+                            <span className="ml-1 text-green-600">★</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-2 font-medium">
+                          {entry.playerB}
+                          {isMyTeam && (
+                            <span className="ml-1 text-green-600">★</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm">
+                          {formatTime(entry.game1)}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm">
+                          {formatTime(entry.game2)}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm">
+                          {formatTime(entry.game3)}
+                        </td>
+                        <td className="py-3 px-2 text-center font-bold text-yellow-600">
+                          {formatTime(entry.total)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {leaderboard.length === 0 && (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-text/50">

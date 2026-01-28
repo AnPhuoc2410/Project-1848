@@ -787,6 +787,11 @@ io.on('connection', (socket) => {
         timeRemaining: INITIAL_TIME,
         gameOver: false,
       };
+      // Log giá trị thực của các thẻ
+      const cardLabels = game3Rooms[roomId].wordCards
+        .map((card, i) => `Thẻ ${String.fromCharCode(65 + i)}: ${card.word}`)
+        .join(', ');
+      console.log(`[Game3] Room ${roomId} - ${cardLabels}`);
     }
     game3Rooms[roomId].players[role] = socket.id;
     game3Rooms[roomId].playerNames[role] = playerName || `Player ${role}`;
