@@ -114,6 +114,34 @@ export default function PlayerB() {
     [stopCurrentBeep]
   );
 
+  // Play soft tick sound for gaps/silence (different from main beep)
+  const playGapSound = useCallback(() => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+      }
+      const ctx = audioContextRef.current;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.frequency.value = 300; // Tần số thấp hơn cho khoảng lặng
+      oscillator.type = 'triangle'; // Âm thanh mềm hơn
+
+      gainNode.gain.setValueAtTime(0.15, ctx.currentTime); // Âm lượng rõ hơn
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.15); // 150ms - đủ ngắn nhưng nghe được
+    } catch (e) {
+      // Ignore audio errors
+    }
+  }, []);
+
   // Initialize empty answer slots
   useEffect(() => {
     setAnswerSlots(Array(totalSlots).fill(null));
@@ -299,6 +327,7 @@ export default function PlayerB() {
 
         // Letter gap after each letter
         if (i < morseSequence.length - 1) {
+          playGapSound(); // Âm thanh nhẹ cho khoảng lặng giữa các chữ
           await sleep(LETTER_GAP);
           if (
             !playingRef.current ||
@@ -323,7 +352,7 @@ export default function PlayerB() {
         }
       }
     },
-    [playBeep, stopCurrentBeep]
+    [playBeep, stopCurrentBeep, playGapSound]
   );
 
   const stopPlaying = () => {
@@ -451,20 +480,11 @@ export default function PlayerB() {
         setIsPlayingDemo(false);
       }, DASH_DURATION);
     } else if (type === 'letter-gap') {
-      // Khoảng lặng giữa chữ: chấm -> gap 0.9s -> chấm
-      setDemoLightOn(true);
-      playBeep(DOT_DURATION);
+      // Chỉ phát âm thanh khoảng lặng
+      playGapSound();
       demoTimeoutRef.current = setTimeout(() => {
-        setDemoLightOn(false);
-        setTimeout(() => {
-          setDemoLightOn(true);
-          playBeep(DOT_DURATION);
-          setTimeout(() => {
-            setDemoLightOn(false);
-            setIsPlayingDemo(false);
-          }, DOT_DURATION);
-        }, LETTER_GAP);
-      }, DOT_DURATION);
+        setIsPlayingDemo(false);
+      }, 200);
     }
   };
 
