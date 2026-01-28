@@ -115,7 +115,7 @@ const InstructorSection = () => {
     {
       name: 'Lê Trung Anh Khôi',
       mssv: 'SE180591',
-      img: 'https://th.bing.com/th/id/OIP.e2aEtW4jL_ZQEu-bLaveCwHaFP?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3',
+      img: '/img/khoi.JPG',
     },
     {
       name: 'Hoàng Quốc An',
