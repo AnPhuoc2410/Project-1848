@@ -1,8 +1,50 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 // Đảm bảo file .env của bạn có biến VITE_SHEETS_URL
 const SHEETS_API_URL = import.meta.env.VITE_SHEETS_URL;
+
+// Header component for Leaderboard
+const LeaderboardHeader = ({ onPlayAgain }) => {
+  const navLinks = [
+    { href: '/', label: 'Trang chủ' },
+    { href: '/mirror-hall', label: 'Đại sảnh gương 3D' },
+  ];
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center py-3">
+          <Link
+            to="/"
+            className="text-lg font-bold text-slate-800"
+            style={{ fontFamily: 'var(--font-crimson-pro)' }}
+          >
+            Chủ nghĩa xã hội khoa học
+          </Link>
+          <div className="flex items-center space-x-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
+                style={{ fontFamily: 'var(--font-atkinson)' }}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <button
+              onClick={onPlayAgain}
+              className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition"
+            >
+              Chơi lại
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
 export default function Leaderboard() {
   const navigate = useNavigate();
@@ -177,28 +219,25 @@ export default function Leaderboard() {
 
   return (
     <div className="game-page min-h-screen pb-8">
+      {/* Header */}
+      <LeaderboardHeader onPlayAgain={handlePlayAgain} />
+
       {/* Background */}
       <div className="absolute inset-0 z-0 bg-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-50" />
       </div>
 
-      {/* Header */}
-      <header className="game-header">
-        <div className="flex items-center gap-4">
-          <h1 className="special-font text-2xl font-black text-primary">
+      {/* Main Content */}
+      <div className="relative z-10 p-6 pt-20 max-w-4xl mx-auto">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <h1 className="special-font text-3xl font-black text-slate-800">
             🏆 LE<b>A</b>DERBOARD
           </h1>
+          <p className="text-slate-500 text-sm mt-2">
+            Bảng xếp hạng các đội hoàn thành nhanh nhất
+          </p>
         </div>
-        <button
-          onClick={handlePlayAgain}
-          className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary/80 transition"
-        >
-          Chơi lại
-        </button>
-      </header>
-
-      {/* Main Content */}
-      <div className="relative z-10 p-6 max-w-4xl mx-auto">
         {/* Debug Info */}
         {!SHEETS_API_URL && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
