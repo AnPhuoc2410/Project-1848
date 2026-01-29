@@ -54,6 +54,7 @@ export default class Environment {
   is_load_finished = false;
 
   constructor() {
+    console.log('🏛️ Environment constructor called');
     this.core = new Core();
     this.loader = this.core.loader;
     this._loadScenes();
@@ -63,6 +64,7 @@ export default class Environment {
    * Load all scene objects - Bố cục Gallery 7 Chương CNXHKH
    */
   private async _loadScenes() {
+    console.log('🏛️ _loadScenes() starting...');
     try {
       await this._loadSceneAndCollisionDetection();
 
@@ -515,26 +517,132 @@ export default class Environment {
             loaded: event.loaded,
             total: event.total,
           });
+        },
+        (error: any) => {
+          console.warn('⚠️ Static scene not found, skipping:', error);
+          resolve(); // Continue without static scene
         }
       );
     });
   }
 
+  /*
+   * Create a fallback floor when scene models are not available
+   */
+  private _createFallbackFloor() {
+    console.log('🏗️ Creating fallback floor (collision only, invisible)...');
+
+    // Create collision geometry only - NO visible floor to avoid overlapping with existing scene
+    const collisionGeometry = new PlaneGeometry(200, 200);
+    collisionGeometry.rotateX(-Math.PI / 2);
+    (collisionGeometry as any).boundsTree = new MeshBVH(collisionGeometry, {
+      lazyGeneration: false,
+    } as MeshBVHOptions);
+
+    this.collider = new Mesh(collisionGeometry);
+    this.collider.position.y = 0;
+    this.collider.visible = false; // Invisible - collision only
+    this.collider.updateMatrixWorld(true);
+
+    console.log('✅ Fallback floor created');
+  }
+
   private _loadSceneAndCollisionDetection(): Promise<void> {
+    console.log(
+      '🚀 Starting to load collision scene from:',
+      COLLISION_SCENE_URL
+    );
+
     return new Promise((resolve) => {
       this.loader.gltf_loader.load(
         COLLISION_SCENE_URL,
         (gltf: any) => {
+          console.log('✅ Collision scene loaded successfully!');
           this.collision_scene = gltf.scene;
 
-          if (!this.collision_scene) return resolve();
+          if (!this.collision_scene) {
+            console.warn('⚠️ Collision scene is empty!');
+            return resolve();
+          }
 
+          console.log(
+            '📊 Scene children count:',
+            this.collision_scene.children.length
+          );
           this.collision_scene.updateMatrixWorld(true);
 
           const itemsToRemove: any[] = [];
 
           this.collision_scene.traverse((item: any) => {
-            console.log('Mesh name:', item.name, 'Type:', item.type); // LOG ĐỂ XEM
+            // FIX: Keep texture but brighten floor and remove shadow effects
+            if (isMesh(item)) {
+              if (
+                item.name === 'home' ||
+                item.name === 'home001' ||
+                item.name === 'home002'
+              ) {
+                const material = item.material as any;
+                if (material) {
+                  // Keep the texture but brighten the material color
+                  if (material.color) {
+                    // Boost the color to counteract dark baked shadows
+                    material.color.setRGB(1.3, 1.3, 1.3); // Brighten
+                    material.needsUpdate = true;
+                  }
+
+                  // Remove shadow-causing maps
+                  if (material.aoMap) {
+                    material.aoMap = null;
+                    material.aoMapIntensity = 0;
+                  }
+                  if (material.lightMap) {
+                    material.lightMap = null;
+                    material.lightMapIntensity = 0;
+                  }
+
+                  // Increase material brightness/emissive slightly
+                  if (material.emissive) {
+                    material.emissive.setHex(0x222222);
+                    material.emissiveIntensity = 0.3;
+                  }
+
+                  material.needsUpdate = true;
+                  console.log('💡 Brightened floor:', item.name);
+                }
+              }
+            }
+
+            // Enhanced logging - log ALL mesh details for debugging
+            if (isMesh(item)) {
+              const material = item.material as any;
+              const worldPos = new Vector3();
+              item.getWorldPosition(worldPos);
+
+              let brightness = 1;
+              if (material?.color) {
+                brightness =
+                  (material.color.r + material.color.g + material.color.b) / 3;
+              }
+
+              console.log(
+                '🔍 MESH:',
+                item.name,
+                '| Type:',
+                item.type,
+                '| Pos:',
+                worldPos.x.toFixed(1),
+                worldPos.y.toFixed(1),
+                worldPos.z.toFixed(1),
+                '| Brightness:',
+                brightness.toFixed(2),
+                '| Transparent:',
+                material?.transparent,
+                '| Opacity:',
+                material?.opacity?.toFixed(2)
+              );
+            }
+
+            // Hide dark patches, shadows, decals, and unwanted floor elements
             const removeNames = [
               'sofa',
               'desk',
@@ -545,6 +653,55 @@ export default class Environment {
               'plane',
               'object',
               'mesh',
+              // Patterns for dark patches and unwanted elements
+              'shadow',
+              'decal',
+              'stain',
+              'dirt',
+              'dark',
+              'spot',
+              'mark',
+              'floor_detail',
+              'ground_detail',
+              'puddle',
+              'wet',
+              'damage',
+              'crack',
+              // Additional patterns for baked effects
+              'ao',
+              'ambient',
+              'occlusion',
+              'bake',
+              'overlay',
+              'blend',
+              'detail',
+              'splat',
+              'grunge',
+              'worn',
+              'scratch',
+              'scuff',
+              'smudge',
+              'reflection',
+              // More shadow-related patterns
+              'blob',
+              'patch',
+              'floor_shadow',
+              'ground_shadow',
+              'baked_shadow',
+              'lightmap',
+              'shadowmap',
+              'footprint',
+              'burn',
+              'soot',
+              'ash',
+              'spill',
+              'leak',
+              'drip',
+              'moss',
+              'mold',
+              'rust',
+              'decay',
+              'erosion',
             ];
             const shouldRemove = removeNames.some((name) =>
               item.name?.toLowerCase().includes(name.toLowerCase())
@@ -556,6 +713,160 @@ export default class Environment {
               if (item.receiveShadow !== undefined) item.receiveShadow = false;
               itemsToRemove.push(item);
               return;
+            }
+
+            // Remove meshes with very dark materials (likely baked shadows)
+            if (isMesh(item)) {
+              const material = item.material as any;
+              if (material) {
+                // Compute bounding box if not exists
+                if (item.geometry && !item.geometry.boundingBox) {
+                  item.geometry.computeBoundingBox();
+                }
+
+                // Get world position for spawn area detection
+                const worldPos = new Vector3();
+                item.getWorldPosition(worldPos);
+
+                // Check if material color is very dark (baked shadow)
+                if (material.color) {
+                  const r = material.color.r;
+                  const g = material.color.g;
+                  const b = material.color.b;
+                  const brightness = (r + g + b) / 3;
+
+                  // AGGRESSIVE: Remove ANY dark mesh that's flat (likely shadow decal)
+                  if (
+                    brightness < 0.4 &&
+                    item.geometry &&
+                    item.geometry.boundingBox
+                  ) {
+                    const bbox = item.geometry.boundingBox;
+                    const size = bbox.max.clone().sub(bbox.min);
+
+                    // Flat dark mesh = shadow decal
+                    if (size.y < 2.0) {
+                      item.visible = false;
+                      itemsToRemove.push(item);
+                      console.log(
+                        '🗑️ Removed dark flat mesh:',
+                        item.name,
+                        'brightness:',
+                        brightness.toFixed(2),
+                        'pos:',
+                        worldPos.z.toFixed(1)
+                      );
+                      return;
+                    }
+                  }
+
+                  // Also check for semi-transparent dark materials (shadow blobs)
+                  if (brightness < 0.5 && material.transparent) {
+                    item.visible = false;
+                    itemsToRemove.push(item);
+                    console.log(
+                      '🗑️ Removed transparent dark patch:',
+                      item.name
+                    );
+                    return;
+                  }
+
+                  // Near spawn area (z: 25-45) - be extra aggressive
+                  if (
+                    worldPos.z > 25 &&
+                    worldPos.z < 55 &&
+                    brightness < 0.5 &&
+                    worldPos.y < 3
+                  ) {
+                    if (item.geometry && item.geometry.boundingBox) {
+                      const size = item.geometry.boundingBox.max
+                        .clone()
+                        .sub(item.geometry.boundingBox.min);
+                      if (size.y < 3) {
+                        item.visible = false;
+                        itemsToRemove.push(item);
+                        console.log(
+                          '🗑️ Removed spawn area dark mesh:',
+                          item.name,
+                          'at z:',
+                          worldPos.z.toFixed(1)
+                        );
+                        return;
+                      }
+                    }
+                  }
+                }
+
+                // Check for dark alpha maps or opacity maps causing patches
+                if (
+                  material.alphaMap ||
+                  (material.opacity !== undefined && material.opacity < 0.95)
+                ) {
+                  const matColor = material.color;
+                  if (matColor) {
+                    const brightness =
+                      (matColor.r + matColor.g + matColor.b) / 3;
+                    if (brightness < 0.6) {
+                      item.visible = false;
+                      itemsToRemove.push(item);
+                      console.log(
+                        '🗑️ Removed alpha dark patch:',
+                        item.name,
+                        'opacity:',
+                        material.opacity
+                      );
+                      return;
+                    }
+                  }
+                }
+
+                // Remove any aoMap (ambient occlusion) which can cause dark patches
+                if (material.aoMap) {
+                  console.log('🔧 Removing aoMap from:', item.name);
+                  material.aoMap = null;
+                  material.aoMapIntensity = 0;
+                  material.needsUpdate = true;
+                }
+
+                // Remove lightMap if it's causing dark areas
+                if (material.lightMap) {
+                  console.log('🔧 Removing lightMap from:', item.name);
+                  material.lightMap = null;
+                  material.lightMapIntensity = 0;
+                  material.needsUpdate = true;
+                }
+
+                // Disable any emissive that might be creating odd effects
+                if (material.emissiveMap) {
+                  material.emissiveMap = null;
+                  material.needsUpdate = true;
+                }
+
+                // BRIGHTEN dark floor materials instead of removing
+                if (material.color && worldPos.y < 1) {
+                  const brightness =
+                    (material.color.r + material.color.g + material.color.b) /
+                    3;
+                  if (brightness < 0.3 && brightness > 0) {
+                    // Brighten the material
+                    const boostFactor = 0.4 / brightness;
+                    material.color.r = Math.min(
+                      1,
+                      material.color.r * boostFactor
+                    );
+                    material.color.g = Math.min(
+                      1,
+                      material.color.g * boostFactor
+                    );
+                    material.color.b = Math.min(
+                      1,
+                      material.color.b * boostFactor
+                    );
+                    material.needsUpdate = true;
+                    console.log('💡 Brightened floor material:', item.name);
+                  }
+                }
+              }
             }
 
             if (item.name === 'home001' || item.name === 'PointLight') {
@@ -611,6 +922,14 @@ export default class Environment {
             loaded: event.loaded,
             total: event.total,
           });
+        },
+        (error: any) => {
+          console.warn(
+            '⚠️ Collision scene not found, creating fallback floor:',
+            error
+          );
+          this._createFallbackFloor();
+          resolve(); // Continue with fallback
         }
       );
     });

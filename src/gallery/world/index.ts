@@ -2,7 +2,7 @@ import Core from '../core';
 import Environment from '../environment';
 import Character from '../character';
 import Css3DRenderer from '../css3DRenderer';
-import Audio from '../audio';
+// import Audio from '../audio'; // DISABLED: Audio temporarily disabled
 import RayCasterControls from '../rayCasterControls';
 import {
   ON_CLICK_RAY_CAST,
@@ -19,10 +19,11 @@ export default class World {
   private environment: Environment;
   private character: Character;
   private css_3d_renderer: Css3DRenderer;
-  private audio: Audio;
+  // private audio: Audio; // DISABLED: Audio temporarily disabled
   private ray_caster_controls: RayCasterControls;
 
   constructor() {
+    console.log('🌍 World constructor called');
     this.core = new Core();
 
     this.core.$on(ON_LOAD_PROGRESS, this._handleLoadProgress.bind(this));
@@ -32,6 +33,7 @@ export default class World {
     this.core.$on(ON_HIDE_TOOLTIP, this._onHideTooltip.bind(this));
     this.core.$on(ON_ENTER_APP, this._onEnterApp.bind(this));
 
+    console.log('🌍 Creating Environment...');
     this.environment = new Environment();
     // Spawn player on top of stairs, will walk down to gallery
     this.character = new Character({
@@ -39,7 +41,7 @@ export default class World {
       reset_position: new Vector3(0, 8, 35), // On top of stairs
     });
     this.css_3d_renderer = new Css3DRenderer();
-    this.audio = new Audio();
+    // this.audio = new Audio(); // DISABLED: Audio temporarily disabled
     this.ray_caster_controls = new RayCasterControls();
   }
 
@@ -57,14 +59,14 @@ export default class World {
    * Callback after entering the gallery
    * */
   private _onEnterApp() {
-    this.audio.playAudio();
+    // this.audio.playAudio(); // DISABLED: Audio temporarily disabled
     // Enable keyboard controls after entering
     this.core.control_manage.enabled();
   }
 
   private async _onLoadModelFinish() {
     // Start loading audio after scene models are loaded
-    await this.audio.createAudio();
+    // await this.audio.createAudio(); // DISABLED: Audio temporarily disabled
 
     // Remove loading UI and show enter confirmation UI after audio is loaded
     this.core.ui.removeLoading();

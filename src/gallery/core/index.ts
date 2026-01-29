@@ -31,10 +31,14 @@ export default class Core extends Emitter {
   constructor() {
     super();
 
+    console.log('🎮 Core constructor called');
+
     // Singleton
     if (instance) {
+      console.log('🎮 Returning existing instance');
       return instance;
     }
+    console.log('🎮 Creating new Core instance');
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     instance = this;
 

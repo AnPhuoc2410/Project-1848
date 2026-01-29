@@ -25,7 +25,8 @@ export default class Css3DRenderer {
 
     this._initRenderer();
     this._initResponsiveResize();
-    this._createCssObj();
+    // Temporarily disabled - remove white square when scene is not loaded
+    // this._createCssObj();
   }
 
   update() {

@@ -23,9 +23,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'), // Giờ dòng này sẽ chạy ngon lành
     },
   },
-  esbuild: {
-    drop: ['console', 'debugger'],
-  },
+
   build: {
     rollupOptions: {
       output: {
