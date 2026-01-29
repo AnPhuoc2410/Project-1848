@@ -140,7 +140,7 @@ const InstructorSection = () => {
     {
       name: 'Hoàng Gia Phong',
       mssv: 'SE181531',
-      img: 'https://via.placeholder.com/160',
+      img: 'https://scontent.fsgn2-4.fna.fbcdn.net/v/t39.30808-1/273499459_974232276854220_950445217617548796_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeEtb7moDESuHwp_IorVrQswAWgZQWnlHYUBaBlBaeUdhZOokbJQ9-oGgf5UzxYv9Q40wC8Ay_iMLoa4nTR4Oi77&_nc_ohc=dtyyiqj5ANwQ7kNvwHQD696&_nc_oc=AdmNx_dbS7u6rdATV9xS-cxVmZ2qgUnSebNwZfAJyWY0EGSqo22k6r8eye6sY6t3QfU&_nc_zt=24&_nc_ht=scontent.fsgn2-4.fna&_nc_gid=ifqM__IRkCyWF8yYZVoKHA&oh=00_AfrEbtJ3meA-EYzxttdprQwPzd6kurgFEH38UG12xPNHDg&oe=69815CAE',
     },
   ];
 
