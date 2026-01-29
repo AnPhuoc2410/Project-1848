@@ -190,7 +190,7 @@ export default function PlayerB() {
         <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
           <span className="text-lg">📋</span>
           <p className="text-sm text-emerald-800">
-            <span className="font-semibold">Nhiệm vụ:</span> Click 2 đèn để
+            <span className="font-semibold">Nhiệm vụ:</span> Click 2 điểm để
             nối/gỡ dây. Hãy hỏi{' '}
             <span className="font-black text-emerald-900 underline decoration-2">
               {playerAName}
@@ -206,12 +206,12 @@ export default function PlayerB() {
           {/* Left - Reference Image */}
           <div className="bg-white rounded-lg shadow border border-slate-200 p-2 flex flex-col">
             <h3 className="text-sm font-bold text-slate-800 mb-1">
-              📷 Ảnh bảng đèn vật lý
+              🔎 Hãy tìm ra dây đúng từ bảng điểm vật lý dưới đây
             </h3>
             <div className="rounded overflow-hidden bg-slate-50 flex-1 flex items-center justify-center bg-white">
               <img
                 src="/img_game/circuit.png"
-                alt="Bảng đèn vật lý"
+                alt="Bảng điểm vật lý"
                 className="w-full h-auto max-h-[60vh] object-contain"
                 onError={(e) => {
                   e.target.style.display = 'none';

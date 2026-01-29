@@ -55,6 +55,15 @@ export default function PlayerB() {
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const demoTimeoutRef = useRef(null);
 
+  // Example Morse (TEST) state
+  const [exampleLightOn, setExampleLightOn] = useState(false);
+  const [isPlayingExample, setIsPlayingExample] = useState(false);
+  const [exampleMorseDisplay, setExampleMorseDisplay] = useState('');
+  const [exampleCurrentElement, setExampleCurrentElement] = useState('');
+  const [showExampleAnswer, setShowExampleAnswer] = useState(false);
+  const examplePlayingRef = useRef(false);
+  const examplePlaybackIdRef = useRef(0);
+
   // Stop any currently playing beep
   const stopCurrentBeep = useCallback(() => {
     try {
@@ -488,6 +497,118 @@ export default function PlayerB() {
     }
   };
 
+  // Play example "TEST" morse code
+  // T = — , E = • , S = ••• , T = —
+  const playExampleMorse = useCallback(async () => {
+    if (isPlayingExample) return;
+
+    examplePlayingRef.current = true;
+    const currentExampleId = ++examplePlaybackIdRef.current;
+
+    setIsPlayingExample(true);
+    setExampleMorseDisplay('');
+    setShowExampleAnswer(false);
+    setExampleCurrentElement('');
+
+    // Morse for TEST: T=— E=• S=••• T=—
+    const testMorse = [
+      { letter: 'T', morse: '—' },
+      { letter: 'E', morse: '•' },
+      { letter: 'S', morse: '•••' },
+      { letter: 'T', morse: '—' },
+    ];
+
+    for (let i = 0; i < testMorse.length; i++) {
+      if (
+        !examplePlayingRef.current ||
+        examplePlaybackIdRef.current !== currentExampleId
+      )
+        break;
+
+      const item = testMorse[i];
+      const elements = item.morse.split('');
+
+      for (let j = 0; j < elements.length; j++) {
+        if (
+          !examplePlayingRef.current ||
+          examplePlaybackIdRef.current !== currentExampleId
+        )
+          break;
+
+        const element = elements[j];
+        const isDot = element === '•';
+        const duration = isDot ? DOT_DURATION : DASH_DURATION;
+
+        setExampleCurrentElement(element);
+        setExampleMorseDisplay((prev) => prev + element);
+
+        setExampleLightOn(true);
+        playBeep(duration);
+        await sleep(duration);
+
+        if (
+          !examplePlayingRef.current ||
+          examplePlaybackIdRef.current !== currentExampleId
+        ) {
+          setExampleLightOn(false);
+          break;
+        }
+
+        setExampleLightOn(false);
+        setExampleCurrentElement('');
+
+        // Element gap within same letter
+        if (j < elements.length - 1) {
+          await sleep(ELEMENT_GAP);
+          if (
+            !examplePlayingRef.current ||
+            examplePlaybackIdRef.current !== currentExampleId
+          )
+            break;
+        }
+      }
+
+      if (
+        !examplePlayingRef.current ||
+        examplePlaybackIdRef.current !== currentExampleId
+      )
+        break;
+
+      // Add space to display between letters
+      setExampleMorseDisplay((prev) => prev + ' ');
+
+      // Letter gap
+      if (i < testMorse.length - 1) {
+        playGapSound();
+        await sleep(LETTER_GAP);
+        if (
+          !examplePlayingRef.current ||
+          examplePlaybackIdRef.current !== currentExampleId
+        )
+          break;
+      }
+    }
+
+    // Show answer after completion
+    if (examplePlaybackIdRef.current === currentExampleId) {
+      await sleep(500);
+      if (examplePlaybackIdRef.current === currentExampleId) {
+        setShowExampleAnswer(true);
+        setIsPlayingExample(false);
+        examplePlayingRef.current = false;
+        setExampleCurrentElement('');
+      }
+    }
+  }, [playBeep, playGapSound]);
+
+  const stopExampleMorse = () => {
+    examplePlayingRef.current = false;
+    setIsPlayingExample(false);
+    setExampleLightOn(false);
+    setExampleCurrentElement('');
+    stopCurrentBeep();
+  };
+
   return (
     <div className="h-screen w-screen bg-slate-100 flex flex-col overflow-hidden">
       {/* ═══════════════════════════════════════════════════════════════════
@@ -540,7 +661,7 @@ export default function PlayerB() {
 
           {/* Right: Signal Legend */}
           <div className="hidden lg:flex items-center gap-2 bg-slate-50 rounded-xl px-4 py-2 border border-slate-200">
-            <span className="text-xs font-semibold text-slate-500 mr-2">
+            <span className="text-base font-semibold text-slate-500 mr-2">
               Bấm để nghe:
             </span>
             <button
@@ -585,7 +706,7 @@ export default function PlayerB() {
               }`}
             >
               <span className="w-4 h-3 border-2 border-dashed border-orange-400 rounded"></span>
-              <span className="text-slate-700">Lặng</span>
+              <span className="text-slate-700">Khoảng cách giữa các chữ</span>
               <span className="text-slate-400 text-xs">
                 {LETTER_GAP / 1000}s
               </span>
@@ -597,88 +718,174 @@ export default function PlayerB() {
       {/* ═══════════════════════════════════════════════════════════════════
           MIDDLE WORKSPACE - Main Stage (Flex Grow)
       ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4 gap-4 min-h-0">
-        {/* Signal Visualizer */}
-        <div className="flex flex-col items-center gap-2">
-          {/* Main Light */}
-          <div
-            className={`w-24 h-24 md:w-28 md:h-28 rounded-full transition-all duration-75 border-4 ${
-              lightOn
-                ? 'bg-yellow-400 border-yellow-500 shadow-[0_0_60px_20px_rgba(250,204,21,0.6)]'
-                : 'bg-slate-200 border-slate-300'
-            }`}
-          />
+      <main className="flex-1 flex p-4 gap-4 min-h-0 relative">
+        {/* Main Game Area - Center */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          {/* Signal Visualizer */}
+          <div className="flex flex-col items-center gap-2">
+            {/* Main Light */}
+            <div
+              className={`w-24 h-24 md:w-28 md:h-28 rounded-full transition-all duration-75 border-4 ${
+                lightOn
+                  ? 'bg-yellow-400 border-yellow-500 shadow-[0_0_60px_20px_rgba(250,204,21,0.6)]'
+                  : 'bg-slate-200 border-slate-300'
+              }`}
+            />
 
-          {/* Current Signal Display */}
-          <div className="h-6 flex items-center justify-center">
-            {currentElement ? (
-              <span className="text-2xl font-bold text-yellow-600 animate-pulse">
-                {currentElement}
-              </span>
-            ) : isPlaying ? (
-              <span className="text-xs text-slate-400">Đang phát...</span>
-            ) : (
-              <span className="text-xs text-slate-400">Chọn thẻ để nghe</span>
+            {/* Current Signal Display */}
+            <div className="h-6 flex items-center justify-center">
+              {currentElement ? (
+                <span className="text-2xl font-bold text-yellow-600 animate-pulse">
+                  {currentElement}
+                </span>
+              ) : isPlaying ? (
+                <span className="text-xs text-slate-400">Đang phát...</span>
+              ) : (
+                <span className="text-xs text-slate-400">Chọn thẻ để nghe</span>
+              )}
+            </div>
+
+            {/* Stop Button */}
+            {isPlaying && (
+              <button
+                onClick={stopPlaying}
+                className="mt-1 px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+              >
+                ⏹ Dừng
+              </button>
             )}
           </div>
 
-          {/* Stop Button */}
-          {isPlaying && (
-            <button
-              onClick={stopPlaying}
-              className="mt-1 px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-            >
-              ⏹ Dừng
-            </button>
-          )}
+          {/* Card Grid */}
+          <div
+            className="w-full max-w-2xl"
+            onDragOver={handleDragOver}
+            onDrop={handleDropOnPool}
+          >
+            {/* Gợi ý - Hint box above cards */}
+            <div className="mb-3 flex items-center justify-center gap-4 text-sm">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-full border border-amber-200 text-amber-800">
+                💡 Mỗi thẻ = <strong className="text-amber-900">1 từ</strong>
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-full border border-red-200 text-red-700">
+                ⚠️ Có <strong>3 thẻ giả</strong>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2 md:gap-3">
+              {wordCards.map((card) => {
+                const isInSlot = answerSlots.some(
+                  (slot) => slot?.id === card.id
+                );
+                const isActive = activeCardId === card.id;
+
+                return (
+                  <button
+                    key={card.id}
+                    disabled={isInSlot}
+                    draggable={!isPlaying && !isInSlot}
+                    onDragStart={(e) => handleDragStart(e, card)}
+                    onClick={() => !isInSlot && handleCardClick(card)}
+                    className={`relative flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all font-medium text-sm ${
+                      isInSlot
+                        ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
+                        : isActive
+                          ? 'bg-yellow-50 border-yellow-400 text-yellow-700 shadow-lg scale-105'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:shadow-md cursor-pointer active:scale-95'
+                    }`}
+                  >
+                    <span className="text-base md:text-lg">🔊</span>
+                    <span className="text-xs md:text-sm mt-0.5">
+                      Thẻ {getCardLabel(card.id)}
+                    </span>
+                    {isActive && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-ping" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Card Grid */}
-        <div
-          className="w-full max-w-2xl"
-          onDragOver={handleDragOver}
-          onDrop={handleDropOnPool}
-        >
-          {/* Gợi ý - Hint box above cards */}
-          <div className="mb-3 flex items-center justify-center gap-4 text-sm">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-full border border-amber-200 text-amber-800">
-              💡 Mỗi thẻ = <strong className="text-amber-900">1 từ</strong>
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-full border border-red-200 text-red-700">
-              ⚠️ Có <strong>3 thẻ giả</strong>
-            </span>
+        {/* ═══════════════════════════════════════════════════════════════════
+            RIGHT PANEL - Example Morse Code Demo
+        ═══════════════════════════════════════════════════════════════════ */}
+        <div className="hidden xl:flex flex-col w-72 bg-white rounded-2xl border-2 border-slate-200 shadow-lg p-4 gap-3">
+          {/* Header */}
+          <div className="text-center border-b border-slate-200 pb-3">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center justify-center gap-2">
+              <span>📚</span> Ví dụ cách chơi
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">Bấm thẻ để xem demo</p>
           </div>
 
-          <div className="grid grid-cols-5 gap-2 md:gap-3">
-            {wordCards.map((card) => {
-              const isInSlot = answerSlots.some((slot) => slot?.id === card.id);
-              const isActive = activeCardId === card.id;
+          {/* Demo Card */}
+          <div className="flex justify-center">
+            <button
+              onClick={playExampleMorse}
+              disabled={isPlayingExample}
+              className={`flex flex-col items-center justify-center py-4 px-6 rounded-xl border-2 transition-all font-medium ${
+                isPlayingExample
+                  ? 'bg-amber-50 border-amber-400 text-amber-700 shadow-lg scale-105'
+                  : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 text-amber-700 hover:border-amber-500 hover:shadow-md cursor-pointer active:scale-95'
+              }`}
+            >
+              <span className="text-2xl">🔊</span>
+              <span className="text-sm mt-1 font-semibold">Thẻ Ví dụ</span>
+              {isPlayingExample && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-ping" />
+              )}
+            </button>
+          </div>
 
-              return (
-                <button
-                  key={card.id}
-                  disabled={isInSlot}
-                  draggable={!isPlaying && !isInSlot}
-                  onDragStart={(e) => handleDragStart(e, card)}
-                  onClick={() => !isInSlot && handleCardClick(card)}
-                  className={`relative flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all font-medium text-sm ${
-                    isInSlot
-                      ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
-                      : isActive
-                        ? 'bg-yellow-50 border-yellow-400 text-yellow-700 shadow-lg scale-105'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-400 hover:shadow-md cursor-pointer active:scale-95'
-                  }`}
-                >
-                  <span className="text-base md:text-lg">🔊</span>
-                  <span className="text-xs md:text-sm mt-0.5">
-                    Thẻ {getCardLabel(card.id)}
-                  </span>
-                  {isActive && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-ping" />
-                  )}
-                </button>
-              );
-            })}
+          {/* Demo Light */}
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className={`w-16 h-16 rounded-full transition-all duration-75 border-4 ${
+                exampleLightOn
+                  ? 'bg-yellow-400 border-yellow-500 shadow-[0_0_40px_15px_rgba(250,204,21,0.6)]'
+                  : 'bg-slate-200 border-slate-300'
+              }`}
+            />
+            {/* Current Element Display */}
+            <div className="h-6 flex items-center justify-center">
+              {exampleCurrentElement ? (
+                <span className="text-xl font-bold text-yellow-600 animate-pulse">
+                  {exampleCurrentElement}
+                </span>
+              ) : isPlayingExample ? (
+                <span className="text-xs text-slate-400">Đang phát...</span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Morse Display */}
+          <div className="bg-slate-50 rounded-xl p-3 min-h-[60px] border border-slate-200">
+            <p className="text-xs text-slate-500 mb-1 text-center">Mã Morse:</p>
+            <div className="text-center font-mono text-lg tracking-widest text-slate-700 min-h-[28px]">
+              {exampleMorseDisplay || <span className="text-slate-300">—</span>}
+            </div>
+          </div>
+
+          {/* Answer Reveal */}
+          <div
+            className={`bg-emerald-50 rounded-xl border-2 transition-all duration-500 ${
+              showExampleAnswer
+                ? 'border-emerald-400 opacity-100 scale-100'
+                : 'border-transparent opacity-50 scale-95'
+            }`}
+          >
+            <p className="text-xs text-emerald-600 mb-1 text-center">Đáp án:</p>
+            <div className="text-center">
+              {showExampleAnswer ? (
+                <span className="text-2xl font-black text-emerald-600 tracking-wider animate-pulse">
+                  TEST
+                </span>
+              ) : (
+                <span className="text-lg text-slate-300">????</span>
+              )}
+            </div>
           </div>
         </div>
       </main>

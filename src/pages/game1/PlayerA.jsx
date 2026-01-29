@@ -203,8 +203,11 @@ export default function PlayerA() {
             <h3 className="text-lg font-bold text-slate-800 mb-2">
               🔐 Mật mã cần giải
             </h3>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-slate-500 mb-2">
               Có {letters.filter((l) => l !== ' ').length} ký hiệu cần mô tả
+            </p>
+            <p className="text-sm text-slate-500 mb-4">
+              Khoảng cách giữa các từ được thể hiện bằng nét đứt.
             </p>
 
             <div className="freemason-phrase">

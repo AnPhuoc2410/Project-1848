@@ -183,8 +183,8 @@ export default function PlayerA() {
           <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
             <span className="text-2xl">📋</span>
             <p className="text-base text-blue-800">
-              <span className="font-semibold">Nhiệm vụ:</span> Trả lời các câu
-              hỏi lý thuyết để{' '}
+              <span className="font-semibold">Nhiệm vụ:</span> Trả lời tất cả
+              câu hỏi lý thuyết để{' '}
               <span className="font-black text-blue-900 underline decoration-2">
                 {playerBName}
               </span>{' '}
