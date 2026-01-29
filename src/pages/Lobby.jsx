@@ -184,7 +184,7 @@ export default function Lobby() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-2">
             <span className="special-font">
-              LOBBY <b className="text-amber-500">1848</b>
+              Hành Trình <b className="text-amber-500">Giải Phóng</b>
             </span>
           </h1>
           <p className="text-slate-500 text-sm">
