@@ -152,7 +152,6 @@ Thanks to all the amazing people who have contributed to this project! ✨
 <a href="https://github.com/AnPhuoc2410/Project-1848/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=AnPhuoc2410/Project-1848" />
 </a>
----
 
 <p align="center">
   Made with ❤️ for learning Scientific Socialism
