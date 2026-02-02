@@ -95,8 +95,9 @@ const questions = [
   {
     id: 11,
     question:
-      'Giai cấp công nhân có thể tự giải phóng triệt để nếu thiếu Đảng lãnh đạo không?',
+      'Giai cấp công nhân Việt Nam ra đời "sau" giai cấp tư sản Việt Nam đúng không?',
     correctAnswer: 'NO',
+    // Bẫy lịch sử: Ở châu Âu thì Tư sản có trước. Ở VN (thuộc địa), Công nhân ra đời TRƯỚC Tư sản (do cuộc khai thác thuộc địa của Pháp).
   },
   {
     id: 12,
@@ -115,6 +116,34 @@ const questions = [
     question:
       'Nhà nước pháp quyền XHCN có phải chỉ bảo vệ quyền lợi của riêng giai cấp công nhân không?',
     correctAnswer: 'NO',
+  },
+  {
+    id: 15,
+    question:
+      'Có phải trí thức là một "giai cấp" độc lập lãnh đạo cách mạng không?',
+    correctAnswer: 'NO',
+    // Bẫy cực lớn: Trí thức là một "tầng lớp", không phải "giai cấp" (vì không có phương thức sản xuất riêng), và họ không lãnh đạo (Công nhân lãnh đạo).
+  },
+  {
+    id: 16,
+    question:
+      'Xóa bỏ chế độ tư hữu đồng nghĩa với việc tịch thu mọi tài sản cá nhân của người dân đúng hay sai?',
+    correctAnswer: 'NO',
+    // Bẫy: Xóa bỏ tư hữu về "Tư liệu sản xuất" khác với "Tư liệu sinh hoạt" (nhà ở, xe cộ cá nhân vẫn được sở hữu).
+  },
+  {
+    id: 17,
+    question:
+      'Trong liên minh Công - Nông - Trí thức, vai trò chính trị của ba lực lượng này có ngang hàng nhau không?',
+    correctAnswer: 'NO',
+    // Bẫy: Bình đẳng về quyền lợi, nghĩa vụ công dân thì CÓ, nhưng về vai trò LÃNH ĐẠO chính trị thì chỉ có Giai cấp Công nhân (thông qua Đảng).
+  },
+  {
+    id: 18,
+    question:
+      'Để tiến lên CNXH, có nhất thiết phải xóa bỏ tôn giáo bằng biện pháp hành chính không?',
+    correctAnswer: 'NO',
+    // Bẫy: CNXH coi tôn giáo là nhu cầu tinh thần, tôn giáo chỉ mất đi khi nguồn gốc sinh ra nó mất đi, không dùng lệnh cấm.
   },
 ];
 
